@@ -221,6 +221,8 @@
           device: device
       };
     }
+    
+    // This is a comment text
 
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     document.getElementById('generateBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: getSettings() } }, '*'));
