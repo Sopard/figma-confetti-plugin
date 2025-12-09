@@ -17,6 +17,7 @@
       --border: #e2e8f0;
       --radius: 8px;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --slider-track: #E5E7EB;
       --switch-bg: #E5E7EB;
     }
@@ -48,6 +49,7 @@
       flex: 1;
       display: flex;
       overflow: hidden;
+      position: relative; /* Ensure popover positioning is relative to this container */
     }
     .settings-panel {
       width: 420px; /* Fixed width for left panel */
@@ -102,7 +104,7 @@
         align-items: center;
     }
 
-    /* ----- SLIDER STYLE ----- */
+    /* ----- SLIDER STYLE (Main UI) ----- */
     .slider-container {
       position: relative;
       height: 36px; /* Thick bar */
@@ -179,7 +181,7 @@
     }
     .checkbox-label { font-size: 14px; font-weight: 500; }
 
-    /* --- NEW COLOR SECTION STYLES --- */
+    /* --- COLOR SECTION STYLES --- */
     
     .color-header-box {
       display: flex;
@@ -245,15 +247,14 @@
     input:checked + .switch-slider { background-color: var(--primary); }
     input:checked + .switch-slider:before { transform: translateX(20px); }
 
-    /* --- NEW SCROLL CONTAINER STYLE --- */
+    /* --- SCROLL CONTAINER STYLE --- */
     .added-colors-scroll-container {
-        /* Fixed height to prevent UI pushing */
-        height: 100px; 
+        max-height: 100px; 
         overflow-y: auto;
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        background-color: transparent; /* No fill */
-        padding: 8px; /* internal spacing */
+        background-color: transparent;
+        padding: 8px;
         margin-top: 8px;
     }
 
@@ -263,7 +264,7 @@
       align-items: center;
       gap: 12px;
       transition: opacity 0.3s;
-      padding: 4px 0; /* Slight padding for rows inside scroll container */
+      padding: 4px 0;
     }
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; }
     .color-preview-sq { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; }
@@ -274,7 +275,107 @@
     }
 
     /* ------------------------------------ */
+    /* --- NEW COLOR PICKER POPOVER STYLES --- */
+    
+    .color-picker-popover {
+        position: absolute;
+        top: 0; left: 0; /* Set by JS */
+        width: 320px;
+        background: var(--background);
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        z-index: 10;
+        display: none; /* Hidden by default */
+        border: 1px solid var(--border);
+        box-sizing: border-box;
 
+        /* When active, this will be set to 'flex' via JS */
+        flex-direction: column; 
+        /* Ensure it doesn't get too squashed vertically */
+        min-height: 350px; 
+    }
+
+    /* The header remains fixed at the top of the flex container */
+    .cp-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 16px; 
+        font-weight: 600; 
+        flex-shrink: 0;
+    }
+
+    /* New scrollable container for middle content */
+    .cp-content-scrollable {
+        flex: 1; /* Take remaining height */
+        overflow-y: auto; /* Scroll internally */
+        margin-bottom: 16px; /* Spacing above the bottom button */
+        padding-right: 4px; /* Prevent scrollbar from overlapping content tight spaces */
+    }
+
+    /* Saturation/Brightness Area */
+    .cp-sat-bright-area {
+        width: 100%; height: 200px;
+        border-radius: 8px;
+        position: relative;
+        background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
+        background-color: red; /* Base Hue */
+        cursor: crosshair;
+        margin-bottom: 16px;
+        flex-shrink: 0; /* Don't shrink this area */
+    }
+    .cp-sb-selector {
+        position: absolute; width: 16px; height: 16px;
+        border-radius: 50%; border: 2px solid white;
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        transform: translate(-8px, -8px); top: 0%; left: 100%;
+        pointer-events: none;
+    }
+
+    /* Sliders (Hue & Alpha) */
+    .cp-sliders { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
+    .cp-slider-track {
+        width: 100%; height: 16px; border-radius: 8px; position: relative; cursor: pointer;
+    }
+    .cp-hue-slider { background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red); }
+    .cp-alpha-slider {
+        /* Checkerboard background for transparency */
+        background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+        background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+    }
+    .cp-alpha-slider-bar { position: absolute; top:0; left:0; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(to right, transparent, red); /* Color updated by JS */ pointer-events: none;}
+    .cp-slider-thumb {
+        position: absolute; top: 50%; width: 20px; height: 20px;
+        background: white; border-radius: 50%; box-shadow: var(--shadow-sm);
+        transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border);
+    }
+
+    /* Inputs Row */
+    .cp-inputs-row { display: flex; gap: 8px; margin-bottom: 16px; flex-shrink: 0; }
+    .cp-input-wrapper {
+        display: flex; align-items: center;
+        background: var(--muted); border: 1px solid var(--border);
+        border-radius: 6px; padding: 4px 8px; height: 36px; box-sizing: border-box;
+    }
+    .cp-input-wrapper span { color: var(--muted-foreground); font-size: 14px; margin-right: 8px; }
+    .cp-input-field {
+        border: none; background: transparent; outline: none;
+        font-family: inherit; font-weight: 500; font-size: 14px; color: var(--foreground);
+        flex: 1; width: 100%; /* Ensure input takes available space */
+    }
+    .cp-hex-wrapper { flex: 2; }
+    .cp-alpha-wrapper { flex: 1; }
+
+    /* Swatches */
+    .cp-swatches-section { flex-shrink: 0; }
+    .cp-swatch-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .cp-swatch { width: 32px; height: 32px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); box-sizing: border-box; }
+
+    /* The confirm button remains fixed at the bottom */
+    #cpAddConfirmBtn { flex-shrink: 0; }
+
+    /* ------------------------------------ */
 
     /* Selectors (Shapes) */
     .selector-grid { display: flex; gap: 12px; }
@@ -402,7 +503,7 @@
           <div class="label">Particle Color</div>
           
           <div class="color-header-box">
-              <span class="color-count-text" id="colorCounter">2 Colors</span>
+              <span class="color-count-text" id="colorCounter">0 Colors</span>
               <button class="icon-btn-flat" id="addColorBtn">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
@@ -475,7 +576,50 @@
         </button>
     </div>
 
-  </div> <script>
+  </div> 
+  
+  <div id="colorPickerPopover" class="color-picker-popover">
+      <div class="cp-header">
+          <span>Add Color</span>
+          <button id="cpCloseBtn" class="icon-btn-flat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+      </div>
+      
+      <div class="cp-content-scrollable">
+          <div class="cp-sat-bright-area" id="cpSatBrightArea">
+              <div class="cp-sb-selector" id="cpSbSelector"></div>
+          </div>
+
+          <div class="cp-sliders">
+              <div class="cp-slider-track cp-hue-slider" id="cpHueSlider">
+                   <div class="cp-slider-thumb" id="cpHueThumb"></div>
+              </div>
+              <div class="cp-slider-track cp-alpha-slider" id="cpAlphaSlider">
+                   <div class="cp-alpha-slider-bar" id="cpAlphaBar"></div>
+                   <div class="cp-slider-thumb" id="cpAlphaThumb"></div>
+              </div>
+          </div>
+
+          <div class="cp-inputs-row">
+              <div class="cp-input-wrapper cp-hex-wrapper">
+                  <span>Hex</span>
+                  <input type="text" id="cpHexInput" class="cp-input-field" value="FF0000" maxlength="6">
+              </div>
+              <div class="cp-input-wrapper cp-alpha-wrapper">
+                  <input type="number" id="cpAlphaInput" class="cp-input-field" value="100" min="0" max="100">
+                  <span>%</span>
+              </div>
+          </div>
+
+           <div class="cp-swatches-section">
+              <div class="label" style="margin-bottom: 8px;">Preset Colors</div>
+              <div class="cp-swatch-grid" id="cpSwatchGrid">
+                  </div>
+          </div>
+      </div> <button id="cpAddConfirmBtn" class="btn btn-primary" style="width: 100%;">Add Color</button>
+  </div>
+  <script>
     // --- UI Interactions ---
 
     // 1. Sliders Linkage
@@ -516,12 +660,12 @@
     });
 
 
-    // --- NEW COLOR SECTION LOGIC ---
+    // --- COLOR SECTION LOGIC ---
 
     // State for colors
     let colorState = {
         isMultiColor: false, // Default to OFF
-        colors: ['#007AFF', '#CD0FD2'] // Initial colors
+        colors: [] // Initial colors empty by default
     };
 
     const multiColorSwitch = document.getElementById('multiColorSwitch');
@@ -531,8 +675,12 @@
 
     // Function to render the color list based on state
     function renderColorList() {
-        // Update counter text
-        colorCounter.textContent = `${colorState.colors.length} Colors`;
+        // Update counter text based on multi-color state
+        if (colorState.isMultiColor) {
+            colorCounter.textContent = "Multi-color";
+        } else {
+            colorCounter.textContent = `${colorState.colors.length} Colors`;
+        }
 
         // Update state of add button based on multi-color switch
         addColorBtn.disabled = colorState.isMultiColor;
@@ -541,15 +689,18 @@
         colorRowsContainer.innerHTML = '';
 
         // Build new entries
-        colorState.colors.forEach((colorHex, index) => {
+        colorState.colors.forEach((colorData, index) => {
             const row = document.createElement('div');
-            // Add disabled class if multi-color is active
             row.className = `color-item-row ${colorState.isMultiColor ? 'disabled' : ''}`;
             
+            // Calculate hex and opacity for display
+            const hex = hslToHex(colorData.h, colorData.s, colorData.l);
+            const opacity = Math.round(colorData.a * 100);
+
             row.innerHTML = `
-                <div class="color-preview-sq" style="background-color: ${colorHex};"></div>
-                <span class="color-hex-text">${colorHex}</span>
-                <span class="color-percent-static">100 %</span>
+                <div class="color-preview-sq" style="background-color: ${hex}; opacity: ${colorData.a};"></div>
+                <span class="color-hex-text">${hex}</span>
+                <span class="color-percent-static">${opacity} %</span>
                 <button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
@@ -558,7 +709,7 @@
             // Add delete functionality
             const deleteBtn = row.querySelector('.delete-color-btn');
             deleteBtn.addEventListener('click', (e) => {
-                if (colorState.isMultiColor) return; // Prevent deletion if disabled
+                if (colorState.isMultiColor) return;
                 const idx = parseInt(e.currentTarget.getAttribute('data-index'));
                 colorState.colors.splice(idx, 1);
                 renderColorList();
@@ -571,19 +722,260 @@
     // Event Listener for Multi-color Switch
     multiColorSwitch.addEventListener('change', (e) => {
         colorState.isMultiColor = e.target.checked;
-        renderColorList(); // Re-render to update UI state
-    });
-
-    // Event Listener for Add Button
-    addColorBtn.addEventListener('click', () => {
-        if (colorState.isMultiColor) return; // Prevent adding if disabled
-        // Add a default color (e.g., a nice green)
-        colorState.colors.push('#34C759'); 
         renderColorList();
     });
 
-    // Initial Render
-    renderColorList();
+
+    // --- COLOR PICKER POPOVER LOGIC ---
+
+    const popover = document.getElementById('colorPickerPopover');
+    const cpCloseBtn = document.getElementById('cpCloseBtn');
+    const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn');
+
+    // Picker Elements
+    const cpSatBrightArea = document.getElementById('cpSatBrightArea');
+    const cpSbSelector = document.getElementById('cpSbSelector');
+    const cpHueSlider = document.getElementById('cpHueSlider');
+    const cpHueThumb = document.getElementById('cpHueThumb');
+    const cpAlphaSlider = document.getElementById('cpAlphaSlider');
+    const cpAlphaThumb = document.getElementById('cpAlphaThumb');
+    const cpAlphaBar = document.getElementById('cpAlphaBar');
+    const cpHexInput = document.getElementById('cpHexInput');
+    const cpAlphaInput = document.getElementById('cpAlphaInput');
+
+    // Picker State (HSLA for easier manipulation)
+    let pickerHSLA = { h: 0, s: 100, l: 50, a: 1 };
+
+    // Helper: Update visual elements based on pickerHSLA state
+    function updatePickerVisuals() {
+        // Update Sat/Bright Area background base hue
+        cpSatBrightArea.style.backgroundColor = `hsl(${pickerHSLA.h}, 100%, 50%)`;
+        
+        // Position SB Selector (Simplified mapping for UI demo)
+        const selX = pickerHSLA.s;
+        const selY = 100 - pickerHSLA.l; 
+        cpSbSelector.style.left = `${selX}%`;
+        cpSbSelector.style.top = `${selY}%`;
+
+        // Position Hue Thumb
+        const huePos = (pickerHSLA.h / 360) * 100;
+        cpHueThumb.style.left = `${huePos}%`;
+
+        // Position Alpha Thumb & Update Bar Color
+        const alphaPos = pickerHSLA.a * 100;
+        cpAlphaThumb.style.left = `${alphaPos}%`;
+        const baseHex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
+        cpAlphaBar.style.background = `linear-gradient(to right, transparent, ${baseHex})`;
+
+        // Update Inputs
+        cpHexInput.value = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l).substring(1); // remove #
+        cpAlphaInput.value = Math.round(pickerHSLA.a * 100);
+    }
+
+    // --- Event Listeners for Picker Interactions ---
+
+    // Saturation/Brightness Area Dragging
+    let isDraggingSB = false;
+    cpSatBrightArea.addEventListener('mousedown', (e) => { isDraggingSB = true; updateSBFromEvent(e); });
+    document.addEventListener('mousemove', (e) => { if(isDraggingSB) updateSBFromEvent(e); });
+    document.addEventListener('mouseup', () => { isDraggingSB = false; });
+
+    function updateSBFromEvent(e) {
+        const rect = cpSatBrightArea.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        x = Math.max(0, Math.min(x, rect.width));
+        y = Math.max(0, Math.min(y, rect.height));
+        
+        // Map positions to S and L (Simplified mapping)
+        pickerHSLA.s = (x / rect.width) * 100;
+        pickerHSLA.l = 100 - ((y / rect.height) * 100);
+        updatePickerVisuals();
+    }
+
+    // Hue Slider Dragging
+    let isDraggingHue = false;
+    cpHueSlider.addEventListener('mousedown', (e) => { isDraggingHue = true; updateHueFromEvent(e); });
+    document.addEventListener('mousemove', (e) => { if(isDraggingHue) updateHueFromEvent(e); });
+    document.addEventListener('mouseup', () => { isDraggingHue = false; });
+
+    function updateHueFromEvent(e) {
+        const rect = cpHueSlider.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        pickerHSLA.h = (x / rect.width) * 360;
+        updatePickerVisuals();
+    }
+
+    // Alpha Slider Dragging
+    let isDraggingAlpha = false;
+    cpAlphaSlider.addEventListener('mousedown', (e) => { isDraggingAlpha = true; updateAlphaFromEvent(e); });
+    document.addEventListener('mousemove', (e) => { if(isDraggingAlpha) updateAlphaFromEvent(e); });
+    document.addEventListener('mouseup', () => { isDraggingAlpha = false; });
+
+    function updateAlphaFromEvent(e) {
+        const rect = cpAlphaSlider.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        pickerHSLA.a = x / rect.width;
+        updatePickerVisuals();
+    }
+
+    // Input Change Listeners
+    cpHexInput.addEventListener('input', (e) => {
+        let hex = e.target.value;
+        if (hex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(hex)) {
+            const hsl = hexToHsl("#" + hex);
+            pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
+            // Keep current alpha
+            updatePickerVisuals();
+        }
+    });
+    cpAlphaInput.addEventListener('input', (e) => {
+        let val = parseInt(e.target.value);
+        if (!isNaN(val)) {
+             val = Math.max(0, Math.min(100, val));
+             pickerHSLA.a = val / 100;
+             updatePickerVisuals();
+        }
+    });
+
+    // Preset Swatches
+    const presetColors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#007AFF', '#5856D6', '#FF2D55', '#8E8E93', '#C7C7CC', '#D1D1D6', '#E5E5EA', '#F2F2F7', '#FFFFFF', '#000000'];
+    const cpSwatchGrid = document.getElementById('cpSwatchGrid');
+    presetColors.forEach(hex => {
+        const swatch = document.createElement('div');
+        swatch.className = 'cp-swatch';
+        swatch.style.backgroundColor = hex;
+        swatch.addEventListener('click', () => {
+            setPickerColorFromHex(hex);
+            // CHANGED: Clicking a preset immediately adds the color.
+            confirmAddColor();
+        });
+        cpSwatchGrid.appendChild(swatch);
+    });
+    
+    function setPickerColorFromHex(hex) {
+        const hsl = hexToHsl(hex);
+        pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
+        pickerHSLA.a = 1.0; // Reset alpha on preset click
+        updatePickerVisuals();
+    }
+
+
+    // --- Popover Open/Close Logic ---
+
+    function openPopover() {
+        if (colorState.isMultiColor) return;
+
+        // Reset picker to default red state
+        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 };
+        updatePickerVisuals();
+
+        // 1. Show temporarily to measure dimensions
+        popover.style.visibility = 'hidden';
+        popover.style.display = 'flex';
+
+        // 2. Get dimensions
+        const btnRect = addColorBtn.getBoundingClientRect();
+        const popoverRect = popover.getBoundingClientRect();
+
+        // 3. Calculate Horizontal Position (Right of button + gap)
+        const leftPos = btnRect.right + 12;
+
+        // 4. Calculate Vertical Position (Centered relative to button)
+        const btnCenterY = btnRect.top + (btnRect.height / 2);
+        let topPos = btnCenterY - (popoverRect.height / 2);
+
+        // 5. Boundary check to keep it on screen vertically
+        const padding = 10;
+        // Ensure it doesn't go off the top
+        topPos = Math.max(padding, topPos);
+        // Ensure it doesn't go off the bottom
+        const maxTop = window.innerHeight - popoverRect.height - padding;
+        topPos = Math.min(topPos, maxTop);
+
+        // 6. Apply positions
+        popover.style.left = `${leftPos}px`;
+        popover.style.top = `${topPos}px`;
+        
+        // 7. Make visible
+        popover.style.visibility = 'visible';
+        
+        // Add click outside listener
+        document.addEventListener('click', closePopoverOnClickOutside);
+    }
+
+    function closePopover() {
+        popover.style.display = 'none';
+        // Remove click outside listener
+        document.removeEventListener('click', closePopoverOnClickOutside);
+    }
+
+    // New function to handle click outside
+    function closePopoverOnClickOutside(event) {
+        const isClickInsidePopover = popover.contains(event.target);
+        const isClickOnAddBtn = addColorBtn.contains(event.target);
+
+        // Check if display is 'flex' (active) before closing
+        if (!isClickInsidePopover && !isClickOnAddBtn && popover.style.display === 'flex') {
+            closePopover();
+        }
+    }
+
+    // Helper function to confirm and add the current picker color
+    function confirmAddColor() {
+         // Create a copy of current picker state
+        const newColor = { ...pickerHSLA };
+        colorState.colors.push(newColor);
+        renderColorList();
+        closePopover();
+    }
+
+
+    // Main Add Color button listener
+    addColorBtn.addEventListener('click', openPopover);
+
+    cpCloseBtn.addEventListener('click', closePopover);
+
+    // Confirm Add Color Button (inside popover)
+    cpAddConfirmBtn.addEventListener('click', confirmAddColor);
+
+
+    // --- Color Conversion Utilities ---
+    // Source: Adapted from common HSL/RGB conversion algorithms used in web development.
+
+    function hslToHex(h, s, l) {
+      l /= 100; const a = s * Math.min(l, 1 - l) / 100;
+      const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
+      };
+      return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+    }
+
+    function hexToHsl(hex) {
+      let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (!result) return { h: 0, s: 0, l: 0 };
+      let r = parseInt(result[1], 16) / 255;
+      let g = parseInt(result[2], 16) / 255;
+      let b = parseInt(result[3], 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) { h = s = 0; } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+      }
+      return { h: h, s: s * 100, l: l * 100 };
+    }
+
     // -------------------------------
 
 
@@ -610,10 +1002,10 @@
             randomizeSize: document.getElementById('checkSize').checked,
             randomizeRotation: document.getElementById('checkRotation').checked,
             selectedShapes: selectedShapes,
-            // Send new color data structure
+            // Send new color data structure (HSLA objects)
             colorData: {
                 isMultiColor: colorState.isMultiColor,
-                customColors: colorState.colors
+                customColors: colorState.colors 
             }
         };
     }
@@ -633,8 +1025,8 @@
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
         
-        // Reset Color Section back to default state (OFF)
-        colorState = { isMultiColor: false, colors: ['#007AFF', '#CD0FD2'] };
+        // Reset Color Section back to default state (OFF and Empty)
+        colorState = { isMultiColor: false, colors: [] };
         multiColorSwitch.checked = false;
         renderColorList();
     });

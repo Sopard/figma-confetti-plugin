@@ -1,4 +1,3 @@
-// Show the UI with dimensions matching the design
 figma.showUI(__html__, { width: 960, height: 700, themeColors: false });
 
 figma.ui.onmessage = msg => {
@@ -26,17 +25,19 @@ function generateConfetti(settings, isPreview) {
   // Determine Color Palette
   let colorPalette = [];
   if (settings.colorData.isMultiColor) {
-      // Use default rainbow multi-color
+      // Use default rainbow multi-color (solid RGBs)
       colorPalette = [
           {r:1, g:0.2, b:0.2}, {r:1, g:0.6, b:0}, {r:1, g:0.9, b:0},
           {r:0.2, g:0.8, b:0.2}, {r:0.2, g:0.6, b:1}, {r:0.6, g:0.2, b:0.8}
       ];
   } else {
-      // Use custom selected colors
-      colorPalette = settings.colorData.customColors.map(hex => hexToRgb(hex));
+      // Use custom selected colors (HSLA objects)
+      // Convert HSLA to Figma RGBA format
+      colorPalette = settings.colorData.customColors.map(hsla => hslToRgba(hsla.h, hsla.s, hsla.l, hsla.a));
+      
       // Fallback if list is empty
       if (colorPalette.length === 0) {
-          colorPalette = [{r:0.5, g:0.5, b:0.5}];
+          colorPalette = [{r:0.5, g:0.5, b:0.5, a:1.0}];
       }
   }
 
@@ -47,6 +48,7 @@ function generateConfetti(settings, isPreview) {
   const frame = figma.createFrame();
   frame.name = `Confetti Frame${isPreview ? ' Preview' : ''}`;
   frame.resize(Number(frameWidth), Number(frameHeight));
+  // Solid white background
   frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
   figma.currentPage.appendChild(frame);
 
@@ -101,9 +103,15 @@ function generateConfetti(settings, isPreview) {
     const particle = createShape(randomShapeType);
     if (!particle) continue;
 
-    // Pick color from the determined palette
-    const colorRGB = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-    particle.fills = [{ type: 'SOLID', color: colorRGB }];
+    // Pick color from the palette
+    const colorData = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    
+    // Apply solid color and opacity
+    particle.fills = [{ 
+        type: 'SOLID', 
+        color: { r: colorData.r, g: colorData.g, b: colorData.b },
+        opacity: colorData.a !== undefined ? colorData.a : 1.0
+    }];
 
     const randomFactor = randomness / 100; 
     const safeMaxX = Math.max(0, frameWidth - particle.width);
@@ -133,18 +141,16 @@ function validateNum(val, min, max, def) {
     return num;
 }
 
-// Helper to convert hex to RGB for Figma
-function hexToRgb(hex) {
-  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-    return r + r + g + g + b + b;
-  });
-
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16) / 255,
-    g: parseInt(result[2], 16) / 255,
-    b: parseInt(result[3], 16) / 255
-  } : { r: 0.5, g: 0.5, b: 0.5 }; // default gray if invalid
+// Helper to convert HSL to Figma RGBA format
+function hslToRgba(h, s, l, a) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a_hsl = s * Math.min(l, 1 - l);
+  const f = n => l - a_hsl * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return {
+    r: f(0),
+    g: f(8),
+    b: f(4),
+    a: a
+  };
 }
