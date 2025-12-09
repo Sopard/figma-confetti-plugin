@@ -1,5 +1,5 @@
-// Show the UI with dimensions matching the design (wider layout)
-figma.showUI(__html__, { width: 720, height: 680, themeColors: false });
+// Show the UI with wider dimensions (960px) to give the preview panel more room
+figma.showUI(__html__, { width: 960, height: 680, themeColors: false });
 
 figma.ui.onmessage = msg => {
   if (msg.type === 'generate-confetti' || msg.type === 'preview-confetti') {
@@ -19,11 +19,12 @@ function generateConfetti(settings, isPreview) {
   const randomizeSize = settings.randomizeSize === true;
   const randomizeRotation = settings.randomizeRotation === true;
 
+  // Default to all shapes if none selected, now including 'square'
   let shapesToUse = (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) 
     ? settings.selectedShapes 
-    : ['rectangle', 'circle', 'star'];
+    : ['rectangle', 'square', 'circle', 'star'];
 
-  // 2. Frame Setup - Always use a standard desktop size
+  // 2. Frame Setup - Standard desktop size
   const frameWidth = 1440;
   const frameHeight = 1024;
 
@@ -56,18 +57,27 @@ function generateConfetti(settings, isPreview) {
     if (isNaN(baseSize) || baseSize <= 2) baseSize = 5;
 
     let node;
-    if (type === 'rectangle') {
-      node = figma.createRectangle();
-      node.resize(baseSize, baseSize * 0.6);
-      node.cornerRadius = baseSize * 0.1;
-    } else if (type === 'circle') {
-      node = figma.createEllipse();
-      node.resize(baseSize, baseSize);
-    } else if (type === 'star') {
-      node = figma.createStar();
-      node.resize(baseSize, baseSize);
-      node.pointCount = 5;
-      node.innerRadius = 0.4;
+    switch (type) {
+        case 'rectangle':
+            node = figma.createRectangle();
+            node.resize(baseSize, baseSize * 0.6); // Oblong
+            node.cornerRadius = baseSize * 0.1;
+            break;
+        case 'square':
+            node = figma.createRectangle();
+            node.resize(baseSize, baseSize); // Perfect square
+            node.cornerRadius = baseSize * 0.1;
+            break;
+        case 'circle':
+            node = figma.createEllipse();
+            node.resize(baseSize, baseSize);
+            break;
+        case 'star':
+            node = figma.createStar();
+            node.resize(baseSize, baseSize);
+            node.pointCount = 5;
+            node.innerRadius = 0.4;
+            break;
     }
     return node;
   }
