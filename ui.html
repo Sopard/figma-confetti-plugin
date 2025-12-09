@@ -12,11 +12,13 @@
       --background: #FFFFFF;
       --foreground: #0f172a; /* Dark text */
       --muted: #f1f5f9; /* Light gray bg */
+      --muted-darker: #e2e8f0; /* Slightly darker muted for inputs */
       --muted-foreground: #64748b; /* Gray text */
       --border: #e2e8f0;
       --radius: 8px;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --slider-track: #E5E7EB;
+      --switch-bg: #E5E7EB;
     }
 
     body {
@@ -151,11 +153,9 @@
         align-items: center;
         gap: 12px;
         cursor: pointer;
-        /* Ensure checkbox row has same height as slider rows for alignment */
-        height: 36px; 
+        height: 36px; /* Align height with sliders */
     }
-    /* Custom checkbox styling */
-    input[type="checkbox"] {
+    input[type="checkbox"].custom-checkbox {
       appearance: none;
       width: 20px;
       height: 20px;
@@ -166,95 +166,115 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      margin: 0; /* Remove default margin */
+      margin: 0;
     }
-    input[type="checkbox"]:checked {
+    input[type="checkbox"].custom-checkbox:checked {
       background-color: var(--primary);
       border-color: var(--primary);
     }
-    input[type="checkbox"]:checked::after {
+    input[type="checkbox"].custom-checkbox:checked::after {
       content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>');
       display: block;
       height: 14px;
     }
     .checkbox-label { font-size: 14px; font-weight: 500; }
 
-    /* Color Section */
-    .color-row { display: flex; gap: 8px; align-items: center; }
-    .icon-btn {
-        width: 40px; height: 40px;
-        display: flex; align-items: center; justify-content: center;
-        border: 1px solid var(--border); border-radius: var(--radius);
-        background: var(--background); color: var(--muted-foreground);
-        cursor: pointer;
-    }
-    .color-display {
-        flex: 1; display: flex; align-items: center; gap: 12px;
-        background: var(--muted); padding: 6px 12px; border-radius: var(--radius);
-        height: 40px; box-sizing: border-box;
-    }
-    .color-preview-box { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
-    .color-name { flex: 1; font-size: 14px; font-weight: 500; }
+    /* --- NEW COLOR SECTION STYLES --- */
     
-    /* --- Editable Color Percentage Input (New Styles) --- */
-    .color-percent-wrapper {
+    .color-header-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--muted);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      height: 40px;
+      box-sizing: border-box;
+    }
+    .color-count-text { font-size: 14px; font-weight: 500; }
+    .icon-btn-flat {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent;
+      color: var(--foreground);
+      cursor: pointer; padding: 0;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .icon-btn-flat:hover:not(:disabled) { background-color: var(--muted-darker); }
+    .icon-btn-flat:disabled { color: var(--muted-foreground); cursor: not-allowed; opacity: 0.5; }
+
+    .color-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Multi-color toggle row */
+    .color-toggle-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 74px; /* Wider to accommodate space */
-      height: 32px; /* Match swatch height */
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background-color: var(--background);
-      padding: 0 4px;
+      justify-content: space-between;
     }
-    
-    .color-percent-input {
-        width: 32px; /* Fixed width for 3 digits */
-        border: none;
-        background: transparent;
-        text-align: center; /* Centered number */
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--muted-foreground);
-        outline: none;
-        padding: 0;
-        margin: 0;
-        -moz-appearance: textfield; /* Hide spinners FF */
+    .color-toggle-label {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; font-weight: 500;
     }
-    /* Hide spinners Chrome/Safari/Edge */
-    .color-percent-input::-webkit-outer-spin-button,
-    .color-percent-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+    .rainbow-icon { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
+
+    /* iOS Style Switch */
+    .switch {
+      position: relative; display: inline-block; width: 44px; height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--switch-bg);
+      transition: .4s; border-radius: 24px;
+    }
+    .switch-slider:before {
+      position: absolute; content: "";
+      height: 20px; width: 20px;
+      left: 2px; bottom: 2px;
+      background-color: white;
+      transition: .4s; border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+    }
+    input:checked + .switch-slider { background-color: var(--primary); }
+    input:checked + .switch-slider:before { transform: translateX(20px); }
+
+    /* --- NEW SCROLL CONTAINER STYLE --- */
+    .added-colors-scroll-container {
+        /* Fixed height to prevent UI pushing */
+        height: 100px; 
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background-color: transparent; /* No fill */
+        padding: 8px; /* internal spacing */
+        margin-top: 8px;
     }
 
-    .color-percent-suffix {
-      font-size: 14px;
-      color: var(--muted-foreground);
-      font-weight: 500;
-      margin-left: 4px; /* Space between number and % */
-      pointer-events: none;
+    /* Individual Color Rows */
+    .color-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: opacity 0.3s;
+      padding: 4px 0; /* Slight padding for rows inside scroll container */
+    }
+    .color-item-row.disabled { opacity: 0.5; pointer-events: none; }
+    .color-preview-sq { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; }
+    .color-hex-text { flex: 1; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .color-percent-static {
+      font-size: 14px; color: var(--muted-foreground);
+      font-variant-numeric: tabular-nums; margin-right: 8px;
     }
 
-    /* Focus state for the wrapper */
-    .color-percent-wrapper:focus-within {
-      border-color: var(--primary);
-    }
-    
-    .swatch-grid { display: flex; gap: 12px; margin-top: 12px; }
-    .swatch { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; position: relative; box-shadow: var(--shadow-sm); border: 1px solid transparent;}
-    .swatch.selected { border-color: var(--primary); }
-    /* Swatch Gradients */
-    .s-gold { background: linear-gradient(135deg, #F2C94C, #F2994A); }
-    .s-silver { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); }
-    .s-red { background: linear-gradient(135deg, #EB5757, #c0392b); }
-    .s-purple { background: linear-gradient(135deg, #BB6BD9, #8e44ad); }
-    .s-blue { background: linear-gradient(135deg, #2F80ED, #2980b9); }
-    .s-magenta { background: linear-gradient(135deg, #e91e63, #c2185b); }
-    .s-solid-red { background: #d32f2f; }
-    .s-solid-green { background: #4caf50; }
-    .s-rainbow { background: linear-gradient(135deg, red, orange, yellow, green, blue, purple); }
+    /* ------------------------------------ */
+
 
     /* Selectors (Shapes) */
     .selector-grid { display: flex; gap: 12px; }
@@ -366,13 +386,13 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div>
               <label class="checkbox-item">
-                  <input type="checkbox" id="checkSize" checked>
+                  <input type="checkbox" id="checkSize" class="custom-checkbox" checked>
                   <span class="checkbox-label">Randomize Size</span>
               </label>
           </div>
           <div>
               <label class="checkbox-item">
-                  <input type="checkbox" id="checkRotation" checked>
+                  <input type="checkbox" id="checkRotation" class="custom-checkbox" checked>
                   <span class="checkbox-label">Randomize Rotation</span>
               </label>
           </div>
@@ -380,32 +400,34 @@
 
       <div>
           <div class="label">Particle Color</div>
-          <div class="color-row">
-              <button class="icon-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 3 4 4"/><path d="M2 22h20"/></svg>
+          
+          <div class="color-header-box">
+              <span class="color-count-text" id="colorCounter">2 Colors</span>
+              <button class="icon-btn-flat" id="addColorBtn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
-              <div class="color-display">
-                  <div class="color-preview-box"></div>
-                  <span class="color-name">Multi-color</span>
-                  <div class="color-percent-wrapper">
-                    <input type="number" class="color-percent-input" value="100" min="0" max="100">
-                    <span class="color-percent-suffix">%</span>
-                  </div>
-              </div>
           </div>
-          <div class="swatch-grid">
-              <div class="swatch s-gold"></div>
-              <div class="swatch s-silver"></div>
-              <div class="swatch s-red"></div>
-              <div class="swatch s-purple"></div>
-              <div class="swatch s-blue"></div>
-              <div class="swatch s-magenta"></div>
-              <div class="swatch s-solid-red"></div>
-              <div class="swatch s-solid-green"></div>
-              <div class="swatch s-rainbow selected"></div>
+
+          <div class="color-list-container">
+              
+              <div class="color-toggle-row">
+                  <div class="color-toggle-label">
+                      <div class="rainbow-icon"></div>
+                      <span>Multi-color</span>
+                  </div>
+                  <label class="switch">
+                      <input type="checkbox" id="multiColorSwitch">
+                      <span class="switch-slider"></span>
+                  </label>
+              </div>
+
+              <div class="added-colors-scroll-container">
+                  <div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                      </div>
+              </div>
+
           </div>
       </div>
-
       <div>
           <div class="label">Particle Shape</div>
           <div class="selector-grid id-shape-selector">
@@ -456,7 +478,7 @@
   </div> <script>
     // --- UI Interactions ---
 
-    // 1. Sliders Linkage (Input <-> Visual Progress & Value)
+    // 1. Sliders Linkage
     function setupSlider(inputId, fillId, valueId, format) {
       const input = document.getElementById(inputId);
       const fill = document.getElementById(fillId);
@@ -472,7 +494,6 @@
         if (format === 'percent') {
              valueLabel.textContent = `${val}%`;
         } else if (format === 'zoom') {
-            // Map 10-50 range to x1.0 - x5.0 for display
             valueLabel.textContent = `x${(val / 10).toFixed(1)}`;
         }
       }
@@ -494,13 +515,77 @@
       });
     });
 
-    // 3. Swatches
-    document.querySelectorAll('.swatch').forEach(swatch => {
-      tab.addEventListener('click', () => {
-         document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-         swatch.classList.add('selected');
-      });
+
+    // --- NEW COLOR SECTION LOGIC ---
+
+    // State for colors
+    let colorState = {
+        isMultiColor: false, // Default to OFF
+        colors: ['#007AFF', '#CD0FD2'] // Initial colors
+    };
+
+    const multiColorSwitch = document.getElementById('multiColorSwitch');
+    const colorRowsContainer = document.getElementById('colorRowsContainer');
+    const colorCounter = document.getElementById('colorCounter');
+    const addColorBtn = document.getElementById('addColorBtn');
+
+    // Function to render the color list based on state
+    function renderColorList() {
+        // Update counter text
+        colorCounter.textContent = `${colorState.colors.length} Colors`;
+
+        // Update state of add button based on multi-color switch
+        addColorBtn.disabled = colorState.isMultiColor;
+
+        // Clear current list
+        colorRowsContainer.innerHTML = '';
+
+        // Build new entries
+        colorState.colors.forEach((colorHex, index) => {
+            const row = document.createElement('div');
+            // Add disabled class if multi-color is active
+            row.className = `color-item-row ${colorState.isMultiColor ? 'disabled' : ''}`;
+            
+            row.innerHTML = `
+                <div class="color-preview-sq" style="background-color: ${colorHex};"></div>
+                <span class="color-hex-text">${colorHex}</span>
+                <span class="color-percent-static">100 %</span>
+                <button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            `;
+
+            // Add delete functionality
+            const deleteBtn = row.querySelector('.delete-color-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                if (colorState.isMultiColor) return; // Prevent deletion if disabled
+                const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+                colorState.colors.splice(idx, 1);
+                renderColorList();
+            });
+
+            colorRowsContainer.appendChild(row);
+        });
+    }
+
+    // Event Listener for Multi-color Switch
+    multiColorSwitch.addEventListener('change', (e) => {
+        colorState.isMultiColor = e.target.checked;
+        renderColorList(); // Re-render to update UI state
     });
+
+    // Event Listener for Add Button
+    addColorBtn.addEventListener('click', () => {
+        if (colorState.isMultiColor) return; // Prevent adding if disabled
+        // Add a default color (e.g., a nice green)
+        colorState.colors.push('#34C759'); 
+        renderColorList();
+    });
+
+    // Initial Render
+    renderColorList();
+    // -------------------------------
+
 
     // 4. Shape Selector (Multi-select)
     document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
@@ -525,6 +610,11 @@
             randomizeSize: document.getElementById('checkSize').checked,
             randomizeRotation: document.getElementById('checkRotation').checked,
             selectedShapes: selectedShapes,
+            // Send new color data structure
+            colorData: {
+                isMultiColor: colorState.isMultiColor,
+                customColors: colorState.colors
+            }
         };
     }
 
@@ -542,8 +632,11 @@
         // Reset Checkboxes
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
-        // Reset Color Input
-        document.querySelector('.color-percent-input').value = 100;
+        
+        // Reset Color Section back to default state (OFF)
+        colorState = { isMultiColor: false, colors: ['#007AFF', '#CD0FD2'] };
+        multiColorSwitch.checked = false;
+        renderColorList();
     });
 
   </script>
