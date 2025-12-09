@@ -1,10 +1,8 @@
-// Show the UI with dimensions that fit the design
-figma.showUI(__html__, { width: 800, height: 750, themeColors: false });
+// Show the UI with dimensions matching the design (wider layout)
+figma.showUI(__html__, { width: 720, height: 680, themeColors: false });
 
-// Listen for messages from the UI
 figma.ui.onmessage = msg => {
   if (msg.type === 'generate-confetti' || msg.type === 'preview-confetti') {
-    // Preview generates a smaller batch for performance
     const isPreview = msg.type === 'preview-confetti';
     generateConfetti(msg.settings, isPreview);
   } else if (msg.type === 'close-plugin') {
@@ -13,128 +11,105 @@ figma.ui.onmessage = msg => {
 };
 
 function generateConfetti(settings, isPreview) {
-  console.log("Raw settings received:", settings);
+  // 1. Validate settings and set defaults
+  const speed = validateNum(settings.speed, 0, 100, 60);
+  const randomness = validateNum(settings.randomness, 0, 100, 60);
+  const amount = validateNum(settings.amount, 0, 100, 60);
+  const zoom = validateNum(settings.zoom, 10, 100, 10);
+  const randomizeSize = settings.randomizeSize === true;
+  const randomizeRotation = settings.randomizeRotation === true;
 
-  // --- 1. RIGOROUS INPUT VALIDATION & DEFAULTS ---
-  // We explicitly check if inputs are valid numbers. If not, we use safe defaults.
-
-  // Speed slider is 0-100. Default to 60 if invalid.
-  const speedRaw = parseFloat(settings.speed);
-  const speed = (!isNaN(speedRaw) && speedRaw >= 0 && speedRaw <= 100) ? speedRaw : 60;
-
-  // Randomness slider is 0-100. Default to 60 if invalid.
-  const randomnessRaw = parseFloat(settings.randomness);
-  const randomness = (!isNaN(randomnessRaw) && randomnessRaw >= 0 && randomnessRaw <= 100) ? randomnessRaw : 60;
-
-  // Zoom slider is 10-100. Default to 10 (1.0x) if invalid.
-  const zoomRaw = parseFloat(settings.zoom);
-  const zoom = (!isNaN(zoomRaw) && zoomRaw >= 10 && zoomRaw <= 100) ? zoomRaw : 10;
-
-  // Ensure device is a valid string. Default to 'desktop'.
-  const deviceStr = (settings.device && typeof settings.device === 'string') ? settings.device : 'desktop';
-
-  // Ensure selectedShapes is an array. Default to all shapes if empty.
   let shapesToUse = (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) 
     ? settings.selectedShapes 
     : ['rectangle', 'circle', 'star'];
 
-  console.log("Validated settings:", { speed, randomness, zoom, deviceStr, shapesToUse });
-
-  // --- 2. FRAME SETUP ---
-  let frameWidth = 1440; let frameHeight = 1024;
-  if (deviceStr === 'mobile') { frameWidth = 390; frameHeight = 844; }
-  else if (deviceStr === 'tablet') { frameWidth = 834; frameHeight = 1194; }
+  // 2. Frame Setup - Always use a standard desktop size
+  const frameWidth = 1440;
+  const frameHeight = 1024;
 
   const frame = figma.createFrame();
-  frame.name = `Confetti - ${deviceStr.charAt(0).toUpperCase() + deviceStr.slice(1)}${isPreview ? ' Preview' : ''}`;
-  // Ensure width/height are numbers before resizing
+  frame.name = `Confetti Frame${isPreview ? ' Preview' : ''}`;
   frame.resize(Number(frameWidth), Number(frameHeight));
-  frame.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+  frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
   figma.currentPage.appendChild(frame);
 
-  // --- 3. CALCULATION SETUP ---
-  // Speed 50 is normal density (multiplier 1). Speed 100 is double density.
-  const densityMultiplier = speed / 50; 
-  // Lower base divider = higher density.
-  const baseDivider = isPreview ? 10000 : 2500; 
+  // 3. Calculation Setup
+  const densityMultiplier = amount / 50; 
+  const baseDivider = isPreview ? 8000 : 2500;
   const baseCount = (frameWidth * frameHeight) / baseDivider;
-  // Ensure count is a safe integer
   const count = Math.floor(baseCount * densityMultiplier);
 
-  const rainbowColors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#18A0FB', '#F24E1E', '#FFC700', '#00C853'];
+  const rainbowColors = [
+    {r:1, g:0.2, b:0.2}, {r:1, g:0.6, b:0}, {r:1, g:0.9, b:0},
+    {r:0.2, g:0.8, b:0.2}, {r:0.2, g:0.6, b:1}, {r:0.6, g:0.2, b:0.8}
+  ];
 
-  // Helper: Create shape with validated size
+  // Helper: Create shape
   const createShape = (type) => {
-    // Zoom 10 = 0.5x scale. Zoom 100 = 5.0x scale.
-    const scaleFactor = zoom / 20; 
-    const baseSize = 20;
-    let size = baseSize * scaleFactor;
+    const zoomScale = zoom / 10; 
+    let baseSize = 20 * zoomScale;
 
-    // Final safety check on size
-    if (isNaN(size) || size <= 0) size = 10;
+    if (randomizeSize) {
+        const sizeVariation = 0.5 + Math.random(); 
+        baseSize = baseSize * sizeVariation;
+    }
+    if (isNaN(baseSize) || baseSize <= 2) baseSize = 5;
 
     let node;
     if (type === 'rectangle') {
       node = figma.createRectangle();
-      node.resize(size, size * 0.6);
-      node.cornerRadius = size * 0.1;
+      node.resize(baseSize, baseSize * 0.6);
+      node.cornerRadius = baseSize * 0.1;
     } else if (type === 'circle') {
       node = figma.createEllipse();
-      node.resize(size, size);
+      node.resize(baseSize, baseSize);
     } else if (type === 'star') {
       node = figma.createStar();
-      node.resize(size, size);
+      node.resize(baseSize, baseSize);
       node.pointCount = 5;
       node.innerRadius = 0.4;
     }
     return node;
   }
 
-  // --- 4. GENERATION LOOP ---
+  // 4. Generation Loop
   figma.notify(isPreview ? "Generating preview..." : `Generating ${count} particles...`);
 
   for (let i = 0; i < count; i++) {
     const randomShapeType = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
     const particle = createShape(randomShapeType);
-    
     if (!particle) continue;
 
     // Color
-    const colorHex = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
-    const r = parseInt(colorHex.slice(1, 3), 16) / 255;
-    const g = parseInt(colorHex.slice(3, 5), 16) / 255;
-    const b = parseInt(colorHex.slice(5, 7), 16) / 255;
-    particle.fills = [{ type: 'SOLID', color: { r, g, b } }];
+    const colorRGB = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
+    particle.fills = [{ type: 'SOLID', color: colorRGB }];
 
-    // Position & Rotation based on Randomness factor (0.0 - 1.0)
+    // Position
     const randomFactor = randomness / 100; 
-    
-    // Calculate safe bounds
     const safeMaxX = Math.max(0, frameWidth - particle.width);
     const potentialX = Math.random() * safeMaxX;
-    
-    // Spread Y: Low randomness concentrates at top, high randomness spreads full height
     const ySpread = frameHeight * (0.2 + (0.8 * randomFactor));
     const potentialY = Math.random() * ySpread;
     
-    const potentialRotation = Math.random() * 360 * Math.max(0.1, randomFactor);
-
-    // FINAL SAFETY CHECK before assignment. If any value is NaN, skip this particle.
-    if (isNaN(potentialX) || isNaN(potentialY) || isNaN(potentialRotation)) {
-        console.error("NaN value calculated for particle. Skipping.");
-        particle.remove();
-        continue;
-    }
-
     particle.x = potentialX;
     particle.y = potentialY;
-    particle.rotation = potentialRotation;
+
+    if (randomizeRotation) {
+       particle.rotation = Math.random() * 360 * Math.max(0.1, randomFactor);
+    } else {
+       particle.rotation = 0;
+    }
 
     frame.appendChild(particle);
   }
 
-  // Center view on result
   figma.currentPage.selection = [frame];
   figma.viewport.scrollAndZoomIntoView([frame]);
-  figma.notify("Confetti generated successfully!");
+}
+
+// Helper function for validation
+function validateNum(val, min, max, def) {
+    const num = parseFloat(val);
+    if (isNaN(num) || num < min || num > max) return def;
+    return num;
 }

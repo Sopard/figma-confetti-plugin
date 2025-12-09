@@ -5,234 +5,498 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confetti Animator</title>
   <style>
-    /* --- CSS STYLES (Same as before) --- */
+    /* --- Modern CSS Variables --- */
     :root {
-      --primary-blue: #1890FF;
-      --text-dark: #333333;
-      --text-gray: #888888;
-      --bg-gray: #F5F5F5;
-      --border-color: #E8E8E8;
-      --border-radius: 8px;
-      --selected-bg-gray: #EEEEEE;
+      --primary: #1890FF; /* Bright Blue */
+      --primary-hover: #40a9ff;
+      --background: #FFFFFF;
+      --foreground: #0f172a; /* Dark text */
+      --muted: #f1f5f9; /* Light gray bg */
+      --muted-foreground: #64748b; /* Gray text */
+      --border: #e2e8f0;
+      --radius: 8px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --slider-track: #E5E7EB;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #FFFFFF; color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
-    .header { position: absolute; top: 0; left: 0; right: 0; height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--border-color); background: #fff; z-index: 10; }
-    .title { font-weight: 600; font-size: 16px; display: flex; align-items: center; }
-    .title-icon { margin-right: 8px; font-size: 20px; }
-    .close-btn { cursor: pointer; padding: 4px; color: var(--text-gray); }
-    .main-container { display: flex; width: 100%; margin-top: 48px; height: calc(100% - 48px); }
-    .left-panel { width: 400px; padding: 24px; border-right: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0; display: flex; flex-direction: column; }
-    .right-panel { flex: 1; padding: 24px; background-color: #fff; display: flex; flex-direction: column; justify-content: flex-start; }
-    .control-group { margin-bottom: 24px; }
-    .control-label { font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .tabs { display: flex; background-color: var(--bg-gray); border-radius: var(--border-radius); padding: 4px; margin-bottom: 24px; }
-    .tab { flex: 1; text-align: center; padding: 8px 0; font-size: 14px; font-weight: 500; border-radius: 6px; cursor: pointer; color: var(--text-gray); transition: all 0.2s; }
-    .tab.active { background-color: #FFFFFF; color: var(--text-dark); box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05); }
-    .slider-container { position: relative; height: 32px; border-radius: var(--border-radius); background-color: var(--bg-gray); overflow: hidden; margin-bottom: 8px; }
-    .slider-progress { position: absolute; height: 100%; background-color: var(--primary-blue); border-radius: var(--border-radius); pointer-events: none; }
-    .slider-value-display { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: 600; font-size: 14px; color: var(--text-dark); pointer-events: none; z-index: 2; }
-    input[type=range] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; margin: 0; }
-    .slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-gray); }
-    .color-input-row { display: flex; gap: 8px; margin-bottom: 16px; }
-    .eyedropper-btn { width: 40px; height: 40px; border-radius: var(--border-radius); background: var(--bg-gray); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-dark); }
-    .color-value-input { flex: 1; display: flex; align-items: center; background: var(--bg-gray); border-radius: var(--border-radius); padding: 0 12px; height: 40px; }
-    .color-preview { width: 24px; height: 24px; border-radius: 4px; margin-right: 12px; background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); }
-    .color-text { flex: 1; font-size: 14px; font-weight: 500; }
-    .color-percent { color: var(--text-gray); font-size: 14px; }
-    .color-swatches { display: flex; gap: 12px; align-items: center; }
-    .swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; box-sizing: border-box; position: relative; }
-    .swatch.selected::after { content: ''; position: absolute; top: -4px; right: -4px; bottom: -4px; left: -4px; border-radius: 50%; border: 2px solid var(--primary-blue); }
-    .swatch.multi { background: linear-gradient(135deg, #FFD700, #FF8C00); }
-    .swatch.silver { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); }
-    .swatch.rose { background: linear-gradient(135deg, #FF6B6B, #C44D4D); }
-    .swatch.purple { background: linear-gradient(135deg, #BA55D3, #8A2BE2); }
-    .swatch.blue { background: #1890FF; }
-    .swatch.magenta { background: #D900D6; }
-    .swatch.red { background: #D9001B; }
-    .swatch.green { background: #52C41A; }
-    .swatch.rainbow { background: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet); }
-    .selection-row { display: flex; gap: 16px; }
-    .select-btn { width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; color: var(--text-gray); transition: all 0.2s; border: 2px solid transparent; background: transparent; }
-    .shape-selector .select-btn { border-color: var(--border-color); background: #fff; }
-    .shape-selector .select-btn.disabled { background: #D9D9D9; border: none; cursor: default; }
-    .shape-selector .select-btn.disabled svg { display: none; }
-    .select-btn.selected { color: var(--text-dark); }
-    .shape-selector .select-btn.selected { border-color: var(--primary-blue); color: var(--primary-blue); background-color: #E6F7FF; }
-    .device-selector .select-btn.selected { background-color: var(--selected-bg-gray); color: var(--text-dark); }
-    .select-btn svg { width: 24px; height: 24px; }
-    .checkmark { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--primary-blue); border-radius: 50%; border: 2px solid #fff; display: none; align-items: center; justify-content: center; color: white; font-size: 10px; }
-    .select-btn.selected .checkmark { display: flex; }
-    .footer { display: flex; gap: 16px; margin-top: auto; padding-top: 24px; }
-    .btn { height: 44px; border-radius: var(--border-radius); font-weight: 600; font-size: 16px; cursor: pointer; border: none; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
-    .btn-primary { flex: 2; background-color: var(--primary-blue); color: white; }
-    .btn-primary:hover { background-color: #1480E3; }
-    .btn-secondary { flex: 1; background-color: var(--bg-gray); color: var(--text-dark); }
-    .btn-secondary:hover { background-color: #D9D9D9; }
-    .preview-header { font-weight: 600; font-size: 16px; margin-bottom: 24px; }
-    .preview-box { flex: none; height: 360px; background-color: #fff; border-radius: 16px; border: 1px solid var(--border-color); background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="5" height="8" fill="%23FF5733"/><circle cx="30" cy="30" r="4" fill="%2333FF57"/><polygon points="50,10 55,25 45,25" fill="%233357FF"/><rect x="70" y="50" width="6" height="6" fill="%23FF33A8" transform="rotate(45 73 53)"/><circle cx="90" cy="80" r="3" fill="%23FFC300"/><rect x="20" y="80" width="4" height="10" fill="%2333FFF5" transform="rotate(-30 22 85)"/></svg>'); background-size: 200px 200px; margin-bottom: 24px; }
-    .play-btn { height: 44px; background-color: var(--bg-gray); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; color: var(--text-dark); cursor: pointer; border: none; }
-    .play-btn:hover { background-color: #D9D9D9; }
-    .play-icon { margin-right: 8px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background-color: var(--background);
+      color: var(--foreground);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Header --- */
+    .header {
+      height: 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .close-btn { cursor: pointer; color: var(--muted-foreground); padding: 4px; }
+
+    /* --- Main Layout (2 Columns) --- */
+    .main-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .settings-panel {
+      width: 420px; /* INCREASED WIDTH (was 360px) */
+      padding: 24px;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .preview-panel {
+      flex: 1; /* Takes remaining space */
+      padding: 24px;
+      background-color: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Components --- */
+
+    /* Tabs (Segmented Control) */
+    .tabs-list {
+      display: flex;
+      background-color: var(--muted);
+      padding: 4px;
+      border-radius: var(--radius);
+    }
+    .tab-trigger {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: calc(var(--radius) - 2px);
+      cursor: pointer;
+      color: var(--muted-foreground);
+      transition: all 0.2s;
+    }
+    .tab-trigger[data-state="active"] {
+      background-color: var(--background);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Labels */
+    .label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* ----- SLIDER STYLE ----- */
+    .slider-container {
+      position: relative;
+      height: 36px; /* Thick bar */
+      background-color: var(--slider-track);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .slider-fill {
+      position: absolute;
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: var(--radius) 0 0 var(--radius);
+      /* Transition for smooth movement */
+      transition: width 0.1s ease-out;
+    }
+    .slider-value-text {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--foreground);
+      pointer-events: none; /* Pass clicks through */
+      z-index: 2;
+    }
+    /* Native range input - invisible and overlaid */
+    .slider-input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+      margin: 0;
+      z-index: 3;
+    }
+    .slider-labels-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted-foreground);
+    }
+    /* --------------------------- */
+
+    /* Checkboxes */
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+    }
+    /* Custom checkbox styling */
+    input[type="checkbox"] {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      background-color: var(--background);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    input[type="checkbox"]:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    /* Add checkmark SVG via pseudo-element when checked */
+    input[type="checkbox"]:checked::after {
+      content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>');
+      display: block;
+      height: 14px;
+    }
+    .checkbox-label { font-size: 14px; font-weight: 500; }
+
+    /* Color Section */
+    .color-row { display: flex; gap: 8px; align-items: center; }
+    .icon-btn {
+        width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid var(--border); border-radius: var(--radius);
+        background: var(--background); color: var(--muted-foreground);
+        cursor: pointer;
+    }
+    .color-display {
+        flex: 1; display: flex; align-items: center; gap: 12px;
+        background: var(--muted); padding: 6px 12px; border-radius: var(--radius);
+        height: 40px; box-sizing: border-box;
+    }
+    .color-preview-box { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
+    .color-name { flex: 1; font-size: 14px; font-weight: 500; }
+    .color-opacity { font-size: 14px; color: var(--muted-foreground); }
+    
+    .swatch-grid { display: flex; gap: 12px; margin-top: 12px; }
+    .swatch { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; position: relative; box-shadow: var(--shadow-sm); border: 1px solid transparent;}
+    .swatch.selected { border-color: var(--primary); }
+    /* Swatch Gradients */
+    .s-gold { background: linear-gradient(135deg, #F2C94C, #F2994A); }
+    .s-silver { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); }
+    .s-red { background: linear-gradient(135deg, #EB5757, #c0392b); }
+    .s-purple { background: linear-gradient(135deg, #BB6BD9, #8e44ad); }
+    .s-blue { background: linear-gradient(135deg, #2F80ED, #2980b9); }
+    .s-magenta { background: linear-gradient(135deg, #e91e63, #c2185b); }
+    .s-solid-red { background: #d32f2f; }
+    .s-solid-green { background: #4caf50; }
+    .s-rainbow { background: linear-gradient(135deg, red, orange, yellow, green, blue, purple); }
+
+    /* Selectors (Shapes) */
+    .selector-grid { display: flex; gap: 12px; }
+    .selector-item {
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid var(--border); border-radius: var(--radius);
+        color: var(--muted-foreground); cursor: pointer; position: relative;
+        background: var(--background); transition: all 0.2s;
+    }
+    .selector-item.disabled { background: #e2e8f0; border: none; cursor: not-allowed; opacity: 0.7; }
+    
+    .selector-item[data-state="selected"] {
+        border-color: var(--primary); color: var(--primary); background-color: #f0f9ff;
+    }
+    /* Checkmark top right */
+    .selector-check {
+        position: absolute; top: -6px; right: -6px;
+        width: 18px; height: 18px; background: var(--primary);
+        border-radius: 50%; border: 2px solid var(--background);
+        display: none; align-items: center; justify-content: center; color: white;
+    }
+    .selector-item[data-state="selected"] .selector-check { display: flex; }
+
+    /* Footer Buttons */
+    .footer { display: flex; gap: 12px; margin-top: auto; padding-top: 24px; }
+    .btn {
+        height: 44px; border-radius: var(--radius); font-weight: 600; font-size: 14px;
+        cursor: pointer; border: none; transition: background-color 0.2s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .btn-primary { flex: 3; background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-outline { flex: 1; background-color: transparent; border: 1px solid var(--border); color: var(--foreground); }
+    .btn-outline:hover { background-color: var(--muted); }
+
+    /* Preview Panel Specifics */
+    .preview-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .preview-canvas {
+        flex: 1; background: var(--background); border: 1px solid var(--border);
+        border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+        /* Placeholder pattern */
+        background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 20px 20px;
+        display: flex; align-items: center; justify-content: center; color: var(--muted-foreground);
+    }
+    .play-btn { width: 100%; background-color: var(--muted); color: var(--foreground); }
+
   </style>
 </head>
 <body>
+
   <div class="header">
-    <div class="title"><span class="title-icon">🎉</span>Confetti Animator</div>
+    <div class="title"><span>🎉</span> Confetti Animator</div>
     <div class="close-btn" id="closeBtn">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L1 13M1 1L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
   </div>
 
-  <div class="main-container">
-    <div class="left-panel">
-      <div class="tabs">
-        <div class="tab active">Free fall</div>
-        <div class="tab">Impact Fall</div>
+  <div class="main-layout">
+    
+    <div class="settings-panel">
+      
+      <div class="tabs-list">
+        <div class="tab-trigger" data-state="active">Free fall</div>
+        <div class="tab-trigger">Impact Fall</div>
       </div>
-      <div class="control-group">
-        <div class="control-label">Fall Speed</div>
-        <div class="slider-container">
-          <div class="slider-progress" style="width: 60%;"></div><span class="slider-value-display">60%</span>
-          <input type="range" id="speedInput" min="0" max="100" value="60">
-        </div>
-        <div class="slider-labels"><span>Slow</span><span>Fast</span></div>
-      </div>
-      <div class="control-group">
-        <div class="control-label">Particle Randomness</div>
-        <div class="slider-container">
-          <div class="slider-progress" style="width: 60%;"></div><span class="slider-value-display">60%</span>
-          <input type="range" id="randomInput" min="0" max="100" value="60">
-        </div>
-        <div class="slider-labels"><span>Uniform</span><span>Chaotic</span></div>
-      </div>
-      <div class="control-group">
-        <div class="control-label">Zoom</div>
-        <div class="slider-container">
-          <div class="slider-progress" style="width: 10%;"></div><span class="slider-value-display">x1.0</span>
-          <input type="range" id="zoomInput" min="10" max="100" value="20">
-        </div>
-        <div class="slider-labels"><span>x0.5</span><span>x5.0</span></div>
-      </div>
-      <div class="control-group">
-        <div class="control-label">Color</div>
-        <div class="color-input-row">
-            <div class="eyedropper-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 5.5L18.5 9.5L9.5 18.5C9 19 8.33333 19.3333 7.5 19.5L4 20L4.5 16.5C4.66667 15.6667 5 15 5.5 14.5L14.5 5.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 6.5L17.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="color-value-input"><div class="color-preview"></div><div class="color-text">Multi-color</div><div class="color-percent">100%</div></div>
-        </div>
-        <div class="color-swatches">
-          <div class="swatch multi"></div><div class="swatch silver"></div><div class="swatch rose"></div><div class="swatch purple"></div><div class="swatch blue"></div><div class="swatch magenta"></div><div class="swatch red"></div><div class="swatch green"></div><div class="swatch rainbow selected"></div>
-        </div>
-      </div>
-      <div class="control-group">
-        <div class="control-label">Shape</div>
-        <div class="selection-row shape-selector">
-          <div class="select-btn selected" data-group="shape" data-value="rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="2"/></svg><div class="checkmark">✓</div></div>
-          <div class="select-btn disabled"></div>
-          <div class="select-btn selected" data-group="shape" data-value="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg><div class="checkmark">✓</div></div>
-          <div class="select-btn selected" data-group="shape" data-value="star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="checkmark">✓</div></div>
-        </div>
-      </div>
-      <div class="control-group">
-        <div class="control-label">Size</div>
-        <div class="selection-row device-selector">
-          <div class="select-btn selected" data-group="device" data-value="desktop"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 21H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 17V21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="checkmark">✓</div></div>
-          <div class="select-btn" data-group="device" data-value="tablet"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M11 19H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-          <div class="select-btn" data-group="device" data-value="mobile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="2" width="12" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M11 19H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-        </div>
-      </div>
-      <div class="footer">
-        <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
-        <button id="resetBtn" class="btn btn-secondary">Reset</button>
-      </div>
-    </div>
-    <div class="right-panel">
-      <div class="preview-header">Preview</div>
-      <div class="preview-box"></div>
-      <button id="playBtn" class="play-btn"><svg class="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3L19 12L5 21V3Z" fill="currentColor"/></svg>Play</button>
-    </div>
-  </div>
 
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div>
+            <div class="label">Fall Speed</div>
+            <div class="slider-container">
+              <div class="slider-fill" id="speedFill" style="width: 60%;"></div>
+              <span class="slider-value-text" id="speedValue">60%</span>
+              <input type="range" id="speedInput" class="slider-input" min="0" max="100" value="60">
+            </div>
+            <div class="slider-labels-row"><span>Slow</span><span>Fast</span></div>
+          </div>
 
-  <script>
+          <div>
+            <div class="label">Particle Randomness</div>
+            <div class="slider-container">
+              <div class="slider-fill" id="randomFill" style="width: 60%;"></div>
+              <span class="slider-value-text" id="randomValue">60%</span>
+              <input type="range" id="randomInput" class="slider-input" min="0" max="100" value="60">
+            </div>
+            <div class="slider-labels-row"><span>Uniform</span><span>Chaotic</span></div>
+          </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div>
+            <div class="label">Particle Amount</div>
+            <div class="slider-container">
+              <div class="slider-fill" id="amountFill" style="width: 60%;"></div>
+              <span class="slider-value-text" id="amountValue">60%</span>
+              <input type="range" id="amountInput" class="slider-input" min="0" max="100" value="60">
+            </div>
+            <div class="slider-labels-row"><span>Less</span><span>More</span></div>
+          </div>
+
+          <div>
+            <div class="label">Zoom</div>
+            <div class="slider-container">
+              <div class="slider-fill" id="zoomFill" style="width: 10%;"></div>
+              <span class="slider-value-text" id="zoomValue">x1.0</span>
+              <input type="range" id="zoomInput" class="slider-input" min="10" max="100" value="10">
+            </div>
+            <div class="slider-labels-row"><span>x1.0</span><span>x10</span></div>
+          </div>
+      </div>
+
+      <div class="checkbox-group">
+          <label class="checkbox-item">
+              <input type="checkbox" id="checkSize" checked>
+              <span class="checkbox-label">Randomize Size</span>
+          </label>
+          <label class="checkbox-item">
+              <input type="checkbox" id="checkRotation" checked>
+              <span class="checkbox-label">Randomize Rotation</span>
+          </label>
+      </div>
+
+      <div>
+          <div class="label">Particle Color</div>
+          <div class="color-row">
+              <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 5.343a4 4 0 0 0-5.657 0L3 14.343V20h5.657l8.99-9a4 4 0 0 0 0-5.657Z"/><line x1="10" y1="14" x2="14" y2="10"/></svg></button>
+              <div class="color-display">
+                  <div class="color-preview-box"></div>
+                  <span class="color-name">Multi-color</span>
+                  <span class="color-opacity">100%</span>
+              </div>
+          </div>
+          <div class="swatch-grid">
+              <div class="swatch s-gold"></div>
+              <div class="swatch s-silver"></div>
+              <div class="swatch s-red"></div>
+              <div class="swatch s-purple"></div>
+              <div class="swatch s-blue"></div>
+              <div class="swatch s-magenta"></div>
+              <div class="swatch s-solid-red"></div>
+              <div class="swatch s-solid-green"></div>
+              <div class="swatch s-rainbow selected"></div>
+          </div>
+      </div>
+
+      <div>
+          <div class="label">Particle Shape</div>
+          <div class="selector-grid id-shape-selector">
+              <div class="selector-item" data-state="selected" data-value="rectangle">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>
+                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+              <div class="selector-item disabled">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+              </div>
+              <div class="selector-item" data-state="selected" data-value="circle">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+              <div class="selector-item" data-state="selected" data-value="star">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+          </div>
+       </div>
+
+       <div class="footer">
+           <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
+           <button id="resetBtn" class="btn btn-outline">Reset</button>
+       </div>
+
+    </div> <div class="preview-panel">
+        <div class="preview-title">Preview</div>
+        <div class="preview-canvas">
+            <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.6">
+                 <g fill="none" stroke="none">
+                  <rect x="50" y="40" width="10" height="6" fill="#FF6B6B" transform="rotate(15 55 43)"/>
+                  <circle cx="120" cy="80" r="5" fill="#F2C94C"/>
+                  <polygon points="200,50 205,65 195,65" fill="#1890FF" transform="rotate(-20 200 60)"/>
+                  <rect x="300" y="150" width="8" height="8" fill="#BB6BD9" transform="rotate(45 304 154)"/>
+                  <circle cx="80" cy="200" r="4" fill="#52c41a"/>
+                  <rect x="250" y="250" width="12" height="8" fill="#F2994A" transform="rotate(-10 256 254)"/>
+                 </g>
+            </svg>
+        </div>
+        <button id="playBtn" class="btn play-btn" style="background-color: #e2e8f0; color: var(--foreground);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M5 3l14 9-14 9V3z"/></svg>
+            Play
+        </button>
+    </div>
+
+  </div> <script>
     // --- UI Interactions ---
-    function setupSlider(inputId, valueDisplayFormat) {
+
+    // 1. Sliders Linkage (Input <-> Visual Progress & Value)
+    function setupSlider(inputId, fillId, valueId, format) {
       const input = document.getElementById(inputId);
-      const container = input.parentElement;
-      const progress = container.querySelector('.slider-progress');
-      const display = container.querySelector('.slider-value-display');
+      const fill = document.getElementById(fillId);
+      const valueLabel = document.getElementById(valueId);
 
       function update() {
-        const value = input.value;
-        const min = input.min ? input.min : 0;
-        const max = input.max ? input.max : 100;
-        const percentage = ((value - min) / (max - min)) * 100;
-        
-        progress.style.width = `${percentage}%`;
-        
-        if (valueDisplayFormat === 'percent') {
-          display.textContent = `${value}%`;
-        } else if (valueDisplayFormat === 'zoom') {
-           // Map range 10-100 to x0.5 - x5.0 for display
-           const zoomVal = (value / 20).toFixed(1);
-           display.textContent = `x${zoomVal}`;
+        const val = input.value;
+        const min = input.min || 0;
+        const max = input.max || 100;
+        // Calculate percentage for the width of the progress bar
+        const percent = ((val - min) / (max - min)) * 100;
+        fill.style.width = `${percent}%`;
+
+        if (format === 'percent') {
+             valueLabel.textContent = `${val}%`;
+        } else if (format === 'zoom') {
+            // Map 10-100 to x1.0 - x10.0
+            valueLabel.textContent = `x${(val / 10).toFixed(1)}`;
         }
       }
       input.addEventListener('input', update);
-      update();
+      update(); // Init
     }
 
-    setupSlider('speedInput', 'percent');
-    setupSlider('randomInput', 'percent');
-    setupSlider('zoomInput', 'zoom');
+    setupSlider('speedInput', 'speedFill', 'speedValue', 'percent');
+    setupSlider('randomInput', 'randomFill', 'randomValue', 'percent');
+    setupSlider('amountInput', 'amountFill', 'amountValue', 'percent');
+    setupSlider('zoomInput', 'zoomFill', 'zoomValue', 'zoom');
 
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.addEventListener('click', () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); }));
 
-    const swatches = document.querySelectorAll('.swatch');
-    swatches.forEach(swatch => swatch.addEventListener('click', () => { swatches.forEach(s => s.classList.remove('selected')); swatch.classList.add('selected'); }));
+    // 2. Tabs
+    document.querySelectorAll('.tab-trigger').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab-trigger').forEach(t => t.removeAttribute('data-state'));
+        tab.setAttribute('data-state', 'active');
+      });
+    });
 
-    const selectBtns = document.querySelectorAll('.select-btn:not(.disabled)');
-    selectBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const group = btn.dataset.group;
-            if (group === 'device') {
-                 document.querySelectorAll(`.select-btn[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
-                 btn.classList.add('selected');
-            } else if (group === 'shape') {
-                btn.classList.toggle('selected');
-            }
-        });
+    // 3. Swatches
+    document.querySelectorAll('.swatch').forEach(swatch => {
+      tab.addEventListener('click', () => {
+         document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+         swatch.classList.add('selected');
+      });
+    });
+
+    // 4. Shape Selector (Multi-select)
+    document.querySelectorAll('.id-shape-selector .selector-item:not(.disabled)').forEach(item => {
+       item.addEventListener('click', () => {
+           const currentState = item.getAttribute('data-state');
+           item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected');
+       });
     });
 
     // --- Plugin Communication ---
-    function getSettings() {
-      const selectedDeviceBtn = document.querySelector('.device-selector .select-btn.selected');
-      // Safety check: default to desktop if nothing selected
-      const device = selectedDeviceBtn ? selectedDeviceBtn.dataset.value : 'desktop';
-      
-      // Gather selected shapes
-      let selectedShapes = Array.from(document.querySelectorAll('.shape-selector .select-btn.selected')).map(btn => btn.dataset.value);
 
-      return {
-          speed: document.getElementById('speedInput').value,
-          randomness: document.getElementById('randomInput').value,
-          zoom: document.getElementById('zoomInput').value,
-          selectedShapes: selectedShapes,
-          device: device
-      };
+    function getSettings() {
+        // Gather Shapes
+        const selectedShapes = Array.from(document.querySelectorAll('.id-shape-selector .selector-item[data-state="selected"]'))
+            .map(el => el.getAttribute('data-value'));
+
+        return {
+            speed: document.getElementById('speedInput').value,
+            randomness: document.getElementById('randomInput').value,
+            amount: document.getElementById('amountInput').value,
+            zoom: document.getElementById('zoomInput').value,
+            randomizeSize: document.getElementById('checkSize').checked,
+            randomizeRotation: document.getElementById('checkRotation').checked,
+            selectedShapes: selectedShapes,
+            // No frameSize setting anymore
+        };
     }
-    
-    // This is a comment text
 
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     document.getElementById('generateBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: getSettings() } }, '*'));
-    // "Play" button now triggers a preview generation on canvas
     document.getElementById('playBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: getSettings() } }, '*'));
 
     document.getElementById('resetBtn').addEventListener('click', () => {
-       document.getElementById('speedInput').value = 60; document.getElementById('speedInput').dispatchEvent(new Event('input'));
-       document.getElementById('randomInput').value = 60; document.getElementById('randomInput').dispatchEvent(new Event('input'));
-       document.getElementById('zoomInput').value = 20; document.getElementById('zoomInput').dispatchEvent(new Event('input'));
+        // Reset Sliders
+        document.getElementById('speedInput').value = 60; document.getElementById('speedInput').dispatchEvent(new Event('input'));
+        document.getElementById('randomInput').value = 60; document.getElementById('randomInput').dispatchEvent(new Event('input'));
+        document.getElementById('amountInput').value = 60; document.getElementById('amountInput').dispatchEvent(new Event('input'));
+        document.getElementById('zoomInput').value = 10; document.getElementById('zoomInput').dispatchEvent(new Event('input'));
+        // Reset Checkboxes
+        document.getElementById('checkSize').checked = true;
+        document.getElementById('checkRotation').checked = true;
     });
 
   </script>
