@@ -196,17 +196,50 @@
     .color-preview-box { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
     .color-name { flex: 1; font-size: 14px; font-weight: 500; }
     
-    /* --- Editable Color Percentage Input --- */
+    /* --- Editable Color Percentage Input (New Styles) --- */
+    .color-percent-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 74px; /* Wider to accommodate space */
+      height: 32px; /* Match swatch height */
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background-color: var(--background);
+      padding: 0 4px;
+    }
+    
     .color-percent-input {
-        width: 60px;
-        height: 28px;
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        text-align: right;
-        padding-right: 4px;
+        width: 32px; /* Fixed width for 3 digits */
+        border: none;
+        background: transparent;
+        text-align: center; /* Centered number */
         font-size: 14px;
+        font-weight: 500;
         color: var(--muted-foreground);
-        background-color: var(--background);
+        outline: none;
+        padding: 0;
+        margin: 0;
+        -moz-appearance: textfield; /* Hide spinners FF */
+    }
+    /* Hide spinners Chrome/Safari/Edge */
+    .color-percent-input::-webkit-outer-spin-button,
+    .color-percent-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .color-percent-suffix {
+      font-size: 14px;
+      color: var(--muted-foreground);
+      font-weight: 500;
+      margin-left: 4px; /* Space between number and % */
+      pointer-events: none;
+    }
+
+    /* Focus state for the wrapper */
+    .color-percent-wrapper:focus-within {
+      border-color: var(--primary);
     }
     
     .swatch-grid { display: flex; gap: 12px; margin-top: 12px; }
@@ -331,14 +364,18 @@
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-          <label class="checkbox-item">
-              <input type="checkbox" id="checkSize" checked>
-              <span class="checkbox-label">Randomize Size</span>
-          </label>
-          <label class="checkbox-item">
-              <input type="checkbox" id="checkRotation" checked>
-              <span class="checkbox-label">Randomize Rotation</span>
-          </label>
+          <div>
+              <label class="checkbox-item">
+                  <input type="checkbox" id="checkSize" checked>
+                  <span class="checkbox-label">Randomize Size</span>
+              </label>
+          </div>
+          <div>
+              <label class="checkbox-item">
+                  <input type="checkbox" id="checkRotation" checked>
+                  <span class="checkbox-label">Randomize Rotation</span>
+              </label>
+          </div>
       </div>
 
       <div>
@@ -350,7 +387,10 @@
               <div class="color-display">
                   <div class="color-preview-box"></div>
                   <span class="color-name">Multi-color</span>
-                  <input type="number" class="color-percent-input" value="100" min="0" max="100">
+                  <div class="color-percent-wrapper">
+                    <input type="number" class="color-percent-input" value="100" min="0" max="100">
+                    <span class="color-percent-suffix">%</span>
+                  </div>
               </div>
           </div>
           <div class="swatch-grid">
