@@ -1,4 +1,4 @@
-// Show the UI with wider dimensions (960px) to give the preview panel more room
+// Show the UI with wider dimensions (960px)
 figma.showUI(__html__, { width: 960, height: 680, themeColors: false });
 
 figma.ui.onmessage = msg => {
@@ -11,23 +11,22 @@ figma.ui.onmessage = msg => {
 };
 
 function generateConfetti(settings, isPreview) {
-  // 1. Validate settings and set defaults
+  // 1. Validate settings
   const speed = validateNum(settings.speed, 0, 100, 60);
   const randomness = validateNum(settings.randomness, 0, 100, 60);
   const amount = validateNum(settings.amount, 0, 100, 60);
-  const zoom = validateNum(settings.zoom, 10, 100, 10);
+  // Zoom input is 10-50 (representing 1.0-5.0). Default to 10 (1.0x).
+  const zoom = validateNum(settings.zoom, 10, 50, 10);
   const randomizeSize = settings.randomizeSize === true;
   const randomizeRotation = settings.randomizeRotation === true;
 
-  // Default to all shapes if none selected, now including 'square'
   let shapesToUse = (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) 
     ? settings.selectedShapes 
     : ['rectangle', 'square', 'circle', 'star'];
 
-  // 2. Frame Setup - Standard desktop size
+  // 2. Frame Setup
   const frameWidth = 1440;
   const frameHeight = 1024;
-
   const frame = figma.createFrame();
   frame.name = `Confetti Frame${isPreview ? ' Preview' : ''}`;
   frame.resize(Number(frameWidth), Number(frameHeight));
@@ -47,6 +46,7 @@ function generateConfetti(settings, isPreview) {
 
   // Helper: Create shape
   const createShape = (type) => {
+    // Zoom calculation changed: 10->1.0x, 50->5.0x
     const zoomScale = zoom / 10; 
     let baseSize = 20 * zoomScale;
 
@@ -60,12 +60,12 @@ function generateConfetti(settings, isPreview) {
     switch (type) {
         case 'rectangle':
             node = figma.createRectangle();
-            node.resize(baseSize, baseSize * 0.6); // Oblong
+            node.resize(baseSize, baseSize * 0.6);
             node.cornerRadius = baseSize * 0.1;
             break;
         case 'square':
             node = figma.createRectangle();
-            node.resize(baseSize, baseSize); // Perfect square
+            node.resize(baseSize, baseSize);
             node.cornerRadius = baseSize * 0.1;
             break;
         case 'circle':
@@ -90,11 +90,9 @@ function generateConfetti(settings, isPreview) {
     const particle = createShape(randomShapeType);
     if (!particle) continue;
 
-    // Color
     const colorRGB = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
     particle.fills = [{ type: 'SOLID', color: colorRGB }];
 
-    // Position
     const randomFactor = randomness / 100; 
     const safeMaxX = Math.max(0, frameWidth - particle.width);
     const potentialX = Math.random() * safeMaxX;
@@ -117,7 +115,6 @@ function generateConfetti(settings, isPreview) {
   figma.viewport.scrollAndZoomIntoView([frame]);
 }
 
-// Helper function for validation
 function validateNum(val, min, max, def) {
     const num = parseFloat(val);
     if (isNaN(num) || num < min || num > max) return def;

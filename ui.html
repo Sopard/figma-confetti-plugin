@@ -57,7 +57,7 @@
       gap: 24px;
     }
     .preview-panel {
-      flex: 1; /* Takes remaining space, now wider due to larger window width */
+      flex: 1; /* Takes remaining space */
       padding: 24px;
       background-color: #fafafa;
       display: flex;
@@ -113,7 +113,6 @@
       height: 100%;
       background-color: var(--primary);
       border-radius: var(--radius) 0 0 var(--radius);
-      /* Transition for smooth movement */
       transition: width 0.1s ease-out;
     }
     .slider-value-text {
@@ -124,10 +123,9 @@
       font-weight: 600;
       font-size: 14px;
       color: var(--foreground);
-      pointer-events: none; /* Pass clicks through */
+      pointer-events: none;
       z-index: 2;
     }
-    /* Native range input - invisible and overlaid */
     .slider-input {
       position: absolute;
       width: 100%;
@@ -146,19 +144,15 @@
       font-size: 12px;
       color: var(--muted-foreground);
     }
-    /* --------------------------- */
 
     /* Checkboxes */
-    .checkbox-group {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
     .checkbox-item {
         display: flex;
         align-items: center;
         gap: 12px;
         cursor: pointer;
+        /* Ensure checkbox row has same height as slider rows for alignment */
+        height: 36px; 
     }
     /* Custom checkbox styling */
     input[type="checkbox"] {
@@ -172,12 +166,12 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
+      margin: 0; /* Remove default margin */
     }
     input[type="checkbox"]:checked {
       background-color: var(--primary);
       border-color: var(--primary);
     }
-    /* Add checkmark SVG via pseudo-element when checked */
     input[type="checkbox"]:checked::after {
       content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>');
       display: block;
@@ -201,7 +195,19 @@
     }
     .color-preview-box { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
     .color-name { flex: 1; font-size: 14px; font-weight: 500; }
-    .color-opacity { font-size: 14px; color: var(--muted-foreground); }
+    
+    /* --- Editable Color Percentage Input --- */
+    .color-percent-input {
+        width: 60px;
+        height: 28px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        text-align: right;
+        padding-right: 4px;
+        font-size: 14px;
+        color: var(--muted-foreground);
+        background-color: var(--background);
+    }
     
     .swatch-grid { display: flex; gap: 12px; margin-top: 12px; }
     .swatch { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; position: relative; box-shadow: var(--shadow-sm); border: 1px solid transparent;}
@@ -226,12 +232,9 @@
         color: var(--muted-foreground); cursor: pointer; position: relative;
         background: var(--background); transition: all 0.2s;
     }
-    /* Removed the specific .disabled style as it's no longer used */
-    
     .selector-item[data-state="selected"] {
         border-color: var(--primary); color: var(--primary); background-color: #f0f9ff;
     }
-    /* Checkmark top right */
     .selector-check {
         position: absolute; top: -6px; right: -6px;
         width: 18px; height: 18px; background: var(--primary);
@@ -295,7 +298,7 @@
           </div>
 
           <div>
-            <div class="label">Particle Randomness</div>
+            <div class="label">Randomize Particles</div>
             <div class="slider-container">
               <div class="slider-fill" id="randomFill" style="width: 60%;"></div>
               <span class="slider-value-text" id="randomValue">60%</span>
@@ -319,15 +322,15 @@
           <div>
             <div class="label">Zoom</div>
             <div class="slider-container">
-              <div class="slider-fill" id="zoomFill" style="width: 10%;"></div>
+              <div class="slider-fill" id="zoomFill" style="width: 0%;"></div>
               <span class="slider-value-text" id="zoomValue">x1.0</span>
-              <input type="range" id="zoomInput" class="slider-input" min="10" max="100" value="10">
+              <input type="range" id="zoomInput" class="slider-input" min="10" max="50" value="10">
             </div>
-            <div class="slider-labels-row"><span>x1.0</span><span>x10</span></div>
+            <div class="slider-labels-row"><span>x1.0</span><span>x5.0</span></div>
           </div>
       </div>
 
-      <div class="checkbox-group">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <label class="checkbox-item">
               <input type="checkbox" id="checkSize" checked>
               <span class="checkbox-label">Randomize Size</span>
@@ -341,11 +344,13 @@
       <div>
           <div class="label">Particle Color</div>
           <div class="color-row">
-              <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 5.343a4 4 0 0 0-5.657 0L3 14.343V20h5.657l8.99-9a4 4 0 0 0 0-5.657Z"/><line x1="10" y1="14" x2="14" y2="10"/></svg></button>
+              <button class="icon-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 3 4 4"/><path d="M2 22h20"/></svg>
+              </button>
               <div class="color-display">
                   <div class="color-preview-box"></div>
                   <span class="color-name">Multi-color</span>
-                  <span class="color-opacity">100%</span>
+                  <input type="number" class="color-percent-input" value="100" min="0" max="100">
               </div>
           </div>
           <div class="swatch-grid">
@@ -421,14 +426,13 @@
         const val = input.value;
         const min = input.min || 0;
         const max = input.max || 100;
-        // Calculate percentage for the width of the progress bar
         const percent = ((val - min) / (max - min)) * 100;
         fill.style.width = `${percent}%`;
 
         if (format === 'percent') {
              valueLabel.textContent = `${val}%`;
         } else if (format === 'zoom') {
-            // Map 10-100 to x1.0 - x10.0
+            // Map 10-50 range to x1.0 - x5.0 for display
             valueLabel.textContent = `x${(val / 10).toFixed(1)}`;
         }
       }
@@ -462,7 +466,6 @@
     document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
        item.addEventListener('click', () => {
            const currentState = item.getAttribute('data-state');
-           // Toggle between 'selected' and empty string (not selected)
            item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected');
        });
     });
@@ -482,7 +485,6 @@
             randomizeSize: document.getElementById('checkSize').checked,
             randomizeRotation: document.getElementById('checkRotation').checked,
             selectedShapes: selectedShapes,
-            // No frameSize setting anymore
         };
     }
 
@@ -495,19 +497,13 @@
         document.getElementById('speedInput').value = 60; document.getElementById('speedInput').dispatchEvent(new Event('input'));
         document.getElementById('randomInput').value = 60; document.getElementById('randomInput').dispatchEvent(new Event('input'));
         document.getElementById('amountInput').value = 60; document.getElementById('amountInput').dispatchEvent(new Event('input'));
+        // Zoom resets to 10 (1.0x)
         document.getElementById('zoomInput').value = 10; document.getElementById('zoomInput').dispatchEvent(new Event('input'));
         // Reset Checkboxes
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
-        // Reset Shapes to default state (Rect, Circle, Star selected)
-        document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
-            const val = item.getAttribute('data-value');
-            if (val === 'rectangle' || val === 'circle' || val === 'star') {
-                item.setAttribute('data-state', 'selected');
-            } else {
-                item.removeAttribute('data-state');
-            }
-        });
+        // Reset Color Input
+        document.querySelector('.color-percent-input').value = 100;
     });
 
   </script>
