@@ -247,7 +247,7 @@
     input:checked + .switch-slider { background-color: var(--primary); }
     input:checked + .switch-slider:before { transform: translateX(20px); }
 
-    /* --- SCROLL CONTAINER STYLE --- */
+    /* --- SCROLL CONTAINER STYLE (Added Colors) --- */
     .added-colors-scroll-container {
         max-height: 100px; 
         overflow-y: auto;
@@ -292,8 +292,7 @@
 
         /* When active, this will be set to 'flex' via JS */
         flex-direction: column; 
-        /* Ensure it doesn't get too squashed vertically */
-        min-height: 350px; 
+        min-height: 560px; 
     }
 
     /* The header remains fixed at the top of the flex container */
@@ -306,12 +305,21 @@
         flex-shrink: 0;
     }
 
-    /* New scrollable container for middle content */
+    /* Scrollable container for middle content */
     .cp-content-scrollable {
         flex: 1; /* Take remaining height */
         overflow-y: auto; /* Scroll internally */
         margin-bottom: 16px; /* Spacing above the bottom button */
         padding-right: 4px; /* Prevent scrollbar from overlapping content tight spaces */
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .cp-content-scrollable::-webkit-scrollbar {
+        display: none;
     }
 
     /* Saturation/Brightness Area */
@@ -370,10 +378,16 @@
     /* Swatches */
     .cp-swatches-section { flex-shrink: 0; }
     .cp-swatch-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .cp-swatch { width: 32px; height: 32px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); box-sizing: border-box; }
+    .cp-swatch { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); box-sizing: border-box; }
 
     /* The confirm button remains fixed at the bottom */
-    #cpAddConfirmBtn { flex-shrink: 0; }
+    #cpAddConfirmBtn { 
+        flex-shrink: 0;
+        height: 64px; 
+        /* CHANGED: Font size updated to 14px */
+        font-size: 14px;
+        font-weight: 600;
+    }
 
     /* ------------------------------------ */
 
