@@ -181,6 +181,16 @@
     }
     .checkbox-label { font-size: 14px; font-weight: 500; }
 
+    /* --- NEW DIVIDER STYLE --- */
+    .section-divider {
+        height: 1px;
+        background-color: var(--border);
+        border: none;
+        /* Parent container gap handles vertical spacing */
+        margin: 0; 
+        width: 100%;
+    }
+
     /* --- COLOR SECTION STYLES --- */
     
     .color-header-box {
@@ -271,19 +281,17 @@
         width: 24px; height: 24px; 
         border-radius: 6px; border: 1px solid var(--border); 
         box-sizing: border-box; 
-        /* CHANGED: Added cursor pointer for edit trigger */
         cursor: pointer; 
     }
     .color-hex-text { flex: 1; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
     
-    /* CHANGED: New style for editable percentage input */
+    /* Editable percentage input */
     .color-percent-input {
         width: 36px;
         font-size: 14px; 
         font-weight: 500;
         font-family: inherit;
         color: var(--foreground);
-        /* CHANGED: Center align the numeric value */
         text-align: center;
         border: 1px solid transparent;
         background: transparent;
@@ -541,6 +549,8 @@
           </div>
       </div>
 
+      <hr class="section-divider">
+
       <div>
           <div class="label">Particle Color</div>
           
@@ -789,7 +799,8 @@
                 renderColorList();
             });
 
-            colorRowsContainer.appendChild(row);
+            // CHANGED: Use prepend instead of appendChild to show newest at the top
+            colorRowsContainer.prepend(row);
         });
     }
 
@@ -929,7 +940,7 @@
         swatch.addEventListener('click', () => {
             setPickerColorFromHex(hex);
             // CHANGED: Clicking a preset immediately adds/saves the color.
-            confirmAddColor();
+            // confirmAddColor(); <-- REMOVED THIS LINE
         });
         cpSwatchGrid.appendChild(swatch);
     });
