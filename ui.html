@@ -149,37 +149,20 @@
       color: var(--muted-foreground);
     }
 
-    /* Checkboxes */
-    .checkbox-item {
+    /* --- Toggle Rows (Replaces Checkboxes) --- */
+    .toggle-row-container {
         display: flex;
+        flex-direction: column;
+        gap: 12px; /* Spacing between the two rows */
+    }
+    .toggle-row {
+        display: flex;
+        justify-content: space-between; /* Aligns label left, switch right */
         align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        height: 36px; /* Align height with sliders */
+        height: 36px;
     }
-    input[type="checkbox"].custom-checkbox {
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border);
-      border-radius: 4px;
-      background-color: var(--background);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      margin: 0;
-    }
-    input[type="checkbox"].custom-checkbox:checked {
-      background-color: var(--primary);
-      border-color: var(--primary);
-    }
-    input[type="checkbox"].custom-checkbox:checked::after {
-      content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>');
-      display: block;
-      height: 14px;
-    }
-    .checkbox-label { font-size: 14px; font-weight: 500; }
+    .toggle-label { font-size: 14px; font-weight: 500; }
+
 
     /* --- NEW DIVIDER STYLE --- */
     .section-divider {
@@ -223,7 +206,7 @@
       gap: 12px;
     }
 
-    /* Multi-color toggle row */
+    /* Multi-color toggle row - Reuse existing style */
     .color-toggle-row {
       display: flex;
       align-items: center;
@@ -235,27 +218,29 @@
     }
     .rainbow-icon { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
 
-    /* iOS Style Switch */
+    /* iOS Style Switch - REDUCED SIZE */
     .switch {
-      position: relative; display: inline-block; width: 44px; height: 24px;
+      position: relative; display: inline-block;
+      width: 36px; height: 20px; /* Reduced from 44x24 */
+      flex-shrink: 0; 
     }
     .switch input { opacity: 0; width: 0; height: 0; }
     .switch-slider {
       position: absolute; cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
       background-color: var(--switch-bg);
-      transition: .4s; border-radius: 24px;
+      transition: .4s; border-radius: 20px;
     }
     .switch-slider:before {
       position: absolute; content: "";
-      height: 20px; width: 20px;
+      height: 16px; width: 16px; /* Reduced from 20x20 */
       left: 2px; bottom: 2px;
       background-color: white;
       transition: .4s; border-radius: 50%;
       box-shadow: var(--shadow-sm);
     }
     input:checked + .switch-slider { background-color: var(--primary); }
-    input:checked + .switch-slider:before { transform: translateX(20px); }
+    input:checked + .switch-slider:before { transform: translateX(16px); /* Adjusted for new width */ }
 
     /* --- SCROLL CONTAINER STYLE (Added Colors) --- */
     .added-colors-scroll-container {
@@ -534,25 +519,25 @@
           </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-          <div>
-              <label class="checkbox-item">
-                  <input type="checkbox" id="checkSize" class="custom-checkbox" checked>
-                  <span class="checkbox-label">Randomize Size</span>
+      <div class="toggle-row-container">
+          <div class="toggle-row">
+              <span class="toggle-label">Randomize Size</span>
+              <label class="switch">
+                  <input type="checkbox" id="checkSize" checked>
+                  <span class="switch-slider"></span>
               </label>
           </div>
-          <div>
-              <label class="checkbox-item">
-                  <input type="checkbox" id="checkRotation" class="custom-checkbox" checked>
-                  <span class="checkbox-label">Randomize Rotation</span>
+          <div class="toggle-row">
+              <span class="toggle-label">Randomize Rotation</span>
+              <label class="switch">
+                  <input type="checkbox" id="checkRotation" checked>
+                  <span class="switch-slider"></span>
               </label>
           </div>
       </div>
 
-      <hr class="section-divider">
-
       <div>
-          <div class="label">Particle Color</div>
+          <div class="label" style="margin-top: 24px;">Particle Color</div>
           
           <div class="color-header-box">
               <span class="color-count-text" id="colorCounter">0 Colors</span>
@@ -768,7 +753,8 @@
             const previewSq = row.querySelector('.color-preview-sq');
             previewSq.addEventListener('click', (e) => {
                  if (colorState.isMultiColor) return;
-                 openPopoverToEdit(index);
+                 // BUG FIX: Pass the trigger element directly instead of relying on DOM index calculation
+                 openPopoverToEdit(index, previewSq);
             });
 
              // CHANGED: Add change listener for direct opacity edit
@@ -841,9 +827,11 @@
         // Update Sat/Bright Area background base hue
         cpSatBrightArea.style.backgroundColor = `hsl(${pickerHSLA.h}, 100%, 50%)`;
         
-        // Position SB Selector (Simplified mapping for UI demo)
-        const selX = pickerHSLA.s;
-        const selY = 100 - pickerHSLA.l; 
+        // CHANGED: Convert current HSL to HSV to determine selector position
+        const hsv = hslToHsv(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
+        const selX = hsv.s; // HSV Saturation maps to X axis (0-100%)
+        const selY = 100 - hsv.v; // HSV Value maps to Y axis (inverted 100-0%)
+
         cpSbSelector.style.left = `${selX}%`;
         cpSbSelector.style.top = `${selY}%`;
 
@@ -877,9 +865,15 @@
         x = Math.max(0, Math.min(x, rect.width));
         y = Math.max(0, Math.min(y, rect.height));
         
-        // Map positions to S and L (Simplified mapping)
-        pickerHSLA.s = (x / rect.width) * 100;
-        pickerHSLA.l = 100 - ((y / rect.height) * 100);
+        // CHANGED: Map positions to HSV Saturation and Value
+        const s_v = (x / rect.width) * 100; // Saturation (HSV) 0-100
+        const v = 100 - ((y / rect.height) * 100); // Value (HSV) 0-100
+
+        // Convert to HSL to update global state
+        const newHSL = hsvToHsl(pickerHSLA.h, s_v, v);
+        pickerHSLA.s = newHSL.s;
+        pickerHSLA.l = newHSL.l;
+        
         updatePickerVisuals();
     }
 
@@ -955,8 +949,8 @@
 
     // --- Popover Open/Close Logic ---
 
-    // CHANGED: New function to open popover in "Edit" mode
-    function openPopoverToEdit(index) {
+    // CHANGED: New function to open popover in "Edit" mode, now accepts triggerElement
+    function openPopoverToEdit(index, triggerElement) {
         editingColorIndex = index;
         const colorToEdit = colorState.colors[index];
         
@@ -968,9 +962,8 @@
         cpHeaderTitle.textContent = "Edit Color";
         cpAddConfirmBtn.textContent = "Save Color";
 
-        // Find trigger element to position popover next to the swatch
-        const triggerEl = colorRowsContainer.children[index].querySelector('.color-preview-sq');
-        openPopover(triggerEl);
+        // BUG FIX: Use the passed triggerElement instead of trying to find it by index
+        openPopover(triggerElement);
     }
 
     // CHANGED: Updated to accept an optional trigger element for positioning
@@ -1101,6 +1094,32 @@
         h *= 60;
       }
       return { h: h, s: s * 100, l: l * 100 };
+    }
+
+    // NEW: Helper to convert HSV to HSL
+    function hsvToHsl(h, s, v) {
+        s /= 100;
+        v /= 100;
+        let l = (2 - s) * v / 2;
+        if (l !== 0) {
+            if (l === 1) {
+                s = 0;
+            } else if (l < 0.5) {
+                s = s * v / (l * 2);
+            } else {
+                s = s * v / (2 - l * 2);
+            }
+        }
+        return { h: h, s: s * 100, l: l * 100 };
+    }
+
+    // NEW: Helper to convert HSL to HSV
+    function hslToHsv(h, s, l) {
+        s /= 100;
+        l /= 100;
+        let v = l + s * Math.min(l, 1 - l);
+        let sv = l === 0 ? 0 : 2 * (1 - l / v);
+        return { h: h, s: sv * 100, v: v * 100 };
     }
 
     // -------------------------------
