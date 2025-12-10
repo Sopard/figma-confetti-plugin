@@ -433,7 +433,12 @@
     .selector-item[data-state="selected"] .selector-check { display: flex; }
 
     /* Footer Buttons */
-    .footer { display: flex; gap: 12px; margin-top: auto; padding-top: 24px; }
+    .footer {
+        display: flex;
+        /* gap removed since it's single item now */
+        margin-top: auto;
+        padding-top: 24px;
+    }
     .btn {
         height: 44px; border-radius: var(--radius); font-weight: 600; font-size: 14px;
         cursor: pointer; border: none; transition: background-color 0.2s;
@@ -453,7 +458,26 @@
         background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 20px 20px;
         display: flex; align-items: center; justify-content: center; color: var(--muted-foreground);
     }
-    .play-btn { width: 100%; background-color: var(--muted); color: var(--foreground); }
+    
+    /* NEW: Preview Footer Container */
+    .preview-footer {
+        display: flex;
+        gap: 12px;
+    }
+    
+    /* NEW: Modern Icon Button for Play */
+    .icon-btn-modern {
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); background: var(--background);
+      color: var(--foreground);
+      cursor: pointer; padding: 0;
+      border-radius: var(--radius);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .icon-btn-modern:hover { background-color: var(--muted); border-color: var(--muted-darker); }
+
 
   </style>
 </head>
@@ -589,11 +613,12 @@
        </div>
 
        <div class="footer">
-           <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
            <button id="resetBtn" class="btn btn-outline">Reset</button>
        </div>
 
-    </div> <div class="preview-panel">
+    </div> 
+    
+    <div class="preview-panel">
         <div class="preview-title">Preview</div>
         <div class="preview-canvas">
             <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.6">
@@ -607,10 +632,14 @@
                  </g>
             </svg>
         </div>
-        <button id="playBtn" class="btn play-btn" style="background-color: #e2e8f0; color: var(--foreground);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M5 3l14 9-14 9V3z"/></svg>
-            Play
-        </button>
+        
+        <div class="preview-footer">
+            <button id="playBtn" class="icon-btn-modern">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+            </button>
+            <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
+        </div>
+
     </div>
 
   </div> 
