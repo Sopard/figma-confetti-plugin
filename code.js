@@ -1,3 +1,5 @@
+// code.js
+
 figma.showUI(__html__, { width: 960, height: 700, themeColors: false });
 
 figma.ui.onmessage = msg => {
@@ -95,13 +97,52 @@ function generateConfetti(settings, isPreview) {
     return node;
   }
 
+  // --- NEW: Initialize counters for naming convention ---
+  let rectangleCount = 0;
+  let squareCount = 0;
+  let circleCount = 0; // Used for "Eclipse" names
+  let starCount = 0;
+  // ------------------------------------------------------
+
+
   // 4. Generation Loop
   figma.notify(isPreview ? "Generating preview..." : `Generating ${count} particles...`);
 
   for (let i = 0; i < count; i++) {
     const randomShapeType = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
+    
+    // --- NEW: Determine Name based on type and increment counter ---
+    let particleName = "";
+    switch (randomShapeType) {
+        case 'rectangle':
+            rectangleCount++;
+            particleName = `Rectangle${rectangleCount}`;
+            break;
+        case 'square':
+            squareCount++;
+            particleName = `Square${squareCount}`;
+            break;
+        case 'circle':
+            circleCount++;
+            // Using "Eclipse" as requested in prompt for circles
+            particleName = `Eclipse${circleCount}`; 
+            break;
+        case 'star':
+            starCount++;
+            particleName = `Star${starCount}`;
+            break;
+        default:
+            particleName = `Particle${i}`;
+    }
+    // ------------------------------------------------------------
+
     const particle = createShape(randomShapeType);
     if (!particle) continue;
+
+    // --- NEW: Apply the generated name ---
+    particle.name = particleName;
+    // -------------------------------------
+
 
     // Pick color from the palette
     const colorData = colorPalette[Math.floor(Math.random() * colorPalette.length)];
