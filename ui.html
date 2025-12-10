@@ -267,11 +267,40 @@
       padding: 4px 0;
     }
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; }
-    .color-preview-sq { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; }
+    .color-preview-sq { 
+        width: 24px; height: 24px; 
+        border-radius: 6px; border: 1px solid var(--border); 
+        box-sizing: border-box; 
+        /* CHANGED: Added cursor pointer for edit trigger */
+        cursor: pointer; 
+    }
     .color-hex-text { flex: 1; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
-    .color-percent-static {
-      font-size: 14px; color: var(--muted-foreground);
-      font-variant-numeric: tabular-nums; margin-right: 8px;
+    
+    /* CHANGED: New style for editable percentage input */
+    .color-percent-input {
+        width: 36px;
+        font-size: 14px; 
+        font-weight: 500;
+        font-family: inherit;
+        color: var(--foreground);
+        /* CHANGED: Center align the numeric value */
+        text-align: center;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-variant-numeric: tabular-nums;
+        -moz-appearance: textfield; /* Hide spinners FF */
+    }
+    .color-percent-input::-webkit-outer-spin-button,
+    .color-percent-input::-webkit-inner-spin-button {
+        -webkit-appearance: none; /* Hide spinners Chrome */
+        margin: 0;
+    }
+    .color-percent-input:hover, .color-percent-input:focus {
+        border-color: var(--border);
+        background-color: var(--muted);
+        outline: none;
     }
 
     /* ------------------------------------ */
@@ -384,7 +413,6 @@
     #cpAddConfirmBtn { 
         flex-shrink: 0;
         height: 64px; 
-        /* CHANGED: Font size updated to 14px */
         font-size: 14px;
         font-weight: 600;
     }
@@ -594,7 +622,7 @@
   
   <div id="colorPickerPopover" class="color-picker-popover">
       <div class="cp-header">
-          <span>Add Color</span>
+          <span id="cpHeaderTitle">Add Color</span>
           <button id="cpCloseBtn" class="icon-btn-flat">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -682,6 +710,9 @@
         colors: [] // Initial colors empty by default
     };
 
+    // State for tracking which color is being edited (-1 = adding new)
+    let editingColorIndex = -1;
+
     const multiColorSwitch = document.getElementById('multiColorSwitch');
     const colorRowsContainer = document.getElementById('colorRowsContainer');
     const colorCounter = document.getElementById('colorCounter');
@@ -714,18 +745,47 @@
             row.innerHTML = `
                 <div class="color-preview-sq" style="background-color: ${hex}; opacity: ${colorData.a};"></div>
                 <span class="color-hex-text">${hex}</span>
-                <span class="color-percent-static">${opacity} %</span>
+                <div style="display: flex; align-items: center; margin-right: 8px;">
+                    <input type="number" class="color-percent-input" data-index="${index}" value="${opacity}" min="0" max="100" ${colorState.isMultiColor ? 'disabled' : ''}>
+                    <span style="margin-left: 4px; color: var(--muted-foreground); font-size: 14px;">%</span>
+                </div>
                 <button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
             `;
 
+            // CHANGED: Add click listener for editing color
+            const previewSq = row.querySelector('.color-preview-sq');
+            previewSq.addEventListener('click', (e) => {
+                 if (colorState.isMultiColor) return;
+                 openPopoverToEdit(index);
+            });
+
+             // CHANGED: Add change listener for direct opacity edit
+            const percentInput = row.querySelector('.color-percent-input');
+            percentInput.addEventListener('change', (e) => {
+                let newVal = parseInt(e.target.value);
+                if (isNaN(newVal)) newVal = 100;
+                newVal = Math.max(0, Math.min(100, newVal));
+                e.target.value = newVal; // Snap value in input
+
+                // Update state
+                colorState.colors[index].a = newVal / 100;
+                // Re-render to update preview swatch transparency immediately
+                renderColorList();
+            });
+
+
             // Add delete functionality
             const deleteBtn = row.querySelector('.delete-color-btn');
             deleteBtn.addEventListener('click', (e) => {
                 if (colorState.isMultiColor) return;
-                const idx = parseInt(e.currentTarget.getAttribute('data-index'));
-                colorState.colors.splice(idx, 1);
+                // If we are deleting the color currently being edited, reset edit mode
+                if (editingColorIndex === index) {
+                     editingColorIndex = -1;
+                     closePopover();
+                }
+                colorState.colors.splice(index, 1);
                 renderColorList();
             });
 
@@ -736,6 +796,10 @@
     // Event Listener for Multi-color Switch
     multiColorSwitch.addEventListener('change', (e) => {
         colorState.isMultiColor = e.target.checked;
+        if (colorState.isMultiColor) {
+            closePopover(); // Close popover if open
+            editingColorIndex = -1;
+        }
         renderColorList();
     });
 
@@ -745,6 +809,7 @@
     const popover = document.getElementById('colorPickerPopover');
     const cpCloseBtn = document.getElementById('cpCloseBtn');
     const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn');
+    const cpHeaderTitle = document.getElementById('cpHeaderTitle');
 
     // Picker Elements
     const cpSatBrightArea = document.getElementById('cpSatBrightArea');
@@ -863,7 +928,7 @@
         swatch.style.backgroundColor = hex;
         swatch.addEventListener('click', () => {
             setPickerColorFromHex(hex);
-            // CHANGED: Clicking a preset immediately adds the color.
+            // CHANGED: Clicking a preset immediately adds/saves the color.
             confirmAddColor();
         });
         cpSwatchGrid.appendChild(swatch);
@@ -879,19 +944,34 @@
 
     // --- Popover Open/Close Logic ---
 
-    function openPopover() {
-        if (colorState.isMultiColor) return;
-
-        // Reset picker to default red state
-        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 };
+    // CHANGED: New function to open popover in "Edit" mode
+    function openPopoverToEdit(index) {
+        editingColorIndex = index;
+        const colorToEdit = colorState.colors[index];
+        
+        // Load color into picker state
+        pickerHSLA = { ...colorToEdit };
         updatePickerVisuals();
+
+        // Update UI texts
+        cpHeaderTitle.textContent = "Edit Color";
+        cpAddConfirmBtn.textContent = "Save Color";
+
+        // Find trigger element to position popover next to the swatch
+        const triggerEl = colorRowsContainer.children[index].querySelector('.color-preview-sq');
+        openPopover(triggerEl);
+    }
+
+    // CHANGED: Updated to accept an optional trigger element for positioning
+    function openPopover(triggerElement = addColorBtn) {
+        if (colorState.isMultiColor) return;
 
         // 1. Show temporarily to measure dimensions
         popover.style.visibility = 'hidden';
         popover.style.display = 'flex';
 
-        // 2. Get dimensions
-        const btnRect = addColorBtn.getBoundingClientRect();
+        // 2. Get dimensions based on triggerElement
+        const btnRect = triggerElement.getBoundingClientRect();
         const popoverRect = popover.getBoundingClientRect();
 
         // 3. Calculate Horizontal Position (Right of button + gap)
@@ -917,42 +997,64 @@
         popover.style.visibility = 'visible';
         
         // Add click outside listener
+        // Need to pass the trigger element so clicking it again doesn't immediately close
+        currentTriggerElement = triggerElement;
         document.addEventListener('click', closePopoverOnClickOutside);
     }
+    
+    let currentTriggerElement = null;
 
     function closePopover() {
         popover.style.display = 'none';
         // Remove click outside listener
         document.removeEventListener('click', closePopoverOnClickOutside);
+        currentTriggerElement = null;
+        editingColorIndex = -1; // Reset edit index on close
     }
 
     // New function to handle click outside
     function closePopoverOnClickOutside(event) {
         const isClickInsidePopover = popover.contains(event.target);
-        const isClickOnAddBtn = addColorBtn.contains(event.target);
+        // Check against the element that triggered opening
+        const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target);
 
         // Check if display is 'flex' (active) before closing
-        if (!isClickInsidePopover && !isClickOnAddBtn && popover.style.display === 'flex') {
+        if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') {
             closePopover();
         }
     }
 
-    // Helper function to confirm and add the current picker color
+    // Helper function to confirm and add/save the current picker color
     function confirmAddColor() {
-         // Create a copy of current picker state
-        const newColor = { ...pickerHSLA };
-        colorState.colors.push(newColor);
+         const newColorData = { ...pickerHSLA };
+
+         if (editingColorIndex > -1) {
+             // Edit existing color
+             colorState.colors[editingColorIndex] = newColorData;
+         } else {
+             // Add new color
+             colorState.colors.push(newColorData);
+         }
+        
         renderColorList();
         closePopover();
     }
 
 
     // Main Add Color button listener
-    addColorBtn.addEventListener('click', openPopover);
+    addColorBtn.addEventListener('click', () => {
+        // Reset to "Add" mode settings
+        editingColorIndex = -1;
+        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; // Default red
+        updatePickerVisuals();
+        cpHeaderTitle.textContent = "Add Color";
+        cpAddConfirmBtn.textContent = "Add Color";
+        openPopover(addColorBtn);
+    });
 
     cpCloseBtn.addEventListener('click', closePopover);
 
-    // Confirm Add Color Button (inside popover)
+    // Confirm Add/Save Color Button (inside popover)
     cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
 
@@ -1043,6 +1145,7 @@
         colorState = { isMultiColor: false, colors: [] };
         multiColorSwitch.checked = false;
         renderColorList();
+        editingColorIndex = -1; // Reset edit index on reset
     });
 
   </script>
