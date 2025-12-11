@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confetti Animator</title>
+  <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
   <style>
     /* --- Modern CSS Variables --- */
     :root {
@@ -453,19 +454,42 @@
     .preview-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
     .preview-canvas {
         flex: 1; background: var(--background); border: 1px solid var(--border);
-        border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+        border-radius: var(--radius); margin-bottom: 16px; 
+        /* CHANGED: Ensure overflow is hidden for panzoom */
+        overflow: hidden; 
         /* Placeholder pattern */
         background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 20px 20px;
         display: flex; align-items: center; justify-content: center; color: var(--muted-foreground);
+        position: relative;
+    }
+    
+    /* NEW: Container for Panzoom interaction */
+    #panzoomContainer {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: grab;
+    }
+    #panzoomContainer:active {
+        cursor: grabbing;
+    }
+    /* Ensure SVG fits nicely inside panzoom container */
+    #previewSvg {
+        max-width: 100%;
+        max-height: 100%;
+        pointer-events: none; /* Let clicks pass through to panzoom container */
     }
     
     /* NEW: Preview Footer Container */
     .preview-footer {
         display: flex;
-        gap: 12px;
+        /* gap removed as there is only one button now */
     }
     
     /* NEW: Modern Icon Button for Play */
+    /* (Styles kept just in case, though button is removed from HTML) */
     .icon-btn-modern {
       width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
@@ -621,22 +645,13 @@
     <div class="preview-panel">
         <div class="preview-title">Preview</div>
         <div class="preview-canvas">
-            <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.6">
-                 <g fill="none" stroke="none">
-                  <rect x="50" y="40" width="10" height="6" fill="#FF6B6B" transform="rotate(15 55 43)"/>
-                  <circle cx="120" cy="80" r="5" fill="#F2C94C"/>
-                  <polygon points="200,50 205,65 195,65" fill="#1890FF" transform="rotate(-20 200 60)"/>
-                  <rect x="300" y="150" width="8" height="8" fill="#BB6BD9" transform="rotate(45 304 154)"/>
-                  <circle cx="80" cy="200" r="4" fill="#52c41a"/>
-                  <rect x="250" y="250" width="12" height="8" fill="#F2994A" transform="rotate(-10 256 254)"/>
-                 </g>
-            </svg>
+            <div id="panzoomContainer">
+                 <svg id="previewSvg" width="100%" height="100%" viewBox="0 0 1440 1080" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                </svg>
+            </div>
         </div>
         
         <div class="preview-footer">
-            <button id="playBtn" class="icon-btn-modern">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
-            </button>
             <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
         </div>
 
@@ -686,10 +701,18 @@
       </div> <button id="cpAddConfirmBtn" class="btn btn-primary" style="width: 100%;">Add Color</button>
   </div>
   <script>
+    // --- Globals for Preview ---
+    const previewSvg = document.getElementById('previewSvg');
+    // CHANGED: Get the new panzoom container reference
+    const panzoomContainer = document.getElementById('panzoomContainer');
+    let previewParticles = [];
+    let panzoomInstance; // To store the panzoom object
+
     // --- UI Interactions ---
 
     // 1. Sliders Linkage
-    function setupSlider(inputId, fillId, valueId, format) {
+    // CHANGED: Added shouldRegenerate flag to control backend calls
+    function setupSlider(inputId, fillId, valueId, format, shouldRegenerate = true) {
       const input = document.getElementById(inputId);
       const fill = document.getElementById(fillId);
       const valueLabel = document.getElementById(valueId);
@@ -706,15 +729,25 @@
         } else if (format === 'zoom') {
             valueLabel.textContent = `x${(val / 10).toFixed(1)}`;
         }
+
+        // CHANGED: Logic to decide whether to ask backend for new data or redraw existing data locally
+        if (shouldRegenerate) {
+            updatePreview(); // Trigger full regeneration from backend
+        } else {
+            renderPreview(); // Just redraw existing particles with new global settings (like zoom)
+        }
       }
       input.addEventListener('input', update);
-      update(); // Init
+      // Initial call handled at end of script
     }
 
-    setupSlider('speedInput', 'speedFill', 'speedValue', 'percent');
-    setupSlider('randomInput', 'randomFill', 'randomValue', 'percent');
-    setupSlider('amountInput', 'amountFill', 'amountValue', 'percent');
-    setupSlider('zoomInput', 'zoomFill', 'zoomValue', 'zoom');
+    // Speed: Don't regenerate (for now, as it's static)
+    setupSlider('speedInput', 'speedFill', 'speedValue', 'percent', false);
+    // Randomness & Amount: Must regenerate
+    setupSlider('randomInput', 'randomFill', 'randomValue', 'percent', true);
+    setupSlider('amountInput', 'amountFill', 'amountValue', 'percent', true);
+    // Zoom: Don't regenerate, just re-render with new scale factor
+    setupSlider('zoomInput', 'zoomFill', 'zoomValue', 'zoom', false);
 
 
     // 2. Tabs
@@ -722,8 +755,14 @@
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab-trigger').forEach(t => t.removeAttribute('data-state'));
         tab.setAttribute('data-state', 'active');
+        // CHANGED: Update preview on tab change (if behavior differs later)
+        updatePreview();
       });
     });
+
+    // CHANGED: Add listeners for toggles
+    document.getElementById('checkSize').addEventListener('change', updatePreview);
+    document.getElementById('checkRotation').addEventListener('change', updatePreview);
 
 
     // --- COLOR SECTION LOGIC ---
@@ -796,8 +835,9 @@
 
                 // Update state
                 colorState.colors[index].a = newVal / 100;
-                // Re-render to update preview swatch transparency immediately
                 renderColorList();
+                // CHANGED: Update preview on opacity change
+                updatePreview();
             });
 
 
@@ -817,6 +857,8 @@
             // CHANGED: Use prepend instead of appendChild to show newest at the top
             colorRowsContainer.prepend(row);
         });
+        // CHANGED: Update preview whenever color list changes (add/remove)
+        updatePreview();
     }
 
     // Event Listener for Multi-color Switch
@@ -827,6 +869,8 @@
             editingColorIndex = -1;
         }
         renderColorList();
+        // CHANGED: Update preview on multicolor toggle
+        updatePreview();
     });
 
 
@@ -1159,6 +1203,8 @@
        item.addEventListener('click', () => {
            const currentState = item.getAttribute('data-state');
            item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected');
+           // CHANGED: Update preview on shape selection change
+           updatePreview();
        });
     });
 
@@ -1170,10 +1216,10 @@
             .map(el => el.getAttribute('data-value'));
 
         return {
-            speed: document.getElementById('speedInput').value,
-            randomness: document.getElementById('randomInput').value,
-            amount: document.getElementById('amountInput').value,
-            zoom: document.getElementById('zoomInput').value,
+            speed: parseInt(document.getElementById('speedInput').value),
+            randomness: parseInt(document.getElementById('randomInput').value),
+            amount: parseInt(document.getElementById('amountInput').value),
+            zoom: parseInt(document.getElementById('zoomInput').value),
             randomizeSize: document.getElementById('checkSize').checked,
             randomizeRotation: document.getElementById('checkRotation').checked,
             selectedShapes: selectedShapes,
@@ -1187,15 +1233,15 @@
 
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     document.getElementById('generateBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: getSettings() } }, '*'));
-    document.getElementById('playBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: getSettings() } }, '*'));
+    // CHANGED: Play button removed, listener removed.
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         // Reset Sliders
-        document.getElementById('speedInput').value = 60; document.getElementById('speedInput').dispatchEvent(new Event('input'));
-        document.getElementById('randomInput').value = 60; document.getElementById('randomInput').dispatchEvent(new Event('input'));
-        document.getElementById('amountInput').value = 60; document.getElementById('amountInput').dispatchEvent(new Event('input'));
-        // Zoom resets to 10 (1.0x)
-        document.getElementById('zoomInput').value = 10; document.getElementById('zoomInput').dispatchEvent(new Event('input'));
+        document.getElementById('speedInput').value = 60; 
+        document.getElementById('randomInput').value = 60; 
+        document.getElementById('amountInput').value = 60; 
+        document.getElementById('zoomInput').value = 10; 
+        
         // Reset Checkboxes
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
@@ -1205,7 +1251,147 @@
         multiColorSwitch.checked = false;
         renderColorList();
         editingColorIndex = -1; // Reset edit index on reset
+
+        // Reset Shapes to default (Rectangle, Circle, Star)
+        document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
+            const val = item.getAttribute('data-value');
+            if(val === 'rectangle' || val === 'circle' || val === 'star') {
+                item.setAttribute('data-state', 'selected');
+            } else {
+                item.removeAttribute('data-state');
+            }
+        });
+
+        // Trigger Slider UI updates
+        document.getElementById('speedInput').dispatchEvent(new Event('input'));
+        document.getElementById('randomInput').dispatchEvent(new Event('input'));
+        document.getElementById('amountInput').dispatchEvent(new Event('input'));
+        document.getElementById('zoomInput').dispatchEvent(new Event('input'));
+
+        // CHANGED: Final update for reset
+        updatePreview();
+        // CHANGED: Reset panzoom view
+        if (panzoomInstance) panzoomInstance.reset();
     });
+
+    // =========================================
+    // --- REAL-TIME PREVIEW RENDERING LOGIC ---
+    // =========================================
+
+    // Helper for SVG creation
+    function createSvgElement(type, attributes) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", type);
+        for (const key in attributes) el.setAttribute(key, attributes[key]);
+        return el;
+    }
+
+    // 1. Render the generated particles to the SVG based on REAL data from backend
+    function renderPreview() {
+        const settings = getSettings();
+        // Clear existing content
+        previewSvg.innerHTML = '';
+        
+        // Global Zoom Slider acts as a multiplier on top of backend scale
+        const globalZoom = settings.zoom / 10;
+
+        previewParticles.forEach(p => {
+            let el;
+            // Assuming backend sends standard RGB(A) objects {r,g,b,a}
+            // We use CSS rgb() string for fill
+            const r = Math.round(p.color.r * 255);
+            const g = Math.round(p.color.g * 255);
+            const b = Math.round(p.color.b * 255);
+            const fill = `rgb(${r}, ${g}, ${b})`;
+            // Use provided alpha or default to 1
+            const opacity = p.color.a !== undefined ? p.color.a : 1;
+
+            // Base size for shapes (approximate standard 24px before scaling)
+            const baseSize = 24;
+
+            // Combine transforms: translate -> rotate -> scale(backend) -> scale(zoom slider)
+            const finalScale = p.scale * globalZoom;
+
+            const commonAttrs = {
+                fill: fill,
+                'fill-opacity': opacity,
+                // Center rotation origin on the particle's coordinates
+                'transform-origin': `${p.x}px ${p.y}px`,
+                // SVG transforms apply right-to-left: scale, rotate, then translate to position
+                'transform': `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`
+            };
+
+            // BUG FIX HERE: Changed p.shape to p.shapeType to match backend data
+            if (p.shapeType === 'rectangle') {
+                // Rectangles are slightly wider (approx 4:3 aspect)
+                el = createSvgElement('rect', {
+                    x: -(baseSize * 1.33) / 2, y: -baseSize / 2,
+                    width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs
+                });
+            } else if (p.shapeType === 'square') {
+                 el = createSvgElement('rect', {
+                    x: -baseSize / 2, y: -baseSize / 2,
+                    width: baseSize, height: baseSize, rx: 2, ...commonAttrs
+                });
+            } else if (p.shapeType === 'circle') {
+                el = createSvgElement('circle', {
+                    cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs
+                });
+            } else if (p.shapeType === 'star') {
+                // Simple 5-point star path approximated roughly fitting baseSize box
+                const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5";
+                 el = createSvgElement('polygon', {
+                    points: points, ...commonAttrs
+                });
+            }
+
+            if(el) previewSvg.appendChild(el);
+        });
+    }
+
+    // Main function to trigger updates by asking backend for data
+    function updatePreview() {
+        const settings = getSettings();
+
+        // SAFEGUARD: If amount is 0, don't ask backend. Just clear locally.
+        // This ensures that if Amount is 0, the canvas is cleared and subsequent
+        // local updates (like Zoom) don't try to render stale data.
+        if (settings.amount === 0) {
+            previewParticles = []; // Clear local cache
+            renderPreview(); // Renders the empty cache (clearing the canvas)
+            return; // Stop here, don't bother the backend
+        }
+
+        // CHANGED: Instead of generating locally, ask the backend for real data.
+        // Assumes backend handles 'preview-confetti' and sends back 'preview-data'.
+        parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings } }, '*');
+    }
+
+    // CHANGED: Listen for data from the plugin backend
+    window.onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (msg && msg.type === 'preview-data') {
+            // Store the real data received from backend and render it
+            previewParticles = msg.particles;
+            renderPreview();
+        }
+    };
+    
+    // CHANGED: Initialize Panzoom on the wrapper container
+    panzoomInstance = Panzoom(panzoomContainer, {
+        maxScale: 5,
+        minScale: 0.1,
+        contain: 'outside',
+        startScale: 1
+    });
+    // Enable mouse wheel zoom
+    panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+
+
+    // Initial Render on load
+    // We need to wait for the sliders to init their visual state first.
+    // The setupSlider calls update() which calls updatePreview(), so it should handle itself.
+    // Just in case, we call it once after everything is defined.
+    setTimeout(updatePreview, 100);
 
   </script>
 </body>
