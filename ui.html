@@ -455,7 +455,7 @@
     .preview-canvas {
         flex: 1; background: var(--background); border: 1px solid var(--border);
         border-radius: var(--radius); margin-bottom: 16px; 
-        /* CHANGED: Ensure overflow is hidden for panzoom */
+        /* Ensure overflow is hidden for panzoom */
         overflow: hidden; 
         /* Placeholder pattern */
         background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 20px 20px;
@@ -1232,7 +1232,21 @@
     }
 
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
-    document.getElementById('generateBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: getSettings() } }, '*'));
+    
+    // CHANGED: GENERATE BUTTON LISTENER WITH WORKAROUND
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        const settings = getSettings();
+        
+        if (settings.amount === 0) {
+            // WORKAROUND: If amount is 0, send a specific 'empty-frame' message.
+            // This allows the backend to bypass its minimum particle count logic and just create the container frame.
+            parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*');
+        } else {
+            // Standard generation for > 0 particles
+            parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*');
+        }
+    });
+    
     // CHANGED: Play button removed, listener removed.
 
     document.getElementById('resetBtn').addEventListener('click', () => {
@@ -1352,13 +1366,12 @@
     function updatePreview() {
         const settings = getSettings();
 
-        // SAFEGUARD: If amount is 0, don't ask backend. Just clear locally.
-        // This ensures that if Amount is 0, the canvas is cleared and subsequent
-        // local updates (like Zoom) don't try to render stale data.
+        // SAFEGUARD FOR PREVIEW: If amount is 0, don't ask backend. Just clear locally.
+        // This makes the preview panel responsive.
         if (settings.amount === 0) {
             previewParticles = []; // Clear local cache
             renderPreview(); // Renders the empty cache (clearing the canvas)
-            return; // Stop here, don't bother the backend
+            return; // Stop here, don't bother the backend for preview data
         }
 
         // CHANGED: Instead of generating locally, ask the backend for real data.

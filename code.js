@@ -112,8 +112,8 @@ function generateParticleData(settings, bounds) {
        // Variation between 0.5x and 1.5x of the zoomed size
       scaleFactor *= (0.5 + Math.random());
     }
-     // Ensure a tiny minimum scale so they don't disappear completely
-     scaleFactor = Math.max(scaleFactor, 0.1);
+      // Ensure a tiny minimum scale so they don't disappear completely
+      scaleFactor = Math.max(scaleFactor, 0.1);
 
 
     // Calculate Position (incorporating randomness spread logic)
@@ -267,7 +267,7 @@ async function createFinalConfettiOnCanvas(settings) {
         // Performance Optimization: Yield to the main thread every X nodes
         // to prevent Figma from freezing during large generations.
         if (i % 200 === 0) {
-             await new Promise(resolve => setTimeout(resolve, 0));
+              await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
   })();
@@ -276,6 +276,22 @@ async function createFinalConfettiOnCanvas(settings) {
   figma.currentPage.selection = [frame];
   figma.viewport.scrollAndZoomIntoView([frame]);
 }
+
+// --- NEW FUNCTION: Create Empty Frame ---
+function createEmptyConfettiFrame() {
+  const frameWidth = 1440;
+  const frameHeight = 1080; 
+  const frame = figma.createFrame();
+  frame.name = 'Confetti Frame (Empty)';
+  frame.resize(frameWidth, frameHeight);
+  frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
+  figma.currentPage.appendChild(frame);
+
+  figma.notify("Empty confetti frame created.");
+  figma.currentPage.selection = [frame];
+  figma.viewport.scrollAndZoomIntoView([frame]);
+}
+
 
 // --- MAIN MESSAGE ROUTER ---
 
@@ -299,7 +315,11 @@ figma.ui.onmessage = async (msg) => {
     // Create actual nodes on canvas
     await createFinalConfettiOnCanvas(msg.settings);
   }
-  // 3. Close
+  // 3. Handle Empty Frame Generation Request from UI (New)
+  else if (msg.type === 'generate-empty-frame') {
+    createEmptyConfettiFrame();
+  }
+  // 4. Close
   else if (msg.type === 'close-plugin') {
     figma.closePlugin();
   }
