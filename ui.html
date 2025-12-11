@@ -1400,11 +1400,10 @@
     panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
 
 
-    // Initial Render on load
-    // We need to wait for the sliders to init their visual state first.
-    // The setupSlider calls update() which calls updatePreview(), so it should handle itself.
-    // Just in case, we call it once after everything is defined.
-    setTimeout(updatePreview, 100);
+    // Initial Render on load - Automatically trigger reset on startup
+    // This ensures the UI always starts in a clean, default state.
+    // The reset handler already calls updatePreview(), so we don't need the explicit setTimeout anymore.
+    document.getElementById('resetBtn').click();
 
   </script>
 </body>
