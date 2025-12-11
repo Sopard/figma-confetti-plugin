@@ -120,7 +120,9 @@
       border-radius: var(--radius) 0 0 var(--radius);
       transition: width 0.1s ease-out;
     }
-    .slider-value-text {
+
+    /* CHANGED: Updated styles for editable slider values */
+    .slider-value-input {
       position: absolute;
       right: 12px;
       top: 50%;
@@ -128,9 +130,30 @@
       font-weight: 600;
       font-size: 14px;
       color: var(--foreground);
-      pointer-events: none;
-      z-index: 2;
+      /* Crucial change: allow interaction */
+      pointer-events: auto; 
+      /* Ensure it sits above the invisible range input */
+      z-index: 10; 
+      
+      /* Input styling to look like plain text */
+      border: 1px solid transparent;
+      background: transparent;
+      width: 60px; /* fixed width to prevent jumping */
+      text-align: right;
+      padding: 4px;
+      border-radius: 4px;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s;
     }
+     /* Style when user clicks to edit */
+    .slider-value-input:focus {
+        background-color: var(--background);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+
     .slider-input {
       position: absolute;
       width: 100%;
@@ -191,10 +214,14 @@
     .color-count-text { font-size: 14px; font-weight: 500; }
     .icon-btn-flat {
       width: 24px; height: 24px;
-      display: flex; align-items: center; justify-content: center;
-      border: none; background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
       color: var(--foreground);
-      cursor: pointer; padding: 0;
+      cursor: pointer;
+      padding: 0;
       border-radius: 4px;
       transition: background-color 0.2s;
     }
@@ -214,8 +241,11 @@
       justify-content: space-between;
     }
     .color-toggle-label {
-      display: flex; align-items: center; gap: 12px;
-      font-size: 14px; font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
     }
     .rainbow-icon { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
 
@@ -528,6 +558,19 @@
         background-color: var(--background);
     }
 
+    /* --- CHANGED: New Styles for Grouped Settings Box --- */
+    .grouped-settings-box {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    /* Remove bottom margin from rows inside the box to let gap handle spacing */
+    .grouped-settings-box .number-input-row {
+        margin-bottom: 0;
+    }
 
   </style>
 </head>
@@ -550,47 +593,39 @@
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-          <div>
-            <div class="label">Fall Speed</div>
-            <div class="slider-container">
-              <div class="slider-fill" id="speedFill" style="width: 60%;"></div>
-              <span class="slider-value-text" id="speedValue">60%</span>
-              <input type="range" id="speedInput" class="slider-input" min="0" max="100" value="60">
-            </div>
-            <div class="slider-labels-row"><span>Slow</span><span>Fast</span></div>
-          </div>
-
+          
           <div>
             <div class="label">Randomize Particles</div>
             <div class="slider-container">
               <div class="slider-fill" id="randomFill" style="width: 60%;"></div>
-              <span class="slider-value-text" id="randomValue">60%</span>
+              <input type="text" class="slider-value-input" id="randomValueInput" value="60%">
               <input type="range" id="randomInput" class="slider-input" min="0" max="100" value="60">
             </div>
             <div class="slider-labels-row"><span>Uniform</span><span>Chaotic</span></div>
+          </div>
+
+          <div>
+            <div class="label">Particle Amount</div>
+            <div class="slider-container">
+              <div class="slider-fill" id="amountFill" style="width: 60%;"></div>
+              <input type="text" class="slider-value-input" id="amountValueInput" value="60%">
+              <input type="range" id="amountInput" class="slider-input" min="0" max="100" value="60">
+            </div>
+            <div class="slider-labels-row"><span>Less</span><span>More</span></div>
           </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           <div>
-            <div class="label">Particle Amount</div>
-            <div class="slider-container">
-              <div class="slider-fill" id="amountFill" style="width: 60%;"></div>
-              <span class="slider-value-text" id="amountValue">60%</span>
-              <input type="range" id="amountInput" class="slider-input" min="0" max="100" value="60">
-            </div>
-            <div class="slider-labels-row"><span>Less</span><span>More</span></div>
-          </div>
-
-          <div>
             <div class="label">Zoom</div>
             <div class="slider-container">
               <div class="slider-fill" id="zoomFill" style="width: 0%;"></div>
-              <span class="slider-value-text" id="zoomValue">x1.0</span>
+              <input type="text" class="slider-value-input" id="zoomValueInput" value="x1.0">
               <input type="range" id="zoomInput" class="slider-input" min="0" max="50" value="10">
             </div>
             <div class="slider-labels-row"><span>x0.0</span><span>x5.0</span></div>
           </div>
+          <div></div>
       </div>
 
       <div class="toggle-row-container">
@@ -666,13 +701,15 @@
 
         <div>
             <div class="label">Animation Settings</div>
-            <div class="number-input-row">
-                <span class="toggle-label">Frame Count (Min 1)</span>
-                <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
-            </div>
-            <div class="number-input-row">
-                <span class="toggle-label">Delay per Frame (ms)</span>
-                <input type="number" id="frameDelayInput" class="number-input-field" value="50" min="1">
+            <div class="grouped-settings-box">
+                <div class="number-input-row">
+                    <span class="toggle-label">Frame Count (Min 1)</span>
+                    <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
+                </div>
+                <div class="number-input-row">
+                    <span class="toggle-label">Delay per Frame (ms)</span>
+                    <input type="number" id="frameDelayInput" class="number-input-field" value="50" min="1">
+                </div>
             </div>
         </div>
 
@@ -733,7 +770,7 @@
               </div>
           </div>
 
-           <div class="cp-swatches-section">
+            <div class="cp-swatches-section">
               <div class="label" style="margin-bottom: 8px;">Preset Colors</div>
               <div class="cp-swatch-grid" id="cpSwatchGrid">
                   </div>
@@ -750,44 +787,94 @@
 
     // --- UI Interactions ---
 
-    // 1. Sliders Linkage
-    // CHANGED: Added shouldRegenerate flag to control backend calls
-    function setupSlider(inputId, fillId, valueId, format, shouldRegenerate = true) {
-      const input = document.getElementById(inputId);
+    // 1. Sliders Linkage (Major Update for Two-Way Binding)
+    function setupSlider(sliderInputId, fillId, textInputId, format, shouldRegenerate = true) {
+      const sliderInput = document.getElementById(sliderInputId);
       const fill = document.getElementById(fillId);
-      const valueLabel = document.getElementById(valueId);
+      const textInput = document.getElementById(textInputId);
+      
+      const min = parseFloat(sliderInput.min) || 0;
+      const max = parseFloat(sliderInput.max) || 100;
 
-      function update() {
-        const val = input.value;
-        const min = input.min || 0;
-        const max = input.max || 100;
+      // --- Synchronize Slider -> Text Input ---
+      function updateFromSlider() {
+        let val = parseFloat(sliderInput.value);
         const percent = ((val - min) / (max - min)) * 100;
         fill.style.width = `${percent}%`;
 
+        // Format display text based on type
         if (format === 'percent') {
-             valueLabel.textContent = `${val}%`;
+             textInput.value = `${Math.round(val)}%`;
         } else if (format === 'zoom') {
-            valueLabel.textContent = `x${(val / 10).toFixed(1)}`;
+             // Zoom internal 10 = display x1.0
+             textInput.value = `x${(val / 10).toFixed(1)}`;
         }
 
-        // CHANGED: Logic to decide whether to ask backend for new data or redraw existing data locally
+        triggerPreviewUpdate();
+      }
+
+      // --- Synchronize Text Input -> Slider ---
+      function updateFromText() {
+          let rawValue = textInput.value;
+          let numericValue;
+
+          // 1. Parse the input based on format
+          if (format === 'percent') {
+              // Remove % and non-numeric chars except dot
+              rawValue = rawValue.replace(/[^0-9.]/g, '');
+              numericValue = parseFloat(rawValue);
+          } else if (format === 'zoom') {
+              // Remove 'x' and non-numeric chars except dot
+              rawValue = rawValue.replace(/[^0-9.]/g, '');
+              numericValue = parseFloat(rawValue);
+              // Convert display value (e.g., 1.5) back to internal value (e.g., 15)
+              if (!isNaN(numericValue)) {
+                  numericValue = Math.round(numericValue * 10);
+              }
+          }
+
+          // 2. Validate and Clamp
+          if (isNaN(numericValue)) {
+              // Revert to current slider value if input is invalid
+              numericValue = parseFloat(sliderInput.value);
+          } else {
+              // Clamp between min and max
+              numericValue = Math.max(min, Math.min(max, numericValue));
+          }
+
+          // 3. Update slider and force visual refresh
+          sliderInput.value = numericValue;
+          updateFromSlider(); // This will re-format the text input correctly
+      }
+
+      // --- Helper to trigger appropriate preview mode ---
+      function triggerPreviewUpdate() {
         if (shouldRegenerate) {
-            updatePreview(); // Trigger full regeneration from backend
+            updatePreview(); // Full backend regeneration
         } else {
-            renderPreview(); // Just redraw existing particles with new global settings (like zoom)
+            renderPreview(); // Local redraw (e.g., for zoom)
         }
       }
-      input.addEventListener('input', update);
-      // Initial call handled at end of script
+
+      // Attach Listeners
+      // Update live while dragging slider
+      sliderInput.addEventListener('input', updateFromSlider);
+      // Update only on blur or 'Enter' for text input
+      textInput.addEventListener('change', updateFromText); 
+      textInput.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter') {
+              e.target.blur(); // Triggers 'change' event
+          }
+      });
     }
 
-    // Speed: Don't regenerate (for now, as it's static)
-    setupSlider('speedInput', 'speedFill', 'speedValue', 'percent', false);
+
     // Randomness & Amount: Must regenerate
-    setupSlider('randomInput', 'randomFill', 'randomValue', 'percent', true);
-    setupSlider('amountInput', 'amountFill', 'amountValue', 'percent', true);
+    // Note the change in IDs passed to the function (e.g., 'randomValueInput')
+    setupSlider('randomInput', 'randomFill', 'randomValueInput', 'percent', true);
+    setupSlider('amountInput', 'amountFill', 'amountValueInput', 'percent', true);
     // Zoom: Don't regenerate, just re-render with new scale factor
-    setupSlider('zoomInput', 'zoomFill', 'zoomValue', 'zoom', false);
+    setupSlider('zoomInput', 'zoomFill', 'zoomValueInput', 'zoom', false);
 
 
     // 2. Tabs
@@ -860,9 +947,9 @@
             // CHANGED: Add click listener for editing color
             const previewSq = row.querySelector('.color-preview-sq');
             previewSq.addEventListener('click', (e) => {
-                 if (colorState.isMultiColor) return;
-                 // BUG FIX: Pass the trigger element directly instead of relying on DOM index calculation
-                 openPopoverToEdit(index, previewSq);
+                  if (colorState.isMultiColor) return;
+                  // BUG FIX: Pass the trigger element directly instead of relying on DOM index calculation
+                  openPopoverToEdit(index, previewSq);
             });
 
              // CHANGED: Add change listener for direct opacity edit
@@ -887,8 +974,8 @@
                 if (colorState.isMultiColor) return;
                 // If we are deleting the color currently being edited, reset edit mode
                 if (editingColorIndex === index) {
-                     editingColorIndex = -1;
-                     closePopover();
+                      editingColorIndex = -1;
+                      closePopover();
                 }
                 colorState.colors.splice(index, 1);
                 renderColorList();
@@ -1031,9 +1118,9 @@
     cpAlphaInput.addEventListener('input', (e) => {
         let val = parseInt(e.target.value);
         if (!isNaN(val)) {
-             val = Math.max(0, Math.min(100, val));
-             pickerHSLA.a = val / 100;
-             updatePickerVisuals();
+              val = Math.max(0, Math.min(100, val));
+              pickerHSLA.a = val / 100;
+              updatePickerVisuals();
         }
     });
 
@@ -1143,15 +1230,15 @@
 
     // Helper function to confirm and add/save the current picker color
     function confirmAddColor() {
-         const newColorData = { ...pickerHSLA };
+          const newColorData = { ...pickerHSLA };
 
-         if (editingColorIndex > -1) {
-             // Edit existing color
-             colorState.colors[editingColorIndex] = newColorData;
-         } else {
-             // Add new color
-             colorState.colors.push(newColorData);
-         }
+          if (editingColorIndex > -1) {
+              // Edit existing color
+              colorState.colors[editingColorIndex] = newColorData;
+          } else {
+              // Add new color
+              colorState.colors.push(newColorData);
+          }
         
         renderColorList();
         closePopover();
@@ -1256,7 +1343,7 @@
             .map(el => el.getAttribute('data-value'));
 
         return {
-            speed: parseInt(document.getElementById('speedInput').value),
+            // CHANGED: speed removed from settings
             randomness: parseInt(document.getElementById('randomInput').value),
             amount: parseInt(document.getElementById('amountInput').value),
             zoom: parseInt(document.getElementById('zoomInput').value),
@@ -1294,7 +1381,7 @@
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         // Reset Sliders
-        document.getElementById('speedInput').value = 60; 
+        // CHANGED: Speed slider reset removed
         document.getElementById('randomInput').value = 60; 
         document.getElementById('amountInput').value = 60; 
         document.getElementById('zoomInput').value = 10; 
@@ -1324,7 +1411,7 @@
         document.getElementById('frameDelayInput').value = 50;
 
         // Trigger Slider UI updates
-        document.getElementById('speedInput').dispatchEvent(new Event('input'));
+        // CHANGED: Speed slider update removed
         document.getElementById('randomInput').dispatchEvent(new Event('input'));
         document.getElementById('amountInput').dispatchEvent(new Event('input'));
         document.getElementById('zoomInput').dispatchEvent(new Event('input'));

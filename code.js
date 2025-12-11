@@ -30,7 +30,7 @@ function hslToRgba(h, s, l, a) {
 
 /**
  * Generates the initial properties and calculates required physics for all particles.
- * The "Fall Speed" slider now determines the target distance below the frame.
+ * The "Fall Speed" is now hardcoded to 30.
  */
 function initializeParticlePool(settings, bounds) {
   const { width: boundsWidth, height: boundsHeight } = bounds;
@@ -45,8 +45,8 @@ function initializeParticlePool(settings, bounds) {
   // Enforce minimum of 1 frame
   const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
   
-  // CHANGED: Get the raw speed setting (0-100)
-  const speedSetting = validateNum(settings.speed, 0, 100, 60);
+  // CHANGED: Hardcode the speed setting to 30
+  const speedSetting = 30;
 
 
   let shapesToUse =
