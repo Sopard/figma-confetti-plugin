@@ -667,8 +667,8 @@
         <div>
             <div class="label">Animation Settings</div>
             <div class="number-input-row">
-                <span class="toggle-label">Frame Count (Min 10)</span>
-                <input type="number" id="frameCountInput" class="number-input-field" value="10" min="10">
+                <span class="toggle-label">Frame Count (Min 1)</span>
+                <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
             </div>
             <div class="number-input-row">
                 <span class="toggle-label">Delay per Frame (ms)</span>
@@ -1269,7 +1269,8 @@
                 customColors: colorState.colors 
             },
             // NEW: Animation Settings
-            frameCount: parseInt(document.getElementById('frameCountInput').value) || 10,
+            // CHANGED: Default fallback is now 1 instead of 10
+            frameCount: parseInt(document.getElementById('frameCountInput').value) || 1,
             frameDelay: parseInt(document.getElementById('frameDelayInput').value) || 50
         };
     }
