@@ -180,113 +180,137 @@ function createFigmaShapeNode(type, width, height) {
   return node;
 }
 
-// --- FINAL OUTPUT GENERATOR (Creates Frame and Nodes on Canvas) ---
-
-async function createFinalConfettiOnCanvas(settings) {
-  // 1. Frame Setup
-  // Using 1440x1080 to match the UI preview aspect ratio for consistency
+// --- FRAME CREATION HELPER ---
+function createBaseFrame(x_pos, name) {
   const frameWidth = 1440;
   const frameHeight = 1080; 
   const frame = figma.createFrame();
-  frame.name = 'Confetti Frame';
+  frame.name = name;
   frame.resize(frameWidth, frameHeight);
+  frame.x = x_pos; // Position horizontally
   frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
   figma.currentPage.appendChild(frame);
+  return frame;
+}
 
-  // 2. Generate Data Blueprint
-  figma.notify("Calculating particle physics...");
-  // Yield to let UI update
-  await new Promise(resolve => setTimeout(resolve, 20)); 
-
-  const particleData = generateParticleData(settings, {
-    width: frameWidth,
-    height: frameHeight,
-  });
-
-  figma.notify(`Generating ${particleData.length} particles...`);
-   // Yield again before heavy node creation loop
-  await new Promise(resolve => setTimeout(resolve, 50));
-
-
-  // Initialize counters for naming convention
+// --- FRAME POPULATION HELPER ---
+// Takes a frame and particle data, creates nodes, and yields for performance
+async function populateFrameWithConfetti(frame, particleData) {
+  // Initialize counters here. They reset for every frame populated.
+  // This ensures consistent naming across identical frames.
   let rectangleCount = 0;
   let squareCount = 0;
   let circleCount = 0;
   let starCount = 0;
 
-  // 3. Node Creation Loop
-  // Wrap in a huge async IIFE to allow yielding during heavy processing
-  await (async () => {
-      for (let i = 0; i < particleData.length; i++) {
-        const p = particleData[i];
+  for (let i = 0; i < particleData.length; i++) {
+    const p = particleData[i];
+    let particleName = '';
+    switch (p.shapeType) {
+      case 'rectangle': rectangleCount++; particleName = `Rectangle${rectangleCount}`; break;
+      case 'square': squareCount++; particleName = `Square${squareCount}`; break;
+      case 'circle': circleCount++; particleName = `Eclipse${circleCount}`; break;
+      case 'star': starCount++; particleName = `Star${starCount}`; break;
+    }
 
-        // Determine Name based on type and increment counter
-        let particleName = '';
-        switch (p.shapeType) {
-          case 'rectangle':
-            rectangleCount++;
-            particleName = `Rectangle${rectangleCount}`;
-            break;
-          case 'square':
-            squareCount++;
-            particleName = `Square${squareCount}`;
-            break;
-          case 'circle':
-            circleCount++;
-            particleName = `Eclipse${circleCount}`; // Using "Eclipse" per requirement
-            break;
-          case 'star':
-            starCount++;
-            particleName = `Star${starCount}`;
-            break;
-        }
+    const node = createFigmaShapeNode(p.shapeType, p.baseWidth, p.baseHeight);
+    if (!node) continue;
 
-        // Create the basic node with base dimensions
-        const node = createFigmaShapeNode(p.shapeType, p.baseWidth, p.baseHeight);
-        if (!node) continue;
+    node.name = particleName;
+    node.x = p.x;
+    node.y = p.y;
+    node.rescale(p.scale); 
+    node.rotation = p.rotation;
+    node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+    frame.appendChild(node);
 
-        // Apply properties
-        node.name = particleName;
-        node.x = p.x;
-        node.y = p.y;
-        // Apply scale calculated in data generator
-        // We rescale based on its current size multiplied by the scale factor
-        node.rescale(p.scale); 
-        node.rotation = p.rotation;
-        
-        node.fills = [
-          {
-            type: 'SOLID',
-            color: { r: p.color.r, g: p.color.g, b: p.color.b },
-            opacity: p.color.a,
-          },
-        ];
-
-        frame.appendChild(node);
-
-        // Performance Optimization: Yield to the main thread every X nodes
-        // to prevent Figma from freezing during large generations.
-        if (i % 200 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 0));
-        }
-      }
-  })();
-
-  figma.notify("Confetti generated successfully!");
-  figma.currentPage.selection = [frame];
-  figma.viewport.scrollAndZoomIntoView([frame]);
+    // Yield every 200 nodes per frame to prevent freezing
+    if (i % 200 === 0) await new Promise(r => setTimeout(r, 0));
+  }
 }
 
-// --- NEW FUNCTION: Create Empty Frame ---
-function createEmptyConfettiFrame() {
-  const frameWidth = 1440;
-  const frameHeight = 1080; 
-  const frame = figma.createFrame();
-  frame.name = 'Confetti Frame (Empty)';
-  frame.resize(frameWidth, frameHeight);
-  frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
-  figma.currentPage.appendChild(frame);
 
+// --- FINAL OUTPUT GENERATOR (Creates Animated Sequence) ---
+
+async function createFinalConfettiOnCanvas(settings) {
+  // 1. Validate Animation Settings
+  const frameCount = Math.max(10, validateNum(settings.frameCount, 10, 100, 10));
+  const frameDelay = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 50));
+
+  const frameWidth = 1440;
+  const frameHeight = 1080;
+  
+  const gap = 100; // Horizontal spacing between frames onto the canvas
+  const createdFrames = [];
+
+  // *** CHANGED: Generate particle data ONCE here, outside the loop. ***
+  figma.notify("Calculating initial confetti arrangement...");
+  // Yield briefly
+  await new Promise(r => setTimeout(r, 20));
+
+  // This "master" data will be reused for ALL frames in the sequence to keep them identical.
+  const masterParticleData = generateParticleData(settings, { width: frameWidth, height: frameHeight });
+
+  figma.notify(`Starting generation of ${frameCount} identical animated frames...`);
+
+  // 2. Frame Creation Loop
+  for (let i = 0; i < frameCount; i++) {
+    // Calculate X position for side-by-side layout
+    const xPos = i * (frameWidth + gap);
+    const frameName = `Confetti Sequence - Frame ${i + 1}`;
+
+    // Create the empty frame
+    const frame = createBaseFrame(xPos, frameName);
+    createdFrames.push(frame);
+
+    figma.notify(`Populating Frame ${i + 1}/${frameCount}...`);
+    
+    // *** CHANGED: Populate the frame using the IDENTICAL master data ***
+    await populateFrameWithConfetti(frame, masterParticleData);
+    
+    // Yield between frames just in case
+    await new Promise(r => setTimeout(r, 10));
+  }
+
+
+  // 3. Prototyping Interaction Loop (Linking the frames)
+  figma.notify("Setting up prototype interactions...");
+  // Loop up to the second-to-last frame
+  for (let i = 0; i < createdFrames.length - 1; i++) {
+    const currentFrame = createdFrames[i];
+    const nextFrame = createdFrames[i + 1];
+
+    // Add the "After delay" reaction
+    currentFrame.reactions = [{
+      trigger: {
+        type: 'AFTER_TIMEOUT',
+        timeout: frameDelay // ms delay from settings
+      },
+      action: {
+        type: 'NODE',
+        destinationId: nextFrame.id,
+        navigation: 'NAVIGATE',
+        // Use Dissolve for smooth transition if they were different, 
+        // but since they are identical, this will just be a static wait.
+        transition: {
+          type: 'DISSOLVE',
+          duration: frameDelay / 1000, 
+          easing: { type: 'LINEAR' }
+        }
+      }
+    }];
+  }
+
+  figma.notify("Animated confetti sequence generated successfully!");
+  // Select all generated frames
+  figma.currentPage.selection = createdFrames;
+  // Zoom to fit the whole sequence
+  figma.viewport.scrollAndZoomIntoView(createdFrames);
+}
+
+// --- NEW FUNCTION: Create Single Empty Frame (Alternative action) ---
+function createEmptyConfettiFrame() {
+  const frame = createBaseFrame(0, 'Confetti Frame (Empty)');
   figma.notify("Empty confetti frame created.");
   figma.currentPage.selection = [frame];
   figma.viewport.scrollAndZoomIntoView([frame]);
@@ -298,24 +322,15 @@ function createEmptyConfettiFrame() {
 figma.ui.onmessage = async (msg) => {
   // 1. Handle Real-time Preview Request from UI
   if (msg.type === 'preview-confetti') {
-    // Define bounds to match the UI's SVG viewBox (1440x1080)
     const previewBounds = { width: 1440, height: 1080 };
-
-    // Generate pure data (no nodes created)
     const data = generateParticleData(msg.settings, previewBounds);
-
-    // Send data back to UI for rendering
-    figma.ui.postMessage({
-      type: 'preview-data',
-      particles: data,
-    });
+    figma.ui.postMessage({ type: 'preview-data', particles: data });
   }
-  // 2. Handle Final Generation Request from UI
+  // 2. Handle Final Generation Request from UI (Creates Sequence)
   else if (msg.type === 'generate-confetti') {
-    // Create actual nodes on canvas
     await createFinalConfettiOnCanvas(msg.settings);
   }
-  // 3. Handle Empty Frame Generation Request from UI (New)
+  // 3. Handle Empty Frame Generation Request from UI
   else if (msg.type === 'generate-empty-frame') {
     createEmptyConfettiFrame();
   }

@@ -502,6 +502,32 @@
     }
     .icon-btn-modern:hover { background-color: var(--muted); border-color: var(--muted-darker); }
 
+    /* NEW: Number Input Style for Animation Settings */
+    .number-input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .number-input-field {
+        width: 80px;
+        height: 36px;
+        padding: 0 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background-color: var(--muted);
+        color: var(--foreground);
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .number-input-field:focus {
+        border-color: var(--primary);
+        background-color: var(--background);
+    }
+
 
   </style>
 </head>
@@ -636,6 +662,20 @@
           </div>
        </div>
 
+        <hr class="section-divider">
+
+        <div>
+            <div class="label">Animation Settings</div>
+            <div class="number-input-row">
+                <span class="toggle-label">Frame Count (Min 10)</span>
+                <input type="number" id="frameCountInput" class="number-input-field" value="10" min="10">
+            </div>
+            <div class="number-input-row">
+                <span class="toggle-label">Delay per Frame (ms)</span>
+                <input type="number" id="frameDelayInput" class="number-input-field" value="50" min="1">
+            </div>
+        </div>
+
        <div class="footer">
            <button id="resetBtn" class="btn btn-outline">Reset</button>
        </div>
@@ -652,7 +692,7 @@
         </div>
         
         <div class="preview-footer">
-            <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
+            <button id="generateBtn" class="btn btn-primary">Generate Confetti Sequence</button>
         </div>
 
     </div>
@@ -1227,7 +1267,10 @@
             colorData: {
                 isMultiColor: colorState.isMultiColor,
                 customColors: colorState.colors 
-            }
+            },
+            // NEW: Animation Settings
+            frameCount: parseInt(document.getElementById('frameCountInput').value) || 10,
+            frameDelay: parseInt(document.getElementById('frameDelayInput').value) || 50
         };
     }
 
@@ -1239,7 +1282,6 @@
         
         if (settings.amount === 0) {
             // WORKAROUND: If amount is 0, send a specific 'empty-frame' message.
-            // This allows the backend to bypass its minimum particle count logic and just create the container frame.
             parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*');
         } else {
             // Standard generation for > 0 particles
@@ -1275,6 +1317,10 @@
                 item.removeAttribute('data-state');
             }
         });
+        
+        // NEW: Reset Animation Settings
+        document.getElementById('frameCountInput').value = 10;
+        document.getElementById('frameDelayInput').value = 50;
 
         // Trigger Slider UI updates
         document.getElementById('speedInput').dispatchEvent(new Event('input'));
@@ -1401,8 +1447,6 @@
 
 
     // Initial Render on load - Automatically trigger reset on startup
-    // This ensures the UI always starts in a clean, default state.
-    // The reset handler already calls updatePreview(), so we don't need the explicit setTimeout anymore.
     document.getElementById('resetBtn').click();
 
   </script>
