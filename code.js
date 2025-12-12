@@ -185,39 +185,59 @@ function getParticleStateForFrame(particle, frameIndex) {
 
 // --- NODE CREATION HELPER (Generates actual Figma nodes) ---
 
-// CHANGED: Now handles standard shapes, emojis, and custom vector paths
 async function createFigmaShapeNode(particleData) {
   const { shapeType, isEmoji, baseWidth, baseHeight, customPathData } = particleData;
   let node;
 
-  // NEW: Handle Emoji (Text Node)
+  // Handle Emoji (Text Node)
   if (isEmoji) {
       node = figma.createText();
-      // Need to load a font that supports emojis. Inter works well generally.
-      // Adding a fallback in case Inter isn't available, though it usually is.
       try {
           await figma.loadFontAsync({ family: "Inter", style: "Regular" });
           node.fontName = { family: "Inter", style: "Regular" };
       } catch (e) {
-          // Fallback to default font if Inter fails
           await figma.loadFontAsync(figma.fonts[0]);
           node.fontName = figma.fonts[0];
       }
       
-      node.characters = shapeType; // shapeType holds the emoji char
-      node.fontSize = baseHeight; // Use height as font size base
-      // Center text within its bounding box
+      node.characters = shapeType;
+      node.fontSize = baseHeight;
       node.textAlignHorizontal = 'CENTER';
       node.textAlignVertical = 'CENTER';
-      // Resize frame to fit text tightly
       node.resize(baseWidth, baseHeight);
   } 
-  // NEW: Handle Custom Shape (Vector Node from SVG path)
-  else if (shapeType === 'custom' && customPathData) {
-      // Create a vector node from the SVG path string
-      node = figma.createVector(customPathData);
-      // Resize to the base dimensions. Figma will stretch the path.
-      node.resize(baseWidth, baseHeight);
+  // CRITICAL FIX: Handle Custom Shape correctly using createNodeFromSvg
+  else if (shapeType === 'custom') {
+      if (customPathData) {
+          // 1. Wrap the path data in a minimal SVG structure based on UI editor size (320x320)
+          const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><path d="${customPathData}" /></svg>`;
+          
+          // 2. Use the correct API to import SVG data. This returns a FrameNode.
+          const importedFrame = figma.createNodeFromSvg(svgString);
+          
+          // 3. Extract the vector node from inside the imported frame
+          if (importedFrame.children.length > 0) {
+              node = importedFrame.children[0];
+              // Move the node out of the temporary frame onto the current page temporarily
+              figma.currentPage.appendChild(node);
+              // Remove the temporary container frame
+              importedFrame.remove();
+          } else {
+              // Fallback if SVG import resulted in an empty frame for some reason
+              importedFrame.remove();
+              node = figma.createEllipse();
+          }
+
+          // 4. Resize to target dimensions
+          node.resize(baseWidth, baseHeight);
+          // Ensure no strokes from the import process
+          if ('strokes' in node) { node.strokes = []; }
+
+      } else {
+          // Fallback if "custom" selected but no path data exists
+          node = figma.createEllipse();
+          node.resize(baseWidth, baseHeight);
+      }
   }
   // Handle Standard Shapes
   else {
@@ -242,13 +262,18 @@ async function createFigmaShapeNode(particleData) {
           node.pointCount = 5;
           node.innerRadius = 0.4;
           break;
-        // Fallback for safety
         default: 
-           node = figma.createEllipse();
-           node.resize(baseWidth, baseHeight);
+           // Fallback handled by main if check below
            break;
       }
   }
+
+  // Final safety check: if node wasn't created (e.g. unknown shapeType), create a default
+  if (!node) {
+      node = figma.createEllipse();
+      node.resize(baseWidth, baseHeight);
+  }
+
   return node;
 }
 
@@ -274,9 +299,10 @@ async function populateFrameWithConfetti(frame, particleDataList) {
     const p = particleDataList[i];
     shapeCounter++;
     
-    // Create the specific node type (async now due to font loading)
+    // Create the specific node type (async now due to font loading & svg import)
     const node = await createFigmaShapeNode(p);
-    if (!node) continue;
+    // Safety check if node creation failed completely
+    if (!node) continue; 
 
     node.name = `Particle ${shapeCounter}`;
     
@@ -285,10 +311,8 @@ async function populateFrameWithConfetti(frame, particleDataList) {
         node.rotation = p.rotation; 
     }
 
-    // Apply scale. For text, this scales fontSize. For shapes, it resizes.
-    // We need to handle text scaling differently to ensure it scales around center.
+    // Apply scale.
     if (p.isEmoji) {
-        // Simple resizing for text node wrapper
         const newSize = p.baseHeight * p.scale;
         node.fontSize = newSize;
         node.resize(newSize, newSize);
@@ -298,28 +322,26 @@ async function populateFrameWithConfetti(frame, particleDataList) {
      
     // Apply Color only if not an emoji
     if (!p.isEmoji && p.color) {
-        node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+        // Ensure the node supports fills (VectorNodes do)
+        if ('fills' in node) {
+            node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+        }
     }
 
-    // Ensure center anchor for scaling/rotation effect by offsetting position
-    // Note: Figma rotates around top-left by default.
+    // Ensure center anchor for scaling/rotation effect
     if (!p.isEmoji) {
         const width = node.width;
         const height = node.height;
-        // Offset x/y by half width/height so (p.x, p.y) is the center
         node.x = p.x - (width / 2);
         node.y = p.y - (height / 2);
     } else {
-         // For emojis, simpler centering is enough due to text alignment
          node.x = p.x - (node.width / 2);
-         // Small vertical adjustment for text baseline
          node.y = p.y - (node.height / 2) + (node.height * 0.1);
     }
 
-
     frame.appendChild(node);
 
-    // Yield to main thread periodically to prevent freezing
+    // Yield to main thread periodically
     if (i % 150 === 0) await new Promise(r => setTimeout(r, 5));
   }
 }
@@ -329,7 +351,9 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 
 async function createFinalConfettiOnCanvas(settings) {
   const frameCount = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
-  const frameDelay = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 50));
+  
+  // CHANGED: Get the animation delay from settings (default 75ms if invalid)
+  const animationDelayMs = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 75));
 
   const frameWidth = 1440;
   const frameHeight = 1080;
@@ -380,11 +404,12 @@ async function createFinalConfettiOnCanvas(settings) {
     const currentFrame = createdOuterFrames[i];
     const nextFrame = createdOuterFrames[i + 1];
 
-    // --- FIX: Updated 'action' to 'actions' array as per Figma API requirement ---
+    // Updated 'action' to 'actions' array as per Figma API requirement
     currentFrame.reactions = [{
       trigger: {
         type: 'AFTER_TIMEOUT',
-        timeout: frameDelay 
+        // CHANGED: Hardcoded trigger delay to 1ms (0.001s)
+        timeout: 0.001 
       },
       actions: [{
         type: 'NODE',
@@ -392,7 +417,8 @@ async function createFinalConfettiOnCanvas(settings) {
         navigation: 'NAVIGATE',
         transition: {
           type: 'SMART_ANIMATE',
-          duration: frameDelay / 1000, 
+          // CHANGED: Use the UI input value for animation duration (converted to seconds)
+          duration: animationDelayMs / 1000, 
           easing: { type: 'LINEAR' }
         }
       }]
