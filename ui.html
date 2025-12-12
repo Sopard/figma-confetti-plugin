@@ -992,6 +992,9 @@
     let activeShapeTab = 'preset';
     // Final SVG Path String stored here
     let finalCustomShapePathStr = "";
+    
+    // NEW: History stack for custom shape undo
+    let csHistory = [];
 
     // --- HELPER FUNCTIONS ---
     // Moved createSvgElement to top for better organization and to prevent hoisting confusion
@@ -1515,6 +1518,9 @@
     }
 
     function startDrag(e, index, type) {
+        // SAVE HISTORY
+        csHistory.push(JSON.parse(JSON.stringify(csState)));
+
         draggingElement = type;
         dragStartIndex = index;
         document.addEventListener('mousemove', onDrag);
@@ -1544,6 +1550,26 @@
         document.removeEventListener('mouseup', stopDrag);
     }
 
+    // NEW: Undo Function
+    function undoShape() {
+        if (csHistory.length > 0) {
+            csState = csHistory.pop();
+            renderEditorCanvas();
+        }
+    }
+
+    // NEW: Keydown Listener
+    document.addEventListener('keydown', (e) => {
+        // Check for Ctrl+Z or Cmd+Z
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+            // Only undo if the custom shape popover is open
+            if (customShapePopover.style.display === 'flex') {
+                e.preventDefault();
+                undoShape();
+            }
+        }
+    });
+
     customShapeBtn.addEventListener('click', () => {
         customShapePopover.style.display = 'flex';
         renderEditorCanvas(); 
@@ -1571,6 +1597,7 @@
     csResetIcon.addEventListener('click', () => {
         // 1. Reset shape state to initial square
         csState = JSON.parse(JSON.stringify(initialCsState));
+        csHistory = []; // Clear history
         renderEditorCanvas();
         
         // 2. Deselect custom button
@@ -1656,6 +1683,7 @@
 
         document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
             const val = item.getAttribute('data-value');
+            // CHANGED: Added 'circle' back to default selection
             if(val === 'rectangle' || val === 'circle' || val === 'star') {
                 item.setAttribute('data-state', 'selected');
             } else {
@@ -1788,8 +1816,10 @@
     }
     
     // Initial Render on load
-    // CHANGED: Call the reset function directly instead of simulating a click
-    resetPluginState();
+    // CHANGED: Call resetPluginState inside a setTimeout to allow the bridge to initialize.
+    setTimeout(() => {
+       resetPluginState();
+    }, 250);
 
   </script>
 </body>
