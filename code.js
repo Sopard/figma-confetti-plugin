@@ -1,7 +1,7 @@
 // code.js
 
-// Increased width to accommodate settings + preview panel
-figma.showUI(__html__, { width: 960, height: 700, themeColors: false });
+// Increased width/height to accommodate new overlays and settings
+figma.showUI(__html__, { width: 960, height: 800, themeColors: false });
 
 // --- HELPER FUNCTIONS ---
 
@@ -28,10 +28,6 @@ function hslToRgba(h, s, l, a) {
 
 // --- CORE DATA GENERATOR ---
 
-/**
- * Generates the initial properties and calculates required physics for all particles.
- * The "Fall Speed" is now hardcoded to 30.
- */
 function initializeParticlePool(settings, bounds) {
   const { width: boundsWidth, height: boundsHeight } = bounds;
 
@@ -41,37 +37,43 @@ function initializeParticlePool(settings, bounds) {
   const zoom = validateNum(settings.zoom, 0, 50, 10);
   const randomizeSize = settings.randomizeSize === true;
   const randomizeRotation = settings.randomizeRotation === true;
-  // Get total frames to calculate required speed over time
-  // Enforce minimum of 1 frame
   const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
+  const speedSetting = 30; // Hardcoded speed
+
+  // Determine Shapes to use
+  let shapesToUse = [];
   
-  // CHANGED: Hardcode the speed setting to 30
-  const speedSetting = 30;
-
-
-  let shapesToUse =
-    Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0
-      ? settings.selectedShapes
-      : ['rectangle', 'square', 'circle', 'star'];
-
-  // Determine Color Palette
-  let colorPalette = [];
-  if (settings.colorData.isMultiColor) {
-    colorPalette = [
-      { r: 1, g: 0.2, b: 0.2, a: 1 },
-      { r: 1, g: 0.6, b: 0, a: 1 },
-      { r: 1, g: 0.9, b: 0, a: 1 },
-      { r: 0.2, g: 0.8, b: 0.2, a: 1 },
-      { r: 0.2, g: 0.6, b: 1, a: 1 },
-      { r: 0.6, g: 0.2, b: 0.8, a: 1 },
-    ];
+  const isEmojiMode = settings.shapeTab === 'emoji';
+  if (isEmojiMode && settings.selectedEmoji) {
+      shapesToUse = [settings.selectedEmoji]; // Use the single selected emoji char
+  } else if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
+      shapesToUse = settings.selectedShapes;
   } else {
-    colorPalette = settings.colorData.customColors.map((hsla) =>
-      hslToRgba(hsla.h, hsla.s, hsla.l, hsla.a)
-    );
-    if (colorPalette.length === 0) {
-      colorPalette = [{ r: 0.5, g: 0.5, b: 0.5, a: 1.0 }];
-    }
+      // Fallback
+      shapesToUse = ['rectangle', 'circle', 'star'];
+  }
+
+
+  // Determine Color Palette (Only if NOT in emoji mode)
+  let colorPalette = [];
+  if (!isEmojiMode) {
+      if (settings.colorData.isMultiColor) {
+        colorPalette = [
+          { r: 1, g: 0.2, b: 0.2, a: 1 },
+          { r: 1, g: 0.6, b: 0, a: 1 },
+          { r: 1, g: 0.9, b: 0, a: 1 },
+          { r: 0.2, g: 0.8, b: 0.2, a: 1 },
+          { r: 0.2, g: 0.6, b: 1, a: 1 },
+          { r: 0.6, g: 0.2, b: 0.8, a: 1 },
+        ];
+      } else {
+        colorPalette = settings.colorData.customColors.map((hsla) =>
+          hslToRgba(hsla.h, hsla.s, hsla.l, hsla.a)
+        );
+        if (colorPalette.length === 0) {
+          colorPalette = [{ r: 0.5, g: 0.5, b: 0.5, a: 1.0 }];
+        }
+      }
   }
 
   // Calculate Count
@@ -84,17 +86,32 @@ function initializeParticlePool(settings, bounds) {
 
   // Generation Loop
   for (let i = 0; i < count; i++) {
-    const shapeType = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
-    const colorBtn = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    // Select shape identifier (either shape name like 'rectangle' or emoji char like '😀')
+    const shapeIdentifier = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
+    
+    // Select color only if not in emoji mode
+    let colorBtn = null;
+    if (!isEmojiMode && colorPalette.length > 0) {
+         colorBtn = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    }
+
 
     // Base Size calc
     const baseReferenceSize = 20; 
     let baseWidth = baseReferenceSize;
     let baseHeight = baseReferenceSize;
-    if (shapeType === 'rectangle') {
+    
+    // Adjust aspect ratio for specific standard shapes
+    if (shapeIdentifier === 'rectangle') {
         baseWidth = baseReferenceSize * 1.5;
         baseHeight = baseReferenceSize * 0.9;
     }
+    // NEW: Emojis and Custom shapes tend to be square-ish bases
+    if (isEmojiMode || shapeIdentifier === 'custom') {
+         baseWidth = baseReferenceSize * 1.2;
+         baseHeight = baseReferenceSize * 1.2;
+    }
+
 
     // Scale Factor
     let scaleFactor = zoom / 10;
@@ -107,39 +124,25 @@ function initializeParticlePool(settings, bounds) {
     const actualHeight = baseHeight * scaleFactor;
 
     // --- PHYSICS INIT LOGIC (Distance based) ---
-    
     // 1. X Position
     const estimatedFinalWidth = baseWidth * scaleFactor;
     const safeMaxX = Math.max(0, boundsWidth - estimatedFinalWidth);
     const xPos = Math.random() * safeMaxX;
 
-    // 2. Y Positions (Start and End thresholds)
+    // 2. Y Positions
     const startBuffer = 50; 
     const verticalSpread = boundsHeight * 1.5;
     const randomYOffset = Math.random() * verticalSpread;
-
-    // Start Y: negative height minus buffer minus random offset.
     const startY = -actualHeight - startBuffer - randomYOffset;
     
-    // CHANGED: End Y target is now determined by the speed setting.
-    // Speed 0 = target is bottom of frame. Speed 100 = target is 2x frame height below.
     const extraDistance = (speedSetting / 100) * boundsHeight * 2;
     const targetEndY = boundsHeight + extraDistance;
 
     // 3. Calculate Required Speed
     const totalDistanceToTravel = targetEndY - startY;
-    
-    // Calculate steps needed to get from frame 0 to frame N-1.
     const steps = Math.max(1, totalFrames - 1);
-    
-    // CHANGED: The speed per frame is now calculated to cover the total distance
-    // over the exact number of steps.
     const basePixelsPerFrame = totalDistanceToTravel / steps;
-
-    // Apply individual variance based on randomness slider (+/- 30% variance max)
     const individualVariance = 1 + ((Math.random() - 0.5) * 0.6 * randomness);
-    
-    // Final speed for this specific particle.
     const finalPixelsPerFrame = basePixelsPerFrame * individualVariance;
 
 
@@ -149,14 +152,16 @@ function initializeParticlePool(settings, bounds) {
 
 
     particles.push({
-      // Immutable properties
-      shapeType: shapeType,
-      color: colorBtn,
+      isEmoji: isEmojiMode,
+      // shapeType will store either the shape name string, the emoji char string, or 'custom'
+      shapeType: shapeIdentifier,
+      // NEW: Store custom path data if applicable
+      customPathData: shapeIdentifier === 'custom' ? settings.customShapePath : null,
+      color: colorBtn, // Will be null for emojis
       baseWidth: baseWidth,
       baseHeight: baseHeight,
       scale: scaleFactor,
       x: xPos, 
-      // Physics properties pre-calculated
       startY: startY,
       pixelsPerFrame: finalPixelsPerFrame,
       initialRotation: initialRotation,
@@ -167,18 +172,10 @@ function initializeParticlePool(settings, bounds) {
   return particles;
 }
 
-/**
- * HELPER: Calculates a particle's exact state at a specific frame index (time).
- * Now much simpler as speed is pre-calculated.
- */
-function getParticleStateForFrame(particle, frameIndex) {
-    // Calculate current Y based on fixed start Y and constant speed over time
-    const currentY = particle.startY + (particle.pixelsPerFrame * frameIndex);
-    
-    // Calculate current Rotation
-    const currentRotation = particle.initialRotation + (particle.rotationSpeed * frameIndex);
 
-    // Use Object.assign for compatibility
+function getParticleStateForFrame(particle, frameIndex) {
+    const currentY = particle.startY + (particle.pixelsPerFrame * frameIndex);
+    const currentRotation = particle.initialRotation + (particle.rotationSpeed * frameIndex);
     return Object.assign({}, particle, {
         y: currentY,
         rotation: currentRotation
@@ -188,29 +185,69 @@ function getParticleStateForFrame(particle, frameIndex) {
 
 // --- NODE CREATION HELPER (Generates actual Figma nodes) ---
 
-function createFigmaShapeNode(type, width, height) {
+// CHANGED: Now handles standard shapes, emojis, and custom vector paths
+async function createFigmaShapeNode(particleData) {
+  const { shapeType, isEmoji, baseWidth, baseHeight, customPathData } = particleData;
   let node;
-  switch (type) {
-    case 'rectangle':
-      node = figma.createRectangle();
-      node.resize(width, height);
-      node.cornerRadius = Math.min(width, height) * 0.1;
-      break;
-    case 'square':
-      node = figma.createRectangle();
-      node.resize(width, height);
-      node.cornerRadius = width * 0.1;
-      break;
-    case 'circle':
-      node = figma.createEllipse();
-      node.resize(width, height);
-      break;
-    case 'star':
-      node = figma.createStar();
-      node.resize(width, height);
-      node.pointCount = 5;
-      node.innerRadius = 0.4;
-      break;
+
+  // NEW: Handle Emoji (Text Node)
+  if (isEmoji) {
+      node = figma.createText();
+      // Need to load a font that supports emojis. Inter works well generally.
+      // Adding a fallback in case Inter isn't available, though it usually is.
+      try {
+          await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+          node.fontName = { family: "Inter", style: "Regular" };
+      } catch (e) {
+          // Fallback to default font if Inter fails
+          await figma.loadFontAsync(figma.fonts[0]);
+          node.fontName = figma.fonts[0];
+      }
+      
+      node.characters = shapeType; // shapeType holds the emoji char
+      node.fontSize = baseHeight; // Use height as font size base
+      // Center text within its bounding box
+      node.textAlignHorizontal = 'CENTER';
+      node.textAlignVertical = 'CENTER';
+      // Resize frame to fit text tightly
+      node.resize(baseWidth, baseHeight);
+  } 
+  // NEW: Handle Custom Shape (Vector Node from SVG path)
+  else if (shapeType === 'custom' && customPathData) {
+      // Create a vector node from the SVG path string
+      node = figma.createVector(customPathData);
+      // Resize to the base dimensions. Figma will stretch the path.
+      node.resize(baseWidth, baseHeight);
+  }
+  // Handle Standard Shapes
+  else {
+      switch (shapeType) {
+        case 'rectangle':
+          node = figma.createRectangle();
+          node.resize(baseWidth, baseHeight);
+          node.cornerRadius = Math.min(baseWidth, baseHeight) * 0.1;
+          break;
+        case 'square':
+          node = figma.createRectangle();
+          node.resize(baseWidth, baseHeight);
+          node.cornerRadius = baseWidth * 0.1;
+          break;
+        case 'circle':
+          node = figma.createEllipse();
+          node.resize(baseWidth, baseHeight);
+          break;
+        case 'star':
+          node = figma.createStar();
+          node.resize(baseWidth, baseHeight);
+          node.pointCount = 5;
+          node.innerRadius = 0.4;
+          break;
+        // Fallback for safety
+        default: 
+           node = figma.createEllipse();
+           node.resize(baseWidth, baseHeight);
+           break;
+      }
   }
   return node;
 }
@@ -223,7 +260,6 @@ function createBaseFrame(x_pos, name) {
   frame.name = name;
   frame.resize(frameWidth, frameHeight);
   frame.x = x_pos; 
-  // IMPORTANT: Clip content so particles above/below aren't visible
   frame.clipsContent = true; 
   frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
   figma.currentPage.appendChild(frame);
@@ -231,112 +267,126 @@ function createBaseFrame(x_pos, name) {
 }
 
 // --- FRAME POPULATION HELPER ---
-// Targets a specific frame (now used for the inner container)
-async function populateFrameWithConfetti(frame, particleData) {
-  let rectangleCount = 0;
-  let squareCount = 0;
-  let circleCount = 0;
-  let starCount = 0;
+async function populateFrameWithConfetti(frame, particleDataList) {
+  let shapeCounter = 0;
 
-  for (let i = 0; i < particleData.length; i++) {
-    const p = particleData[i];
-    let particleName = '';
-    switch (p.shapeType) {
-      case 'rectangle': rectangleCount++; particleName = `Rectangle${rectangleCount}`; break;
-      case 'square': squareCount++; particleName = `Square${squareCount}`; break;
-      case 'circle': circleCount++; particleName = `Eclipse${circleCount}`; break;
-      case 'star': starCount++; particleName = `Star${starCount}`; break;
-    }
-
-    const node = createFigmaShapeNode(p.shapeType, p.baseWidth, p.baseHeight);
+  for (let i = 0; i < particleDataList.length; i++) {
+    const p = particleDataList[i];
+    shapeCounter++;
+    
+    // Create the specific node type (async now due to font loading)
+    const node = await createFigmaShapeNode(p);
     if (!node) continue;
 
-    node.name = particleName;
-    node.x = p.x;
-    node.y = p.y; // Y calculated per frame
-    node.rescale(p.scale); 
-    node.rotation = p.rotation; // Rotation calculated per frame
-    node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+    node.name = `Particle ${shapeCounter}`;
+    
+    // Emojis don't get rotated in this implementation to keep them upright
+    if (!p.isEmoji) {
+        node.rotation = p.rotation; 
+    }
+
+    // Apply scale. For text, this scales fontSize. For shapes, it resizes.
+    // We need to handle text scaling differently to ensure it scales around center.
+    if (p.isEmoji) {
+        // Simple resizing for text node wrapper
+        const newSize = p.baseHeight * p.scale;
+        node.fontSize = newSize;
+        node.resize(newSize, newSize);
+    } else {
+        node.rescale(p.scale);
+    }
+     
+    // Apply Color only if not an emoji
+    if (!p.isEmoji && p.color) {
+        node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+    }
+
+    // Ensure center anchor for scaling/rotation effect by offsetting position
+    // Note: Figma rotates around top-left by default.
+    if (!p.isEmoji) {
+        const width = node.width;
+        const height = node.height;
+        // Offset x/y by half width/height so (p.x, p.y) is the center
+        node.x = p.x - (width / 2);
+        node.y = p.y - (height / 2);
+    } else {
+         // For emojis, simpler centering is enough due to text alignment
+         node.x = p.x - (node.width / 2);
+         // Small vertical adjustment for text baseline
+         node.y = p.y - (node.height / 2) + (node.height * 0.1);
+    }
+
+
     frame.appendChild(node);
 
-    if (i % 200 === 0) await new Promise(r => setTimeout(r, 0));
+    // Yield to main thread periodically to prevent freezing
+    if (i % 150 === 0) await new Promise(r => setTimeout(r, 5));
   }
 }
 
 
-// --- FINAL OUTPUT GENERATOR (Creates Animated Sequence with Nested Frames) ---
+// --- FINAL OUTPUT GENERATOR ---
 
 async function createFinalConfettiOnCanvas(settings) {
-  // 1. Validate Animation Settings
   const frameCount = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
   const frameDelay = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 50));
 
   const frameWidth = 1440;
   const frameHeight = 1080;
-  const gap = 100;
-  const createdOuterFrames = []; // Keep track of outer frames for prototyping
+  const gap = 200; // Increased gap
+  const createdOuterFrames = [];
 
   figma.notify("Initializing physics pool...");
   await new Promise(r => setTimeout(r, 20));
 
-  // 1. Initialize pool with distance-based physics
-  // Use Object.assign instead of spread syntax for compatibility
   const settingsWithFrameCount = Object.assign({}, settings, { frameCount: frameCount });
   const masterParticlePool = initializeParticlePool(settingsWithFrameCount, { width: frameWidth, height: frameHeight });
 
   figma.notify(`Starting generation of ${frameCount} animated sequence frames...`);
 
-  // 2. Frame Creation Loop (Simulation over time)
-  // Loop from i = 0 up to (but not including) frameCount.
   for (let i = 0; i < frameCount; i++) {
     const xPos = i * (frameWidth + gap);
-    // Naming adjustment for clarity
     let frameName = `Confetti Seq - Frame ${i + 1}`;
     if (i === 0) frameName += " (Start)";
     if (i === frameCount - 1) frameName += " (End)";
 
-    // A. Create Outer Frame (The one with background and clipping)
     const outerFrame = createBaseFrame(xPos, frameName);
     createdOuterFrames.push(outerFrame);
 
-    // B. Create Inner Container Frame
     const innerFrame = figma.createFrame();
     innerFrame.name = "Particle Container";
     innerFrame.resize(frameWidth, frameHeight);
-    // Make transparent so outer frame background shows
     innerFrame.fills = []; 
-    // Don't clip at this level, let the outer frame handle it
     innerFrame.clipsContent = false; 
 
     figma.notify(`Calculating Frame ${i + 1}/${frameCount}...`);
     
-    // Calculate state for this specific time index `i`
     const particlesForThisFrame = masterParticlePool.map(p => 
         getParticleStateForFrame(p, i)
     );
 
-    // C. Populate the INNER frame with particles
+    // Async population now
     await populateFrameWithConfetti(innerFrame, particlesForThisFrame);
     
-    // D. Nest inner frame inside outer frame
     outerFrame.appendChild(innerFrame);
 
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 20));
   }
 
 
-  // 3. Prototyping Interactions (Links Outer Frames)
+  // 3. Prototyping Interactions
   figma.notify("Setting up prototype interactions...");
   for (let i = 0; i < createdOuterFrames.length - 1; i++) {
     const currentFrame = createdOuterFrames[i];
     const nextFrame = createdOuterFrames[i + 1];
 
+    // --- FIX: Updated 'action' to 'actions' array as per Figma API requirement ---
     currentFrame.reactions = [{
       trigger: {
         type: 'AFTER_TIMEOUT',
         timeout: frameDelay 
       },
-      action: {
+      actions: [{
         type: 'NODE',
         destinationId: nextFrame.id,
         navigation: 'NAVIGATE',
@@ -345,7 +395,7 @@ async function createFinalConfettiOnCanvas(settings) {
           duration: frameDelay / 1000, 
           easing: { type: 'LINEAR' }
         }
-      }
+      }]
     }];
   }
 
@@ -354,7 +404,6 @@ async function createFinalConfettiOnCanvas(settings) {
   figma.viewport.scrollAndZoomIntoView(createdOuterFrames);
 }
 
-// --- NEW FUNCTION: Create Single Empty Frame (Alternative action) ---
 function createEmptyConfettiFrame() {
   const frame = createBaseFrame(0, 'Confetti Frame (Empty)');
   figma.notify("Empty confetti frame created.");
@@ -368,21 +417,24 @@ function createEmptyConfettiFrame() {
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'preview-confetti') {
     const previewBounds = { width: 1440, height: 1080 };
-    // For preview, simulate a middle frame
     const simulatedTotalFrames = 20;
     const simulatedFrameIndex = 10; 
     
-    // FIX: Use Object.assign for compatibility
     const settingsWithFrameCount = Object.assign({}, msg.settings, { frameCount: simulatedTotalFrames });
     const pool = initializeParticlePool(settingsWithFrameCount, previewBounds);
     
-    // Get state for middle frame
     const previewData = pool.map(p => getParticleStateForFrame(p, simulatedFrameIndex));
     
     figma.ui.postMessage({ type: 'preview-data', particles: previewData });
   }
   else if (msg.type === 'generate-confetti') {
-    await createFinalConfettiOnCanvas(msg.settings);
+    // Wrap in try/catch for font loading errors or other async issues
+    try {
+        await createFinalConfettiOnCanvas(msg.settings);
+    } catch (e) {
+        figma.notify("Error generating: " + e.message, { error: true });
+        console.error(e);
+    }
   }
   else if (msg.type === 'generate-empty-frame') {
     createEmptyConfettiFrame();

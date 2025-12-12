@@ -21,6 +21,8 @@
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --slider-track: #E5E7EB;
       --switch-bg: #E5E7EB;
+      --handle-color: #1890FF; /* Blue for anchors */
+      --control-color: #FF4D4F; /* Red for control points */
     }
 
     body {
@@ -53,7 +55,7 @@
       position: relative; /* Ensure popover positioning is relative to this container */
     }
     .settings-panel {
-      width: 420px; /* Fixed width for left panel */
+      width: 440px; /* Slightly wider for new UI elements */
       padding: 24px;
       border-right: 1px solid var(--border);
       overflow-y: auto;
@@ -121,7 +123,7 @@
       transition: width 0.1s ease-out;
     }
 
-    /* CHANGED: Updated styles for editable slider values */
+    /* Updated styles for editable slider values */
     .slider-value-input {
       position: absolute;
       right: 12px;
@@ -200,6 +202,14 @@
 
     /* --- COLOR SECTION STYLES --- */
     
+    /* NEW: Style for disabling the color section */
+    .section-disabled {
+        opacity: 0.4;
+        pointer-events: none;
+        filter: grayscale(100%);
+        transition: all 0.3s;
+    }
+
     .color-header-box {
       display: flex;
       justify-content: space-between;
@@ -273,9 +283,9 @@
     input:checked + .switch-slider { background-color: var(--primary); }
     input:checked + .switch-slider:before { transform: translateX(16px); /* Adjusted for new width */ }
 
-    /* --- SCROLL CONTAINER STYLE (Added Colors) --- */
-    .added-colors-scroll-container {
-        max-height: 100px; 
+    /* --- SCROLL CONTAINER STYLE (Used for Colors & Emojis) --- */
+    .scrollable-grid-container {
+        max-height: 120px; /* Increased slightly */
         overflow-y: auto;
         border: 1px solid var(--border);
         border-radius: var(--radius);
@@ -328,7 +338,113 @@
     }
 
     /* ------------------------------------ */
-    /* --- NEW COLOR PICKER POPOVER STYLES --- */
+    /* --- NEW SHAPE SECTION STYLES --- */
+    
+    /* New Tab Style for Shapes */
+    .shape-tabs {
+        display: flex;
+        gap: 16px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 16px;
+    }
+    .shape-tab-trigger {
+        padding: 8px 0;
+        font-size: 14px; font-weight: 500;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+    }
+    .shape-tab-trigger[data-state="active"] {
+        color: var(--primary);
+    }
+    .shape-tab-trigger[data-state="active"]::after {
+        content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background-color: var(--primary);
+    }
+
+    /* Selectors (Shapes) */
+    .selector-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .selector-item {
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid var(--border); border-radius: var(--radius);
+        color: var(--muted-foreground); cursor: pointer; position: relative;
+        background: var(--background); transition: all 0.2s;
+    }
+    .selector-item:hover {
+        border-color: var(--muted-darker); background-color: var(--muted);
+    }
+    .selector-item[data-state="selected"] {
+        border-color: var(--primary); color: var(--primary); background-color: #f0f9ff;
+    }
+    .selector-check {
+        position: absolute; top: -6px; right: -6px;
+        width: 18px; height: 18px; background: var(--primary);
+        border-radius: 50%; border: 2px solid var(--background);
+        display: none; align-items: center; justify-content: center; color: white;
+    }
+    .selector-item[data-state="selected"] .selector-check { display: flex; }
+    
+    /* Custom Shape Button Style */
+    .custom-shape-btn {
+        width: auto; padding: 0 12px; gap: 6px;
+        font-size: 14px; font-weight: 500;
+    }
+
+    /* Emoji Grid Styles */
+    .emoji-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        gap: 8px;
+    }
+    .emoji-item {
+        width: 40px; height: 40px;
+        font-size: 24px;
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        cursor: pointer; transition: all 0.2s;
+    }
+    .emoji-item:hover { background-color: var(--muted); }
+    .emoji-item[data-state="selected"] {
+        background-color: #f0f9ff; border-color: var(--primary);
+    }
+
+
+    /* ------------------------------------ */
+    /* --- CUSTOM SHAPE POPOVER STYLES --- */
+    .custom-shape-popover {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 360px; background: var(--background);
+        border-radius: 12px; box-shadow: var(--shadow-md);
+        padding: 20px; z-index: 20;
+        display: none; flex-direction: column;
+        border: 1px solid var(--border);
+    }
+    .cs-canvas-container {
+        width: 320px; height: 320px;
+        background-color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin: 16px 0;
+        position: relative;
+        /* Checkerboard pattern */
+        background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+        background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    #csEditorSvg {
+        width: 100%; height: 100%; overflow: visible;
+    }
+    /* Bezier Editor Elements */
+    .cs-anchor { fill: var(--handle-color); stroke: white; stroke-width: 2px; cursor: grab; }
+    .cs-control { fill: var(--control-color); stroke: white; stroke-width: 2px; cursor: grab; }
+    .cs-connector { stroke: var(--muted-foreground); stroke-width: 1px; stroke-dasharray: 4 4; pointer-events: none; }
+    .cs-path-preview { fill: var(--primary); opacity: 0.8; stroke: var(--primary-hover); stroke-width: 2px; pointer-events: none; }
+
+
+    /* ------------------------------------ */
+    /* --- COLOR PICKER POPOVER STYLES --- */
     
     .color-picker-popover {
         position: absolute;
@@ -441,32 +557,9 @@
         font-weight: 600;
     }
 
-    /* ------------------------------------ */
-
-    /* Selectors (Shapes) */
-    .selector-grid { display: flex; gap: 12px; }
-    .selector-item {
-        width: 48px; height: 48px;
-        display: flex; align-items: center; justify-content: center;
-        border: 2px solid var(--border); border-radius: var(--radius);
-        color: var(--muted-foreground); cursor: pointer; position: relative;
-        background: var(--background); transition: all 0.2s;
-    }
-    .selector-item[data-state="selected"] {
-        border-color: var(--primary); color: var(--primary); background-color: #f0f9ff;
-    }
-    .selector-check {
-        position: absolute; top: -6px; right: -6px;
-        width: 18px; height: 18px; background: var(--primary);
-        border-radius: 50%; border: 2px solid var(--background);
-        display: none; align-items: center; justify-content: center; color: white;
-    }
-    .selector-item[data-state="selected"] .selector-check { display: flex; }
-
     /* Footer Buttons */
     .footer {
         display: flex;
-        /* gap removed since it's single item now */
         margin-top: auto;
         padding-top: 24px;
     }
@@ -515,22 +608,8 @@
     /* NEW: Preview Footer Container */
     .preview-footer {
         display: flex;
-        /* gap removed as there is only one button now */
     }
     
-    /* NEW: Modern Icon Button for Play */
-    /* (Styles kept just in case, though button is removed from HTML) */
-    .icon-btn-modern {
-      width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--border); background: var(--background);
-      color: var(--foreground);
-      cursor: pointer; padding: 0;
-      border-radius: var(--radius);
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .icon-btn-modern:hover { background-color: var(--muted); border-color: var(--muted-darker); }
 
     /* NEW: Number Input Style for Animation Settings */
     .number-input-row {
@@ -558,7 +637,7 @@
         background-color: var(--background);
     }
 
-    /* --- CHANGED: New Styles for Grouped Settings Box --- */
+    /* --- NEW Styles for Grouped Settings Box --- */
     .grouped-settings-box {
         border: 1px solid var(--border);
         border-radius: var(--radius);
@@ -644,8 +723,8 @@
               </label>
           </div>
       </div>
-
-      <div>
+      
+      <div id="particleColorSection">
           <div class="label" style="margin-top: 24px;">Particle Color</div>
           
           <div class="color-header-box">
@@ -668,31 +747,50 @@
                   </label>
               </div>
 
-              <div class="added-colors-scroll-container">
+              <div class="scrollable-grid-container">
                   <div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;">
                       </div>
               </div>
 
           </div>
       </div>
+
       <div>
-          <div class="label">Particle Shape</div>
-          <div class="selector-grid id-shape-selector">
-              <div class="selector-item" data-state="selected" data-value="rectangle">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>
-                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="shape-tabs">
+              <div class="shape-tab-trigger" data-target="preset" data-state="active">Preset Shapes</div>
+              <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
+          </div>
+
+          <div id="presetShapesContainer" style="display: block;">
+              <div class="selector-grid id-shape-selector">
+                  <div class="selector-item" data-state="selected" data-value="rectangle">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-value="square">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-state="selected" data-value="circle">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-state="selected" data-value="star">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                   <div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <span>Custom</span>
+                       <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
               </div>
-              <div class="selector-item" data-value="square">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
-                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-              </div>
-              <div class="selector-item" data-state="selected" data-value="circle">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
-                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-              </div>
-              <div class="selector-item" data-state="selected" data-value="star">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+
+          <div id="emojiShapesContainer" style="display: none;">
+              <div class="scrollable-grid-container">
+                  <div class="emoji-grid" id="emojiGrid">
+                      </div>
               </div>
           </div>
        </div>
@@ -777,17 +875,57 @@
           </div>
       </div> <button id="cpAddConfirmBtn" class="btn btn-primary" style="width: 100%;">Add Color</button>
   </div>
+
+  <div id="customShapePopover" class="custom-shape-popover">
+      <div class="cp-header">
+          <span>Custom Shape Editor</span>
+          <button id="csCloseBtn" class="icon-btn-flat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+      </div>
+      <div style="font-size: 12px; color: var(--muted-foreground); margin-bottom: 8px;">Drag points to customize shape.</div>
+      
+      <div class="cs-canvas-container">
+          <svg id="csEditorSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+              </svg>
+      </div>
+
+      <button id="csSaveBtn" class="btn btn-primary" style="width: 100%;">Save Shape</button>
+  </div>
+
+
   <script>
-    // --- Globals for Preview ---
+    // --- Globals and DOM references (Moved to top to fix scope issues) ---
     const previewSvg = document.getElementById('previewSvg');
-    // CHANGED: Get the new panzoom container reference
     const panzoomContainer = document.getElementById('panzoomContainer');
+    const customShapeBtn = document.getElementById('customShapeBtn');
+    const customShapePopover = document.getElementById('customShapePopover');
+    const csCloseBtn = document.getElementById('csCloseBtn');
+    const csSaveBtn = document.getElementById('csSaveBtn');
+    const csEditorSvg = document.getElementById('csEditorSvg');
+    const presetShapesContainer = document.getElementById('presetShapesContainer');
+    const emojiShapesContainer = document.getElementById('emojiShapesContainer');
+    const particleColorSection = document.getElementById('particleColorSection');
+    const emojiGrid = document.getElementById('emojiGrid');
+
     let previewParticles = [];
-    let panzoomInstance; // To store the panzoom object
+    let panzoomInstance; 
+    let selectedEmoji = null;
+    let activeShapeTab = 'preset';
+    // Final SVG Path String stored here
+    let finalCustomShapePathStr = "";
+
+    // --- HELPER FUNCTIONS ---
+    // Moved createSvgElement to top for better organization and to prevent hoisting confusion
+    function createSvgElement(type, attributes) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", type);
+        for (const key in attributes) el.setAttribute(key, attributes[key]);
+        return el;
+    }
 
     // --- UI Interactions ---
 
-    // 1. Sliders Linkage (Major Update for Two-Way Binding)
+    // 1. Sliders Linkage (Two-Way Binding)
     function setupSlider(sliderInputId, fillId, textInputId, format, shouldRegenerate = true) {
       const sliderInput = document.getElementById(sliderInputId);
       const fill = document.getElementById(fillId);
@@ -802,11 +940,9 @@
         const percent = ((val - min) / (max - min)) * 100;
         fill.style.width = `${percent}%`;
 
-        // Format display text based on type
         if (format === 'percent') {
              textInput.value = `${Math.round(val)}%`;
         } else if (format === 'zoom') {
-             // Zoom internal 10 = display x1.0
              textInput.value = `x${(val / 10).toFixed(1)}`;
         }
 
@@ -818,89 +954,66 @@
           let rawValue = textInput.value;
           let numericValue;
 
-          // 1. Parse the input based on format
           if (format === 'percent') {
-              // Remove % and non-numeric chars except dot
               rawValue = rawValue.replace(/[^0-9.]/g, '');
               numericValue = parseFloat(rawValue);
           } else if (format === 'zoom') {
-              // Remove 'x' and non-numeric chars except dot
               rawValue = rawValue.replace(/[^0-9.]/g, '');
               numericValue = parseFloat(rawValue);
-              // Convert display value (e.g., 1.5) back to internal value (e.g., 15)
               if (!isNaN(numericValue)) {
                   numericValue = Math.round(numericValue * 10);
               }
           }
 
-          // 2. Validate and Clamp
           if (isNaN(numericValue)) {
-              // Revert to current slider value if input is invalid
               numericValue = parseFloat(sliderInput.value);
           } else {
-              // Clamp between min and max
               numericValue = Math.max(min, Math.min(max, numericValue));
           }
 
-          // 3. Update slider and force visual refresh
           sliderInput.value = numericValue;
-          updateFromSlider(); // This will re-format the text input correctly
+          updateFromSlider(); 
       }
 
-      // --- Helper to trigger appropriate preview mode ---
       function triggerPreviewUpdate() {
         if (shouldRegenerate) {
-            updatePreview(); // Full backend regeneration
+            updatePreview(); 
         } else {
-            renderPreview(); // Local redraw (e.g., for zoom)
+            renderPreview(); 
         }
       }
 
-      // Attach Listeners
-      // Update live while dragging slider
       sliderInput.addEventListener('input', updateFromSlider);
-      // Update only on blur or 'Enter' for text input
       textInput.addEventListener('change', updateFromText); 
       textInput.addEventListener('keydown', (e) => {
           if(e.key === 'Enter') {
-              e.target.blur(); // Triggers 'change' event
+              e.target.blur(); 
           }
       });
     }
 
-
-    // Randomness & Amount: Must regenerate
-    // Note the change in IDs passed to the function (e.g., 'randomValueInput')
     setupSlider('randomInput', 'randomFill', 'randomValueInput', 'percent', true);
     setupSlider('amountInput', 'amountFill', 'amountValueInput', 'percent', true);
-    // Zoom: Don't regenerate, just re-render with new scale factor
     setupSlider('zoomInput', 'zoomFill', 'zoomValueInput', 'zoom', false);
 
 
-    // 2. Tabs
-    document.querySelectorAll('.tab-trigger').forEach(tab => {
+    // 2. Main Tabs (Free fall / Impact fall)
+    document.querySelectorAll('.tabs-list .tab-trigger').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab-trigger').forEach(t => t.removeAttribute('data-state'));
+        document.querySelectorAll('.tabs-list .tab-trigger').forEach(t => t.removeAttribute('data-state'));
         tab.setAttribute('data-state', 'active');
-        // CHANGED: Update preview on tab change (if behavior differs later)
         updatePreview();
       });
     });
 
-    // CHANGED: Add listeners for toggles
+    // Toggles
     document.getElementById('checkSize').addEventListener('change', updatePreview);
     document.getElementById('checkRotation').addEventListener('change', updatePreview);
 
 
     // --- COLOR SECTION LOGIC ---
 
-    // State for colors
-    let colorState = {
-        isMultiColor: false, // Default to OFF
-        colors: [] // Initial colors empty by default
-    };
-
-    // State for tracking which color is being edited (-1 = adding new)
+    let colorState = { isMultiColor: false, colors: [] };
     let editingColorIndex = -1;
 
     const multiColorSwitch = document.getElementById('multiColorSwitch');
@@ -908,27 +1021,18 @@
     const colorCounter = document.getElementById('colorCounter');
     const addColorBtn = document.getElementById('addColorBtn');
 
-    // Function to render the color list based on state
     function renderColorList() {
-        // Update counter text based on multi-color state
         if (colorState.isMultiColor) {
             colorCounter.textContent = "Multi-color";
         } else {
             colorCounter.textContent = `${colorState.colors.length} Colors`;
         }
-
-        // Update state of add button based on multi-color switch
         addColorBtn.disabled = colorState.isMultiColor;
-
-        // Clear current list
         colorRowsContainer.innerHTML = '';
 
-        // Build new entries
         colorState.colors.forEach((colorData, index) => {
             const row = document.createElement('div');
             row.className = `color-item-row ${colorState.isMultiColor ? 'disabled' : ''}`;
-            
-            // Calculate hex and opacity for display
             const hex = hslToHex(colorData.h, colorData.s, colorData.l);
             const opacity = Math.round(colorData.a * 100);
 
@@ -944,35 +1048,26 @@
                 </button>
             `;
 
-            // CHANGED: Add click listener for editing color
             const previewSq = row.querySelector('.color-preview-sq');
-            previewSq.addEventListener('click', (e) => {
+            previewSq.addEventListener('click', () => {
                   if (colorState.isMultiColor) return;
-                  // BUG FIX: Pass the trigger element directly instead of relying on DOM index calculation
                   openPopoverToEdit(index, previewSq);
             });
 
-             // CHANGED: Add change listener for direct opacity edit
             const percentInput = row.querySelector('.color-percent-input');
             percentInput.addEventListener('change', (e) => {
                 let newVal = parseInt(e.target.value);
                 if (isNaN(newVal)) newVal = 100;
                 newVal = Math.max(0, Math.min(100, newVal));
-                e.target.value = newVal; // Snap value in input
-
-                // Update state
+                e.target.value = newVal; 
                 colorState.colors[index].a = newVal / 100;
                 renderColorList();
-                // CHANGED: Update preview on opacity change
                 updatePreview();
             });
 
-
-            // Add delete functionality
             const deleteBtn = row.querySelector('.delete-color-btn');
-            deleteBtn.addEventListener('click', (e) => {
+            deleteBtn.addEventListener('click', () => {
                 if (colorState.isMultiColor) return;
-                // If we are deleting the color currently being edited, reset edit mode
                 if (editingColorIndex === index) {
                       editingColorIndex = -1;
                       closePopover();
@@ -980,23 +1075,18 @@
                 colorState.colors.splice(index, 1);
                 renderColorList();
             });
-
-            // CHANGED: Use prepend instead of appendChild to show newest at the top
             colorRowsContainer.prepend(row);
         });
-        // CHANGED: Update preview whenever color list changes (add/remove)
         updatePreview();
     }
 
-    // Event Listener for Multi-color Switch
     multiColorSwitch.addEventListener('change', (e) => {
         colorState.isMultiColor = e.target.checked;
         if (colorState.isMultiColor) {
-            closePopover(); // Close popover if open
+            closePopover(); 
             editingColorIndex = -1;
         }
         renderColorList();
-        // CHANGED: Update preview on multicolor toggle
         updatePreview();
     });
 
@@ -1007,8 +1097,6 @@
     const cpCloseBtn = document.getElementById('cpCloseBtn');
     const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn');
     const cpHeaderTitle = document.getElementById('cpHeaderTitle');
-
-    // Picker Elements
     const cpSatBrightArea = document.getElementById('cpSatBrightArea');
     const cpSbSelector = document.getElementById('cpSbSelector');
     const cpHueSlider = document.getElementById('cpHueSlider');
@@ -1019,40 +1107,30 @@
     const cpHexInput = document.getElementById('cpHexInput');
     const cpAlphaInput = document.getElementById('cpAlphaInput');
 
-    // Picker State (HSLA for easier manipulation)
     let pickerHSLA = { h: 0, s: 100, l: 50, a: 1 };
 
-    // Helper: Update visual elements based on pickerHSLA state
     function updatePickerVisuals() {
-        // Update Sat/Bright Area background base hue
         cpSatBrightArea.style.backgroundColor = `hsl(${pickerHSLA.h}, 100%, 50%)`;
-        
-        // CHANGED: Convert current HSL to HSV to determine selector position
         const hsv = hslToHsv(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
-        const selX = hsv.s; // HSV Saturation maps to X axis (0-100%)
-        const selY = 100 - hsv.v; // HSV Value maps to Y axis (inverted 100-0%)
+        const selX = hsv.s; 
+        const selY = 100 - hsv.v; 
 
         cpSbSelector.style.left = `${selX}%`;
         cpSbSelector.style.top = `${selY}%`;
 
-        // Position Hue Thumb
         const huePos = (pickerHSLA.h / 360) * 100;
         cpHueThumb.style.left = `${huePos}%`;
 
-        // Position Alpha Thumb & Update Bar Color
         const alphaPos = pickerHSLA.a * 100;
         cpAlphaThumb.style.left = `${alphaPos}%`;
         const baseHex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
         cpAlphaBar.style.background = `linear-gradient(to right, transparent, ${baseHex})`;
 
-        // Update Inputs
-        cpHexInput.value = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l).substring(1); // remove #
+        cpHexInput.value = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l).substring(1); 
         cpAlphaInput.value = Math.round(pickerHSLA.a * 100);
     }
 
-    // --- Event Listeners for Picker Interactions ---
-
-    // Saturation/Brightness Area Dragging
+    // Picker Interactions
     let isDraggingSB = false;
     cpSatBrightArea.addEventListener('mousedown', (e) => { isDraggingSB = true; updateSBFromEvent(e); });
     document.addEventListener('mousemove', (e) => { if(isDraggingSB) updateSBFromEvent(e); });
@@ -1060,16 +1138,12 @@
 
     function updateSBFromEvent(e) {
         const rect = cpSatBrightArea.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-        x = Math.max(0, Math.min(x, rect.width));
-        y = Math.max(0, Math.min(y, rect.height));
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        let y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
         
-        // CHANGED: Map positions to HSV Saturation and Value
-        const s_v = (x / rect.width) * 100; // Saturation (HSV) 0-100
-        const v = 100 - ((y / rect.height) * 100); // Value (HSV) 0-100
+        const s_v = (x / rect.width) * 100; 
+        const v = 100 - ((y / rect.height) * 100); 
 
-        // Convert to HSL to update global state
         const newHSL = hsvToHsl(pickerHSLA.h, s_v, v);
         pickerHSLA.s = newHSL.s;
         pickerHSLA.l = newHSL.l;
@@ -1077,7 +1151,6 @@
         updatePickerVisuals();
     }
 
-    // Hue Slider Dragging
     let isDraggingHue = false;
     cpHueSlider.addEventListener('mousedown', (e) => { isDraggingHue = true; updateHueFromEvent(e); });
     document.addEventListener('mousemove', (e) => { if(isDraggingHue) updateHueFromEvent(e); });
@@ -1085,13 +1158,11 @@
 
     function updateHueFromEvent(e) {
         const rect = cpHueSlider.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        x = Math.max(0, Math.min(x, rect.width));
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         pickerHSLA.h = (x / rect.width) * 360;
         updatePickerVisuals();
     }
 
-    // Alpha Slider Dragging
     let isDraggingAlpha = false;
     cpAlphaSlider.addEventListener('mousedown', (e) => { isDraggingAlpha = true; updateAlphaFromEvent(e); });
     document.addEventListener('mousemove', (e) => { if(isDraggingAlpha) updateAlphaFromEvent(e); });
@@ -1099,19 +1170,16 @@
 
     function updateAlphaFromEvent(e) {
         const rect = cpAlphaSlider.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        x = Math.max(0, Math.min(x, rect.width));
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         pickerHSLA.a = x / rect.width;
         updatePickerVisuals();
     }
 
-    // Input Change Listeners
     cpHexInput.addEventListener('input', (e) => {
         let hex = e.target.value;
         if (hex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(hex)) {
             const hsl = hexToHsl("#" + hex);
             pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
-            // Keep current alpha
             updatePickerVisuals();
         }
     });
@@ -1124,7 +1192,6 @@
         }
     });
 
-    // Preset Swatches
     const presetColors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#007AFF', '#5856D6', '#FF2D55', '#8E8E93', '#C7C7CC', '#D1D1D6', '#E5E5EA', '#F2F2F7', '#FFFFFF', '#000000'];
     const cpSwatchGrid = document.getElementById('cpSwatchGrid');
     presetColors.forEach(hex => {
@@ -1133,8 +1200,6 @@
         swatch.style.backgroundColor = hex;
         swatch.addEventListener('click', () => {
             setPickerColorFromHex(hex);
-            // CHANGED: Clicking a preset immediately adds/saves the color.
-            // confirmAddColor(); <-- REMOVED THIS LINE
         });
         cpSwatchGrid.appendChild(swatch);
     });
@@ -1142,66 +1207,36 @@
     function setPickerColorFromHex(hex) {
         const hsl = hexToHsl(hex);
         pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
-        pickerHSLA.a = 1.0; // Reset alpha on preset click
+        pickerHSLA.a = 1.0; 
         updatePickerVisuals();
     }
 
-
-    // --- Popover Open/Close Logic ---
-
-    // CHANGED: New function to open popover in "Edit" mode, now accepts triggerElement
     function openPopoverToEdit(index, triggerElement) {
         editingColorIndex = index;
         const colorToEdit = colorState.colors[index];
-        
-        // Load color into picker state
         pickerHSLA = { ...colorToEdit };
         updatePickerVisuals();
-
-        // Update UI texts
         cpHeaderTitle.textContent = "Edit Color";
         cpAddConfirmBtn.textContent = "Save Color";
-
-        // BUG FIX: Use the passed triggerElement instead of trying to find it by index
         openPopover(triggerElement);
     }
 
-    // CHANGED: Updated to accept an optional trigger element for positioning
     function openPopover(triggerElement = addColorBtn) {
         if (colorState.isMultiColor) return;
-
-        // 1. Show temporarily to measure dimensions
         popover.style.visibility = 'hidden';
         popover.style.display = 'flex';
-
-        // 2. Get dimensions based on triggerElement
         const btnRect = triggerElement.getBoundingClientRect();
         const popoverRect = popover.getBoundingClientRect();
-
-        // 3. Calculate Horizontal Position (Right of button + gap)
         const leftPos = btnRect.right + 12;
-
-        // 4. Calculate Vertical Position (Centered relative to button)
         const btnCenterY = btnRect.top + (btnRect.height / 2);
         let topPos = btnCenterY - (popoverRect.height / 2);
-
-        // 5. Boundary check to keep it on screen vertically
         const padding = 10;
-        // Ensure it doesn't go off the top
         topPos = Math.max(padding, topPos);
-        // Ensure it doesn't go off the bottom
         const maxTop = window.innerHeight - popoverRect.height - padding;
         topPos = Math.min(topPos, maxTop);
-
-        // 6. Apply positions
         popover.style.left = `${leftPos}px`;
         popover.style.top = `${topPos}px`;
-        
-        // 7. Make visible
         popover.style.visibility = 'visible';
-        
-        // Add click outside listener
-        // Need to pass the trigger element so clicking it again doesn't immediately close
         currentTriggerElement = triggerElement;
         document.addEventListener('click', closePopoverOnClickOutside);
     }
@@ -1210,46 +1245,33 @@
 
     function closePopover() {
         popover.style.display = 'none';
-        // Remove click outside listener
         document.removeEventListener('click', closePopoverOnClickOutside);
         currentTriggerElement = null;
-        editingColorIndex = -1; // Reset edit index on close
+        editingColorIndex = -1; 
     }
 
-    // New function to handle click outside
     function closePopoverOnClickOutside(event) {
         const isClickInsidePopover = popover.contains(event.target);
-        // Check against the element that triggered opening
         const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target);
-
-        // Check if display is 'flex' (active) before closing
         if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') {
             closePopover();
         }
     }
 
-    // Helper function to confirm and add/save the current picker color
     function confirmAddColor() {
           const newColorData = { ...pickerHSLA };
-
           if (editingColorIndex > -1) {
-              // Edit existing color
               colorState.colors[editingColorIndex] = newColorData;
           } else {
-              // Add new color
               colorState.colors.push(newColorData);
           }
-        
         renderColorList();
         closePopover();
     }
 
-
-    // Main Add Color button listener
     addColorBtn.addEventListener('click', () => {
-        // Reset to "Add" mode settings
         editingColorIndex = -1;
-        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; // Default red
+        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; 
         updatePickerVisuals();
         cpHeaderTitle.textContent = "Add Color";
         cpAddConfirmBtn.textContent = "Add Color";
@@ -1257,13 +1279,10 @@
     });
 
     cpCloseBtn.addEventListener('click', closePopover);
-
-    // Confirm Add/Save Color Button (inside popover)
     cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
 
     // --- Color Conversion Utilities ---
-    // Source: Adapted from common HSL/RGB conversion algorithms used in web development.
 
     function hslToHex(h, s, l) {
       l /= 100; const a = s * Math.min(l, 1 - l) / 100;
@@ -1296,67 +1315,213 @@
       return { h: h, s: s * 100, l: l * 100 };
     }
 
-    // NEW: Helper to convert HSV to HSL
     function hsvToHsl(h, s, v) {
-        s /= 100;
-        v /= 100;
+        s /= 100; v /= 100;
         let l = (2 - s) * v / 2;
         if (l !== 0) {
-            if (l === 1) {
-                s = 0;
-            } else if (l < 0.5) {
-                s = s * v / (l * 2);
-            } else {
-                s = s * v / (2 - l * 2);
-            }
+            if (l === 1) { s = 0; } else if (l < 0.5) { s = s * v / (l * 2); } else { s = s * v / (2 - l * 2); }
         }
         return { h: h, s: s * 100, l: l * 100 };
     }
 
-    // NEW: Helper to convert HSL to HSV
     function hslToHsv(h, s, l) {
-        s /= 100;
-        l /= 100;
+        s /= 100; l /= 100;
         let v = l + s * Math.min(l, 1 - l);
         let sv = l === 0 ? 0 : 2 * (1 - l / v);
         return { h: h, s: sv * 100, v: v * 100 };
     }
 
     // -------------------------------
+    // --- NEW SHAPE SECTION LOGIC (Tabs & Emojis) ---
 
+    // Shape Tab Switching Logic
+    document.querySelectorAll('.shape-tab-trigger').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.shape-tab-trigger').forEach(t => t.removeAttribute('data-state'));
+            tab.setAttribute('data-state', 'active');
+            
+            activeShapeTab = tab.getAttribute('data-target');
+            if (activeShapeTab === 'preset') {
+                presetShapesContainer.style.display = 'block';
+                emojiShapesContainer.style.display = 'none';
+                particleColorSection.classList.remove('section-disabled');
+            } else {
+                presetShapesContainer.style.display = 'none';
+                emojiShapesContainer.style.display = 'block';
+                particleColorSection.classList.add('section-disabled');
+            }
+            updatePreview();
+        });
+    });
 
-    // 4. Shape Selector (Multi-select)
+    // Preset Shape Selector Logic (Multi-select)
     document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
        item.addEventListener('click', () => {
+           const val = item.getAttribute('data-value');
+           if (val === 'custom') return; 
            const currentState = item.getAttribute('data-state');
            item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected');
-           // CHANGED: Update preview on shape selection change
            updatePreview();
        });
     });
 
+    // Populate Emoji Grid
+    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔',  '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+    
+    modernEmojis.forEach(emojiChar => {
+        const emojiItem = document.createElement('div');
+        emojiItem.className = 'emoji-item';
+        emojiItem.textContent = emojiChar;
+        emojiItem.addEventListener('click', () => {
+            document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state'));
+            emojiItem.setAttribute('data-state', 'selected');
+            selectedEmoji = emojiChar;
+            updatePreview();
+        });
+        emojiGrid.appendChild(emojiItem);
+    });
+
+
+    // --- CUSTOM SHAPE EDITOR LOGIC (Bezier) ---
+
+    // Editor State (4 Corner Anchors & 8 Control Points relative to anchors)
+    let csState = {
+        anchors: [{x: 60, y: 60}, {x: 260, y: 60}, {x: 260, y: 260}, {x: 60, y: 260}],
+        controls: [{dx: 0, dy: -30}, {dx: -30, dy: 0}, {dx: 30, dy: 0}, {dx: 0, dy: -30}, {dx: 0, dy: 30}, {dx: 30, dy: 0}, {dx: -30, dy: 0}, {dx: 0, dy: 30}]
+    };
+
+    let draggingElement = null;
+    let dragStartIndex = -1; 
+
+    function renderEditorCanvas() {
+        csEditorSvg.innerHTML = ''; 
+        const a = csState.anchors;
+        const c = csState.controls;
+
+        let d = `M ${a[0].x},${a[0].y} `;
+        d += `C ${a[0].x + c[0].dx},${a[0].y + c[0].dy} ${a[1].x + c[3].dx},${a[1].y + c[3].dy} ${a[1].x},${a[1].y} `;
+        d += `C ${a[1].x + c[2].dx},${a[1].y + c[2].dy} ${a[2].x + c[5].dx},${a[2].y + c[5].dy} ${a[2].x},${a[2].y} `;
+        d += `C ${a[2].x + c[4].dx},${a[2].y + c[4].dy} ${a[3].x + c[7].dx},${a[3].y + c[7].dy} ${a[3].x},${a[3].y} `;
+        d += `C ${a[3].x + c[6].dx},${a[3].y + c[6].dy} ${a[0].x + c[1].dx},${a[0].y + c[1].dy} ${a[0].x},${a[0].y} Z`;
+
+        const pathPreview = createSvgElement('path', { d: d, class: 'cs-path-preview' });
+        csEditorSvg.appendChild(pathPreview);
+
+        const drawCircle = (x, y, cls, idx, type) => {
+             const circle = createSvgElement('circle', { cx: x, cy: y, r: 6, class: cls });
+             circle.addEventListener('mousedown', (e) => startDrag(e, idx, type));
+             return circle;
+        };
+        const drawLine = (x1, y1, x2, y2) => createSvgElement('line', { x1, y1, x2, y2, class: 'cs-connector' });
+
+        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy));
+        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy));
+        csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy));
+        csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy));
+        csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy));
+        csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy));
+        csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy));
+        csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
+
+        c.forEach((ctrl, i) => {
+            const anchorIdx = Math.floor(i / 2);
+            const absX = a[anchorIdx].x + ctrl.dx;
+            const absY = a[anchorIdx].y + ctrl.dy;
+            csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control'));
+        });
+
+        a.forEach((p, i) => {
+            csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor'));
+        });
+    }
+
+    function startDrag(e, index, type) {
+        draggingElement = type;
+        dragStartIndex = index;
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', stopDrag);
+    }
+
+    function onDrag(e) {
+        if (!draggingElement) return;
+        const rect = csEditorSvg.getBoundingClientRect();
+        const x = Math.max(0, Math.min(320, e.clientX - rect.left));
+        const y = Math.max(0, Math.min(320, e.clientY - rect.top));
+
+        if (draggingElement === 'anchor') {
+            csState.anchors[dragStartIndex] = {x, y};
+        } else if (draggingElement === 'control') {
+            const anchorIdx = Math.floor(dragStartIndex / 2);
+            const anchor = csState.anchors[anchorIdx];
+            csState.controls[dragStartIndex] = { dx: x - anchor.x, dy: y - anchor.y };
+        }
+        renderEditorCanvas();
+    }
+
+    function stopDrag() {
+        draggingElement = null;
+        dragStartIndex = -1;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', stopDrag);
+    }
+
+    customShapeBtn.addEventListener('click', () => {
+        customShapePopover.style.display = 'flex';
+        renderEditorCanvas(); 
+    });
+    csCloseBtn.addEventListener('click', () => {
+        customShapePopover.style.display = 'none';
+    });
+    
+    csSaveBtn.addEventListener('click', () => {
+        const previewPath = csEditorSvg.querySelector('.cs-path-preview');
+        if (previewPath) {
+            finalCustomShapePathStr = previewPath.getAttribute('d');
+            customShapeBtn.setAttribute('data-state', 'selected');
+             document.querySelectorAll('.id-shape-selector .selector-item:not(#customShapeBtn)').forEach(item => {
+                 item.removeAttribute('data-state');
+             });
+        }
+        customShapePopover.style.display = 'none';
+        updatePreview();
+    });
+
+
+    // -------------------------------
     // --- Plugin Communication ---
 
     function getSettings() {
-        // Gather Shapes
-        const selectedShapes = Array.from(document.querySelectorAll('.id-shape-selector .selector-item[data-state="selected"]'))
-            .map(el => el.getAttribute('data-value'));
+        let selectedShapes = [];
+        let currentSelectedEmoji = null;
+        let customPath = null;
+
+        if (activeShapeTab === 'preset') {
+             selectedShapes = Array.from(document.querySelectorAll('.id-shape-selector .selector-item[data-state="selected"]:not(#customShapeBtn)'))
+                .map(el => el.getAttribute('data-value'));
+             if (customShapeBtn.getAttribute('data-state') === 'selected') {
+                 selectedShapes.push('custom');
+                 customPath = finalCustomShapePathStr;
+             }
+        } else {
+            currentSelectedEmoji = selectedEmoji;
+        }
 
         return {
-            // CHANGED: speed removed from settings
+            shapeTab: activeShapeTab, 
+            selectedShapes: selectedShapes,
+            selectedEmoji: currentSelectedEmoji,
+            customShapePath: customPath, 
+            
             randomness: parseInt(document.getElementById('randomInput').value),
             amount: parseInt(document.getElementById('amountInput').value),
             zoom: parseInt(document.getElementById('zoomInput').value),
             randomizeSize: document.getElementById('checkSize').checked,
             randomizeRotation: document.getElementById('checkRotation').checked,
-            selectedShapes: selectedShapes,
-            // Send new color data structure (HSLA objects)
+            
             colorData: {
                 isMultiColor: colorState.isMultiColor,
                 customColors: colorState.colors 
             },
-            // NEW: Animation Settings
-            // CHANGED: Default fallback is now 1 instead of 10
             frameCount: parseInt(document.getElementById('frameCountInput').value) || 1,
             frameDelay: parseInt(document.getElementById('frameDelayInput').value) || 50
         };
@@ -1364,39 +1529,30 @@
 
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     
-    // CHANGED: GENERATE BUTTON LISTENER WITH WORKAROUND
     document.getElementById('generateBtn').addEventListener('click', () => {
         const settings = getSettings();
-        
         if (settings.amount === 0) {
-            // WORKAROUND: If amount is 0, send a specific 'empty-frame' message.
             parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*');
         } else {
-            // Standard generation for > 0 particles
             parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*');
         }
     });
     
-    // CHANGED: Play button removed, listener removed.
 
     document.getElementById('resetBtn').addEventListener('click', () => {
-        // Reset Sliders
-        // CHANGED: Speed slider reset removed
         document.getElementById('randomInput').value = 60; 
         document.getElementById('amountInput').value = 60; 
         document.getElementById('zoomInput').value = 10; 
-        
-        // Reset Checkboxes
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
         
-        // Reset Color Section back to default state (OFF and Empty)
         colorState = { isMultiColor: false, colors: [] };
         multiColorSwitch.checked = false;
         renderColorList();
-        editingColorIndex = -1; // Reset edit index on reset
+        editingColorIndex = -1;
 
-        // Reset Shapes to default (Rectangle, Circle, Star)
+        document.querySelector('.shape-tab-trigger[data-target="preset"]').click();
+
         document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
             const val = item.getAttribute('data-value');
             if(val === 'rectangle' || val === 'circle' || val === 'star') {
@@ -1406,19 +1562,14 @@
             }
         });
         
-        // NEW: Reset Animation Settings
         document.getElementById('frameCountInput').value = 10;
         document.getElementById('frameDelayInput').value = 50;
 
-        // Trigger Slider UI updates
-        // CHANGED: Speed slider update removed
         document.getElementById('randomInput').dispatchEvent(new Event('input'));
         document.getElementById('amountInput').dispatchEvent(new Event('input'));
         document.getElementById('zoomInput').dispatchEvent(new Event('input'));
 
-        // CHANGED: Final update for reset
         updatePreview();
-        // CHANGED: Reset panzoom view
         if (panzoomInstance) panzoomInstance.reset();
     });
 
@@ -1426,115 +1577,104 @@
     // --- REAL-TIME PREVIEW RENDERING LOGIC ---
     // =========================================
 
-    // Helper for SVG creation
-    function createSvgElement(type, attributes) {
-        const el = document.createElementNS("http://www.w3.org/2000/svg", type);
-        for (const key in attributes) el.setAttribute(key, attributes[key]);
-        return el;
-    }
-
-    // 1. Render the generated particles to the SVG based on REAL data from backend
     function renderPreview() {
         const settings = getSettings();
-        // Clear existing content
         previewSvg.innerHTML = '';
-        
-        // Global Zoom Slider acts as a multiplier on top of backend scale
         const globalZoom = settings.zoom / 10;
 
         previewParticles.forEach(p => {
             let el;
-            // Assuming backend sends standard RGB(A) objects {r,g,b,a}
-            // We use CSS rgb() string for fill
-            const r = Math.round(p.color.r * 255);
-            const g = Math.round(p.color.g * 255);
-            const b = Math.round(p.color.b * 255);
-            const fill = `rgb(${r}, ${g}, ${b})`;
-            // Use provided alpha or default to 1
-            const opacity = p.color.a !== undefined ? p.color.a : 1;
-
-            // Base size for shapes (approximate standard 24px before scaling)
             const baseSize = 24;
-
-            // Combine transforms: translate -> rotate -> scale(backend) -> scale(zoom slider)
             const finalScale = p.scale * globalZoom;
 
-            const commonAttrs = {
-                fill: fill,
-                'fill-opacity': opacity,
-                // Center rotation origin on the particle's coordinates
-                'transform-origin': `${p.x}px ${p.y}px`,
-                // SVG transforms apply right-to-left: scale, rotate, then translate to position
-                'transform': `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`
-            };
+            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`;
 
-            // BUG FIX HERE: Changed p.shape to p.shapeType to match backend data
-            if (p.shapeType === 'rectangle') {
-                // Rectangles are slightly wider (approx 4:3 aspect)
-                el = createSvgElement('rect', {
-                    x: -(baseSize * 1.33) / 2, y: -baseSize / 2,
-                    width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs
+            if (p.isEmoji) {
+                el = createSvgElement('text', {
+                    x: 0, y: 0, 
+                    'text-anchor': 'middle', 
+                    'dominant-baseline': 'central', 
+                    'font-size': baseSize + 'px', 
+                    'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 
+                    'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` 
                 });
-            } else if (p.shapeType === 'square') {
-                 el = createSvgElement('rect', {
-                    x: -baseSize / 2, y: -baseSize / 2,
-                    width: baseSize, height: baseSize, rx: 2, ...commonAttrs
-                });
-            } else if (p.shapeType === 'circle') {
-                el = createSvgElement('circle', {
-                    cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs
-                });
-            } else if (p.shapeType === 'star') {
-                // Simple 5-point star path approximated roughly fitting baseSize box
-                const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5";
-                 el = createSvgElement('polygon', {
-                    points: points, ...commonAttrs
-                });
+                el.textContent = p.shapeType; 
+
+            } else {
+                const r = Math.round(p.color.r * 255);
+                const g = Math.round(p.color.g * 255);
+                const b = Math.round(p.color.b * 255);
+                const fill = `rgb(${r}, ${g}, ${b})`;
+                const opacity = p.color.a !== undefined ? p.color.a : 1;
+
+                const commonAttrs = {
+                    fill: fill, 'fill-opacity': opacity,
+                    'transform': transformStr
+                };
+
+                if (p.shapeType === 'custom' && p.customPathData) {
+                     const pathScale = baseSize / 320;
+                     el = createSvgElement('path', {
+                        d: p.customPathData,
+                        transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, 
+                        fill: fill, 'fill-opacity': opacity
+                    });
+
+                } else if (p.shapeType === 'rectangle') {
+                    el = createSvgElement('rect', {
+                        x: -(baseSize * 1.33) / 2, y: -baseSize / 2,
+                        width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs
+                    });
+                } else if (p.shapeType === 'square') {
+                     el = createSvgElement('rect', {
+                        x: -baseSize / 2, y: -baseSize / 2,
+                        width: baseSize, height: baseSize, rx: 2, ...commonAttrs
+                    });
+                } else if (p.shapeType === 'circle') {
+                    el = createSvgElement('circle', {
+                        cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs
+                    });
+                } else if (p.shapeType === 'star') {
+                    const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5";
+                     el = createSvgElement('polygon', {
+                        points: points, ...commonAttrs
+                    });
+                }
             }
 
             if(el) previewSvg.appendChild(el);
         });
     }
 
-    // Main function to trigger updates by asking backend for data
     function updatePreview() {
         const settings = getSettings();
-
-        // SAFEGUARD FOR PREVIEW: If amount is 0, don't ask backend. Just clear locally.
-        // This makes the preview panel responsive.
         if (settings.amount === 0) {
-            previewParticles = []; // Clear local cache
-            renderPreview(); // Renders the empty cache (clearing the canvas)
-            return; // Stop here, don't bother the backend for preview data
+            previewParticles = [];
+            renderPreview();
+            return;
         }
-
-        // CHANGED: Instead of generating locally, ask the backend for real data.
-        // Assumes backend handles 'preview-confetti' and sends back 'preview-data'.
         parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings } }, '*');
     }
 
-    // CHANGED: Listen for data from the plugin backend
     window.onmessage = (event) => {
         const msg = event.data.pluginMessage;
         if (msg && msg.type === 'preview-data') {
-            // Store the real data received from backend and render it
             previewParticles = msg.particles;
             renderPreview();
         }
     };
     
-    // CHANGED: Initialize Panzoom on the wrapper container
     panzoomInstance = Panzoom(panzoomContainer, {
-        maxScale: 5,
-        minScale: 0.1,
-        contain: 'outside',
-        startScale: 1
+        maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1
     });
-    // Enable mouse wheel zoom
     panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
 
-
-    // Initial Render on load - Automatically trigger reset on startup
+    // Select the first emoji by default so the variable isn't null on load
+    if (emojiGrid.firstChild) {
+        emojiGrid.firstChild.click();
+    }
+    
+    // Initial Render on load
     document.getElementById('resetBtn').click();
 
   </script>
