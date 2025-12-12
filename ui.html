@@ -243,7 +243,8 @@
       background-color: var(--muted);
       padding: 8px 12px;
       border-radius: var(--radius);
-      margin-bottom: 16px;
+      /* CHANGED: Reduced bottom margin from 16px to 8px */
+      margin-bottom: 8px;
       height: 40px;
       box-sizing: border-box;
     }
@@ -371,7 +372,8 @@
         display: flex;
         gap: 16px;
         border-bottom: 1px solid var(--border);
-        margin-bottom: 16px;
+        /* CHANGED: Increased margin-bottom for more space */
+        margin-bottom: 24px;
     }
     .shape-tab-trigger {
         padding: 8px 0;
@@ -790,9 +792,9 @@
           <div>
             <div class="label">Particle Amount</div>
             <div class="slider-container">
-              <div class="slider-fill" id="amountFill" style="width: 60%;"></div>
-              <input type="text" class="slider-value-input" id="amountValueInput" value="60%">
-              <input type="range" id="amountInput" class="slider-input" min="0" max="100" value="60">
+              <div class="slider-fill" id="amountFill" style="width: 20%;"></div>
+              <input type="text" class="slider-value-input" id="amountValueInput" value="20%">
+              <input type="range" id="amountInput" class="slider-input" min="0" max="100" value="20">
             </div>
             <div class="slider-labels-row"><span>Less</span><span>More</span></div>
           </div>
@@ -829,7 +831,7 @@
       </div>
       
       <div id="particleColorSection">
-          <div class="label" style="margin-top: 24px;">Confetti Color</div>
+          <div class="label" style="margin-top: 24px; margin-bottom: 24px;">Confetti Color</div>
           
           <div class="color-toggle-row" style="margin-bottom: 12px;">
               <div class="color-toggle-label">
@@ -1638,7 +1640,8 @@
 
     document.getElementById('resetBtn').addEventListener('click', () => {
         document.getElementById('randomInput').value = 60; 
-        document.getElementById('amountInput').value = 60; 
+        // CHANGED: Reset to 20%
+        document.getElementById('amountInput').value = 20; 
         document.getElementById('zoomInput').value = 10; 
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
