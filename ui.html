@@ -90,12 +90,38 @@
       cursor: pointer;
       color: var(--muted-foreground);
       transition: all 0.2s;
+      position: relative; /* For tooltip positioning */
     }
     .tab-trigger[data-state="active"] {
       background-color: var(--background);
       color: var(--foreground);
       box-shadow: var(--shadow-sm);
     }
+    
+    /* NEW: Disabled Tab Style */
+    .tab-trigger.disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    /* NEW: Tooltip Style */
+    .tab-trigger.disabled:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 8px;
+        background-color: var(--foreground);
+        color: var(--background);
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 10;
+        pointer-events: none;
+    }
+
 
     /* Labels */
     .label {
@@ -708,10 +734,46 @@
     
     <div class="settings-panel">
       
-      <div class="tabs-list">
-        <div class="tab-trigger" data-state="active">Free fall</div>
-        <div class="tab-trigger">Impact Fall</div>
-      </div>
+      <div style="margin-bottom: 24px;">
+          <div class="shape-tabs">
+              <div class="shape-tab-trigger" data-target="preset" data-state="active">Preset Shapes</div>
+              <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
+          </div>
+
+          <div id="presetShapesContainer" style="display: block;">
+              <div class="selector-grid id-shape-selector">
+                  <div class="selector-item" data-state="selected" data-value="rectangle">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-value="square">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-state="selected" data-value="circle">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <div class="selector-item" data-state="selected" data-value="star">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                   <div class="vertical-divider"></div>
+                   <div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>
+                      <span>Custom</span>
+                       <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+              </div>
+          </div>
+
+          <div id="emojiShapesContainer" style="display: none;">
+              <div class="scrollable-grid-container">
+                  <div class="emoji-grid" id="emojiGrid">
+                      </div>
+              </div>
+          </div>
+       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
           
@@ -797,52 +859,19 @@
           </div>
       </div>
 
-      <div>
-          <div class="shape-tabs">
-              <div class="shape-tab-trigger" data-target="preset" data-state="active">Preset Shapes</div>
-              <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
-          </div>
-
-          <div id="presetShapesContainer" style="display: block;">
-              <div class="selector-grid id-shape-selector">
-                  <div class="selector-item" data-state="selected" data-value="rectangle">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>
-                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  </div>
-                  <div class="selector-item" data-value="square">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
-                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  </div>
-                  <div class="selector-item" data-state="selected" data-value="circle">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
-                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  </div>
-                  <div class="selector-item" data-state="selected" data-value="star">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  </div>
-                   <div class="vertical-divider"></div>
-                   <div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>
-                      <span>Custom</span>
-                       <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  </div>
-              </div>
-          </div>
-
-          <div id="emojiShapesContainer" style="display: none;">
-              <div class="scrollable-grid-container">
-                  <div class="emoji-grid" id="emojiGrid">
-                      </div>
-              </div>
-          </div>
-       </div>
-
         <hr class="section-divider">
 
         <div>
             <div class="label">Animation Settings</div>
             <div class="grouped-settings-box">
+                <div class="number-input-row" style="margin-bottom: 16px;">
+                    <span class="toggle-label">Type</span>
+                    <div class="tabs-list" style="width: 240px;">
+                        <div class="tab-trigger" data-state="active">Free fall</div>
+                        <div class="tab-trigger disabled" data-tooltip="Coming soon!">Impact Fall</div>
+                    </div>
+                </div>
+
                 <div class="number-input-row">
                     <span class="toggle-label">Frame Count (Min 1)</span>
                     <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
@@ -870,7 +899,7 @@
         </div>
         
         <div class="preview-footer">
-            <button id="generateBtn" class="btn btn-primary">Generate Confetti Sequence</button>
+            <button id="generateBtn" class="btn btn-primary">Generate Confetti</button>
         </div>
 
     </div>
@@ -1045,7 +1074,7 @@
 
 
     // 2. Main Tabs (Free fall / Impact fall)
-    document.querySelectorAll('.tabs-list .tab-trigger').forEach(tab => {
+    document.querySelectorAll('.tabs-list .tab-trigger:not(.disabled)').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tabs-list .tab-trigger').forEach(t => t.removeAttribute('data-state'));
         tab.setAttribute('data-state', 'active');
