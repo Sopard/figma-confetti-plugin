@@ -829,8 +829,19 @@
       </div>
       
       <div id="particleColorSection">
-          <div class="label" style="margin-top: 24px;">Particle Color</div>
+          <div class="label" style="margin-top: 24px;">Confetti Color</div>
           
+          <div class="color-toggle-row" style="margin-bottom: 12px;">
+              <div class="color-toggle-label">
+                  <div class="rainbow-icon"></div>
+                  <span>Multi-color</span>
+              </div>
+              <label class="switch">
+                  <input type="checkbox" id="multiColorSwitch">
+                  <span class="switch-slider"></span>
+              </label>
+          </div>
+
           <div class="color-header-box">
               <span class="color-count-text" id="colorCounter">0 Colors</span>
               <button class="icon-btn-flat" id="addColorBtn">
@@ -840,17 +851,6 @@
 
           <div class="color-list-container">
               
-              <div class="color-toggle-row">
-                  <div class="color-toggle-label">
-                      <div class="rainbow-icon"></div>
-                      <span>Multi-color</span>
-                  </div>
-                  <label class="switch">
-                      <input type="checkbox" id="multiColorSwitch">
-                      <span class="switch-slider"></span>
-                  </label>
-              </div>
-
               <div class="scrollable-grid-container">
                   <div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;">
                       </div>
