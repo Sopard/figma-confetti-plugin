@@ -363,7 +363,7 @@
     }
 
     /* Selectors (Shapes) */
-    .selector-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .selector-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
     .selector-item {
         width: 48px; height: 48px;
         display: flex; align-items: center; justify-content: center;
@@ -384,6 +384,13 @@
         display: none; align-items: center; justify-content: center; color: white;
     }
     .selector-item[data-state="selected"] .selector-check { display: flex; }
+
+    /* Vertical Divider */
+    .vertical-divider {
+        width: 1px;
+        height: 48px;
+        background-color: var(--border);
+    }
     
     /* Custom Shape Button Style */
     .custom-shape-btn {
@@ -416,31 +423,66 @@
     .custom-shape-popover {
         position: fixed; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
-        width: 360px; background: var(--background);
+        /* Width to accommodate centered canvas and padding */
+        width: 380px;
+        /* Added sufficient min-height to prevent squashing */
+        min-height: 500px;
+        background: var(--background);
         border-radius: 12px; box-shadow: var(--shadow-md);
         padding: 20px; z-index: 20;
         display: none; flex-direction: column;
         border: 1px solid var(--border);
+        /* Ensure box-sizing includes padding in width/height */
+        box-sizing: border-box;
+        /* Distribute space evenly */
+        justify-content: space-between;
     }
     .cs-canvas-container {
         width: 320px; height: 320px;
         background-color: var(--muted);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        margin: 16px 0;
+        margin: 16px auto; /* Center horizontally */
         position: relative;
         /* Checkerboard pattern */
         background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
         background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        /* Prevent canvas from shrinking */
+        flex-shrink: 0;
     }
     #csEditorSvg {
         width: 100%; height: 100%; overflow: visible;
     }
-    /* Bezier Editor Elements */
+    /* Bezier Editor Elements (RESTORED) */
     .cs-anchor { fill: var(--handle-color); stroke: white; stroke-width: 2px; cursor: grab; }
     .cs-control { fill: var(--control-color); stroke: white; stroke-width: 2px; cursor: grab; }
     .cs-connector { stroke: var(--muted-foreground); stroke-width: 1px; stroke-dasharray: 4 4; pointer-events: none; }
     .cs-path-preview { fill: var(--primary); opacity: 0.8; stroke: var(--primary-hover); stroke-width: 2px; pointer-events: none; }
+
+    /* Reset Icon Style */
+    .cs-reset-icon {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--muted-foreground);
+        transition: all 0.2s;
+        display: none; /* Hidden by default */
+    }
+    .cs-reset-icon:hover {
+        background-color: var(--muted);
+        color: var(--foreground);
+    }
+    
+    /* FIX: Ensure Save button isn't squashed in flex container */
+    #csSaveBtn {
+        flex-shrink: 0;
+        width: 100%;
+    }
 
 
     /* ------------------------------------ */
@@ -779,6 +821,7 @@
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                       <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
+                   <div class="vertical-divider"></div>
                    <div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>
                       <span>Custom</span>
@@ -888,9 +931,12 @@
       <div class="cs-canvas-container">
           <svg id="csEditorSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
               </svg>
+          <div id="csResetIcon" class="cs-reset-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </div>
       </div>
 
-      <button id="csSaveBtn" class="btn btn-primary" style="width: 100%;">Save Shape</button>
+      <button id="csSaveBtn" class="btn btn-primary">Save Shape</button>
   </div>
 
 
@@ -903,6 +949,7 @@
     const csCloseBtn = document.getElementById('csCloseBtn');
     const csSaveBtn = document.getElementById('csSaveBtn');
     const csEditorSvg = document.getElementById('csEditorSvg');
+    const csResetIcon = document.getElementById('csResetIcon');
     const presetShapesContainer = document.getElementById('presetShapesContainer');
     const emojiShapesContainer = document.getElementById('emojiShapesContainer');
     const particleColorSection = document.getElementById('particleColorSection');
@@ -1382,13 +1429,14 @@
     });
 
 
-    // --- CUSTOM SHAPE EDITOR LOGIC (Bezier) ---
+    // --- CUSTOM SHAPE EDITOR LOGIC (Complex Bezier) ---
 
     // Editor State (4 Corner Anchors & 8 Control Points relative to anchors)
-    let csState = {
+    const initialCsState = {
         anchors: [{x: 60, y: 60}, {x: 260, y: 60}, {x: 260, y: 260}, {x: 60, y: 260}],
         controls: [{dx: 0, dy: -30}, {dx: -30, dy: 0}, {dx: 30, dy: 0}, {dx: 0, dy: -30}, {dx: 0, dy: 30}, {dx: 30, dy: 0}, {dx: -30, dy: 0}, {dx: 0, dy: 30}]
     };
+    let csState = JSON.parse(JSON.stringify(initialCsState));
 
     let draggingElement = null;
     let dragStartIndex = -1; 
@@ -1481,7 +1529,27 @@
              document.querySelectorAll('.id-shape-selector .selector-item:not(#customShapeBtn)').forEach(item => {
                  item.removeAttribute('data-state');
              });
+             // Show reset icon after saving
+             csResetIcon.style.display = 'block';
         }
+        customShapePopover.style.display = 'none';
+        updatePreview();
+    });
+
+    // Reset Icon Logic
+    csResetIcon.addEventListener('click', () => {
+        // 1. Reset shape state to initial square
+        csState = JSON.parse(JSON.stringify(initialCsState));
+        renderEditorCanvas();
+        
+        // 2. Deselect custom button
+        customShapeBtn.removeAttribute('data-state');
+        finalCustomShapePathStr = "";
+        
+        // 3. Hide reset icon
+        csResetIcon.style.display = 'none';
+        
+        // 4. Close popover and update preview
         customShapePopover.style.display = 'none';
         updatePreview();
     });
@@ -1562,6 +1630,12 @@
             }
         });
         
+        // Reset Custom Shape state on general reset
+        csState = JSON.parse(JSON.stringify(initialCsState));
+        customShapeBtn.removeAttribute('data-state');
+        finalCustomShapePathStr = "";
+        csResetIcon.style.display = 'none';
+
         document.getElementById('frameCountInput').value = 10;
         // CHANGED: Reset default to 75
         document.getElementById('frameDelayInput').value = 75;
