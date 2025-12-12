@@ -206,32 +206,34 @@ async function createFigmaShapeNode(particleData) {
       node.textAlignVertical = 'CENTER';
       node.resize(baseWidth, baseHeight);
   } 
-  // CRITICAL FIX: Handle Custom Shape correctly using createNodeFromSvg
+  // CRITICAL FIX: Handle Custom Shape accurately by preserving the SVG container frame
   else if (shapeType === 'custom') {
       if (customPathData) {
-          // 1. Wrap the path data in a minimal SVG structure based on UI editor size (320x320)
+          // 1. Wrap the path data in an SVG with the UI editor's 320x320 viewBox.
+          // This ensures the visual relationship (whitespace, alignment) is preserved.
           const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><path d="${customPathData}" /></svg>`;
           
-          // 2. Use the correct API to import SVG data. This returns a FrameNode.
-          const importedFrame = figma.createNodeFromSvg(svgString);
+          // 2. Import SVG. This returns a FrameNode of 320x320 containing the vector.
+          // We use this whole frame as the particle node.
+          node = figma.createNodeFromSvg(svgString);
           
-          // 3. Extract the vector node from inside the imported frame
-          if (importedFrame.children.length > 0) {
-              node = importedFrame.children[0];
-              // Move the node out of the temporary frame onto the current page temporarily
-              figma.currentPage.appendChild(node);
-              // Remove the temporary container frame
-              importedFrame.remove();
-          } else {
-              // Fallback if SVG import resulted in an empty frame for some reason
-              importedFrame.remove();
-              node = figma.createEllipse();
+          // 3. Clean up the container frame properties
+          node.fills = []; // The container itself should be transparent
+          node.clipsContent = false; // Prevent clipping issues during resizing
+
+          // 4. Clean up the inner vector node (remove default stroke)
+          if (node.children.length > 0) {
+              const vectorChild = node.children[0];
+              if ('strokes' in vectorChild) { vectorChild.strokes = []; }
+              // Note: Fill color will be applied in the main loop
           }
 
-          // 4. Resize to target dimensions
+          // 5. Resize the container frame to the target particle dimensions.
+          // Figma will scale the internal vector proportionally.
           node.resize(baseWidth, baseHeight);
-          // Ensure no strokes from the import process
-          if ('strokes' in node) { node.strokes = []; }
+
+          // 6. Mark this node so the coloring loop knows to color its child instead of the frame.
+          node.setPluginData('isCustomContainer', 'true');
 
       } else {
           // Fallback if "custom" selected but no path data exists
@@ -322,9 +324,21 @@ async function populateFrameWithConfetti(frame, particleDataList) {
      
     // Apply Color only if not an emoji
     if (!p.isEmoji && p.color) {
-        // Ensure the node supports fills (VectorNodes do)
-        if ('fills' in node) {
-            node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+        const newFills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+
+        // FIXED COLORING LOGIC FOR CUSTOM SHAPES
+        // Check if this is a custom container frame marked in createFigmaShapeNode
+        if (node.getPluginData('isCustomContainer') === 'true' && node.children.length > 0) {
+            // Apply fill to the inner vector node, not the transparent container frame
+            const vectorChild = node.children[0];
+             if ('fills' in vectorChild) {
+                vectorChild.fills = newFills;
+            }
+        } else {
+            // Standard shape: apply fill directly to the node
+            if ('fills' in node) {
+                node.fills = newFills;
+            }
         }
     }
 
@@ -352,7 +366,7 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 async function createFinalConfettiOnCanvas(settings) {
   const frameCount = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
   
-  // CHANGED: Get the animation delay from settings (default 75ms if invalid)
+  // Get the animation delay from settings (default 75ms if invalid)
   const animationDelayMs = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 75));
 
   const frameWidth = 1440;
@@ -408,7 +422,7 @@ async function createFinalConfettiOnCanvas(settings) {
     currentFrame.reactions = [{
       trigger: {
         type: 'AFTER_TIMEOUT',
-        // CHANGED: Hardcoded trigger delay to 1ms (0.001s)
+        // Hardcoded trigger delay to 1ms (0.001s)
         timeout: 0.001 
       },
       actions: [{
@@ -417,7 +431,7 @@ async function createFinalConfettiOnCanvas(settings) {
         navigation: 'NAVIGATE',
         transition: {
           type: 'SMART_ANIMATE',
-          // CHANGED: Use the UI input value for animation duration (converted to seconds)
+          // Use the UI input value for animation duration (converted to seconds)
           duration: animationDelayMs / 1000, 
           easing: { type: 'LINEAR' }
         }
