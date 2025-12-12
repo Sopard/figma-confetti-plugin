@@ -804,7 +804,7 @@
           <div>
             <div class="label">Zoom</div>
             <div class="slider-container">
-              <div class="slider-fill" id="zoomFill" style="width: 0%;"></div>
+              <div class="slider-fill" id="zoomFill" style="width: 20%;"></div>
               <input type="text" class="slider-value-input" id="zoomValueInput" value="x1.0">
               <input type="range" id="zoomInput" class="slider-input" min="0" max="50" value="10">
             </div>
@@ -1638,14 +1638,15 @@
     });
     
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        document.getElementById('randomInput').value = 60; 
+    // CHANGED: Refactored reset logic into a named function
+    function resetPluginState() {
+        document.getElementById('randomInput').value = 60;
         // CHANGED: Reset to 20%
-        document.getElementById('amountInput').value = 20; 
-        document.getElementById('zoomInput').value = 10; 
+        document.getElementById('amountInput').value = 20;
+        document.getElementById('zoomInput').value = 10;
         document.getElementById('checkSize').checked = true;
         document.getElementById('checkRotation').checked = true;
-        
+
         colorState = { isMultiColor: false, colors: [] };
         multiColorSwitch.checked = false;
         renderColorList();
@@ -1661,7 +1662,7 @@
                 item.removeAttribute('data-state');
             }
         });
-        
+
         // Reset Custom Shape state on general reset
         csState = JSON.parse(JSON.stringify(initialCsState));
         customShapeBtn.removeAttribute('data-state');
@@ -1672,13 +1673,18 @@
         // CHANGED: Reset default to 75
         document.getElementById('frameDelayInput').value = 75;
 
+        // Dispatch events to sync sliders and trigger preview updates
         document.getElementById('randomInput').dispatchEvent(new Event('input'));
         document.getElementById('amountInput').dispatchEvent(new Event('input'));
         document.getElementById('zoomInput').dispatchEvent(new Event('input'));
 
+        // Explicitly call updatePreview to ensure a generation request is sent
         updatePreview();
         if (panzoomInstance) panzoomInstance.reset();
-    });
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', resetPluginState);
+
 
     // =========================================
     // --- REAL-TIME PREVIEW RENDERING LOGIC ---
@@ -1782,7 +1788,8 @@
     }
     
     // Initial Render on load
-    document.getElementById('resetBtn').click();
+    // CHANGED: Call the reset function directly instead of simulating a click
+    resetPluginState();
 
   </script>
 </body>
