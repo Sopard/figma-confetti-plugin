@@ -648,8 +648,10 @@
     /* Footer Buttons */
     .footer {
         display: flex;
-        margin-top: 0; /* CHANGED: Reduced space */
-        padding-top: 12px; /* CHANGED: Reduced space */
+        /* CHANGED: Adjusted margin to reduce spacing to Animation Settings to 16px */
+        /* Parent gap is 24px. To get 16px visual space: 24 + margin = 16 => margin = -8px */
+        margin-top: -8px; 
+        padding-top: 0; 
     }
     .btn {
         height: 44px; border-radius: var(--radius); font-weight: 600; font-size: 14px;
@@ -852,7 +854,7 @@
           </div>
       </div>
       
-      <div id="particleColorSection">
+      <div id="particleColorSection" style="margin-bottom: -12px;">
           <div class="label" style="margin-top: 24px; margin-bottom: 24px;">Confetti Color</div>
           
           <div class="color-toggle-row" style="margin-bottom: 12px;">
@@ -883,7 +885,7 @@
           </div>
       </div>
 
-        <hr class="section-divider">
+        <hr class="section-divider" style="margin-top: -12px;">
 
         <div>
             <div class="label">Animation Settings</div>
