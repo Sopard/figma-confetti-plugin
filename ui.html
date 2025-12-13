@@ -83,8 +83,8 @@
     .tab-trigger {
       flex: 1;
       text-align: center;
-      padding: 8px;
-      font-size: 14px;
+      padding: 6px; /* Reduced padding from prev step */
+      font-size: 12px; /* Reduced font size from prev step */
       font-weight: 500;
       border-radius: calc(var(--radius) - 2px);
       cursor: pointer;
@@ -374,7 +374,16 @@
         border-bottom: 1px solid var(--border);
         /* CHANGED: Increased margin-bottom for more space */
         margin-bottom: 24px;
+        /* NEW: Added to align the reset button to the right */
+        align-items: center;
+        justify-content: space-between;
     }
+    /* NEW: Wrapper for the tab triggers */
+    .shape-tabs-triggers {
+        display: flex;
+        gap: 16px;
+    }
+
     .shape-tab-trigger {
         padding: 8px 0;
         font-size: 14px; font-weight: 500;
@@ -388,6 +397,34 @@
     }
     .shape-tab-trigger[data-state="active"]::after {
         content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background-color: var(--primary);
+    }
+
+    /* NEW: Style for the new top reset button */
+    .top-reset-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        /* CHANGED: Matched properties to 'Emoji' text */
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--muted-foreground); /* Set text color to match */
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    .top-reset-btn:hover {
+        background-color: var(--muted);
+    }
+    /* CHANGED: Explicitly set text color to inherit from parent (muted-foreground) */
+    .top-reset-btn span {
+        color: inherit;
+    }
+    /* CHANGED: Set icon color to brand blue */
+    .top-reset-btn svg {
+        color: var(--primary);
     }
 
     /* Selectors (Shapes) */
@@ -709,15 +746,19 @@
         margin-bottom: 12px;
     }
     .number-input-field {
-        width: 80px;
-        height: 36px;
+        /* CHANGED: Reduced from 80px to 64px */
+        width: 64px; 
+        /* CHANGED: Reduced from 36px to 32px */
+        height: 32px; 
         padding: 0 8px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background-color: var(--muted);
         color: var(--foreground);
-        font-size: 14px;
-        font-weight: 500;
+        /* CHANGED: Slightly adjusted font size */
+        font-size: 13px; 
+        /* CHANGED: Increased font-weight to 600 */
+        font-weight: 600;
         text-align: center;
         outline: none;
         transition: border-color 0.2s;
@@ -758,9 +799,11 @@
       
       <div style="margin-bottom: 12px;">
           <div class="shape-tabs">
-              <div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div>
-              <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
-          </div>
+              <div class="shape-tabs-triggers">
+                  <div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div>
+                  <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
+              </div>
+              </div>
 
           <div id="presetShapesContainer" style="display: block;">
               <div class="selector-grid id-shape-selector">
@@ -892,19 +935,20 @@
             <div class="grouped-settings-box">
                 <div class="number-input-row" style="margin-bottom: 16px;">
                     <span class="toggle-label">Type</span>
-                    <div class="tabs-list" style="width: 240px;">
-                        <div class="tab-trigger" data-state="active">Free fall</div>
+                    <div class="tabs-list" style="width: 200px;">
+                        <div class="tab-trigger" data-state="active">Free Fall</div>
                         <div class="tab-trigger disabled" data-tooltip="Coming soon!">Impact Fall</div>
                     </div>
                 </div>
 
                 <div class="number-input-row">
-                    <span class="toggle-label">Frame Count (Min 1)</span>
-                    <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
-                </div>
-                <div class="number-input-row">
                     <span class="toggle-label">Animation Delay (ms)</span>
                     <input type="number" id="frameDelayInput" class="number-input-field" value="75" min="1">
+                </div>
+
+                <div class="number-input-row">
+                    <span class="toggle-label">Frame Count (Min 1)</span>
+                    <input type="number" id="frameCountInput" class="number-input-field" value="10" min="1">
                 </div>
             </div>
         </div>
@@ -1756,6 +1800,10 @@
         if (panzoomInstance) panzoomInstance.reset();
     }
 
+    // NEW: Attach reset listener to the new top reset button
+    // document.getElementById('topResetBtn').addEventListener('click', resetPluginState);
+    
+    // CHANGED: Re-attach to the bottom reset button
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
 
