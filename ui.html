@@ -393,12 +393,16 @@
     /* Selectors (Shapes) */
     .selector-grid { 
         display: flex; 
-        gap: 8px; /* CHANGED: Reduced gap from 12px to 8px */
-        flex-wrap: nowrap; /* CHANGED: Force single row */
+        gap: 8px; /* Reduced gap */
+        flex-wrap: nowrap; /* Force single row */
         align-items: center; 
+        width: 100%; /* Full width */
     }
     .selector-item {
-        width: 40px; height: 40px; /* CHANGED: Reduced size from 48px to 40px */
+        /* Removed fixed width, added flex properties */
+        flex: 1; /* Allow growing */
+        height: 40px; 
+        min-width: 0; /* Allow shrinking if needed */
         display: flex; align-items: center; justify-content: center;
         border: 2px solid var(--border); border-radius: var(--radius);
         color: var(--muted-foreground); cursor: pointer; position: relative;
@@ -422,17 +426,20 @@
     /* Vertical Divider */
     .vertical-divider {
         width: 1px;
-        height: 40px; /* CHANGED: Matched height to new selector size */
+        height: 40px; /* Matched to item height */
         background-color: var(--border);
+        flex-shrink: 0; /* Don't shrink */
+        flex-grow: 0;
     }
     
     /* Custom Shape Button Style */
     .custom-shape-btn {
-        width: auto; 
-        padding: 0 12px; 
+        flex: 2; /* Give it double the space of icons to fit text */
+        padding: 0 4px; 
         gap: 6px;
-        font-size: 13px; /* CHANGED: Slightly smaller font to fit inline */
+        font-size: 13px; 
         font-weight: 500;
+        white-space: nowrap; /* Prevent text wrap */
     }
 
     /* Emoji Grid Styles */
@@ -747,7 +754,7 @@
     
     <div class="settings-panel">
       
-      <div style="margin-bottom: 24px;">
+      <div style="margin-bottom: 12px;">
           <div class="shape-tabs">
               <div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div>
               <div class="shape-tab-trigger" data-target="emoji">Emoji</div>
@@ -1817,8 +1824,7 @@
                         points: points, ...commonAttrs
                     });
                 } else if (p.shapeType === 'wave') {
-                    // Wave is an open path, needs stroke, no fill
-                    // Path provided: 24x24 viewBox
+                    // CHANGED: Wave shape rendering for preview canvas
                     el = createSvgElement('path', {
                         d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6",
                         stroke: fill, // Apply the color to stroke
