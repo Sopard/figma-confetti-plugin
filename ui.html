@@ -997,6 +997,9 @@
     
     // NEW: History stack for custom shape undo
     let csHistory = [];
+    
+    // NEW: Array to store selected emojis (multi-select)
+    let selectedEmojis = [];
 
     // --- HELPER FUNCTIONS ---
     // Moved createSvgElement to top for better organization and to prevent hoisting confusion
@@ -1456,9 +1459,17 @@
         emojiItem.className = 'emoji-item';
         emojiItem.textContent = emojiChar;
         emojiItem.addEventListener('click', () => {
-            document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state'));
-            emojiItem.setAttribute('data-state', 'selected');
-            selectedEmoji = emojiChar;
+            // CHANGED: Multi-select logic for Emojis
+            const index = selectedEmojis.indexOf(emojiChar);
+            if (index > -1) {
+                // If already selected, remove it
+                selectedEmojis.splice(index, 1);
+                emojiItem.removeAttribute('data-state');
+            } else {
+                // If not selected, add it
+                selectedEmojis.push(emojiChar);
+                emojiItem.setAttribute('data-state', 'selected');
+            }
             updatePreview();
         });
         emojiGrid.appendChild(emojiItem);
@@ -1637,7 +1648,8 @@
         return {
             shapeTab: activeShapeTab, 
             selectedShapes: selectedShapes,
-            selectedEmoji: currentSelectedEmoji,
+            // Pass the array for multi-select
+            selectedEmojis: selectedEmojis,
             customShapePath: customPath, 
             
             randomness: parseInt(document.getElementById('randomInput').value),
@@ -1698,6 +1710,15 @@
         customShapeBtn.removeAttribute('data-state');
         finalCustomShapePathStr = "";
         csResetIcon.style.display = 'none';
+
+        // NEW: Reset Emoji selection
+        selectedEmojis = [];
+        document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state'));
+        // Select first emoji by default if none selected
+        if (emojiGrid.firstChild) {
+            selectedEmojis.push(modernEmojis[0]); // assuming order matches
+            emojiGrid.firstChild.setAttribute('data-state', 'selected');
+        }
 
         document.getElementById('frameCountInput').value = 10;
         // CHANGED: Reset default to 75

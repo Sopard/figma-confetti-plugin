@@ -44,8 +44,14 @@ function initializeParticlePool(settings, bounds) {
   let shapesToUse = [];
   
   const isEmojiMode = settings.shapeTab === 'emoji';
-  if (isEmojiMode && settings.selectedEmoji) {
-      shapesToUse = [settings.selectedEmoji]; // Use the single selected emoji char
+
+  if (isEmojiMode) {
+      // NEW: Handle multiple emojis from array
+      if (Array.isArray(settings.selectedEmojis) && settings.selectedEmojis.length > 0) {
+          shapesToUse = settings.selectedEmojis;
+      } else {
+          shapesToUse = ['😀']; // Fallback if array is empty
+      }
   } else if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
       shapesToUse = settings.selectedShapes;
   } else {
@@ -86,7 +92,7 @@ function initializeParticlePool(settings, bounds) {
 
   // Generation Loop
   for (let i = 0; i < count; i++) {
-    // Select shape identifier (either shape name like 'rectangle' or emoji char like '😀')
+    // Select shape identifier (randomly picks from the array of selected shapes OR emojis)
     const shapeIdentifier = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
     
     // Select color only if not in emoji mode
@@ -196,6 +202,7 @@ async function createFigmaShapeNode(particleData) {
           await figma.loadFontAsync({ family: "Inter", style: "Regular" });
           node.fontName = { family: "Inter", style: "Regular" };
       } catch (e) {
+          // Fallback to default font if Inter not found
           await figma.loadFontAsync(figma.fonts[0]);
           node.fontName = figma.fonts[0];
       }
@@ -206,7 +213,7 @@ async function createFigmaShapeNode(particleData) {
       node.textAlignVertical = 'CENTER';
       node.resize(baseWidth, baseHeight);
   } 
-  // CRITICAL FIX: Handle Custom Shape correctly using createNodeFromSvg
+  // Handle Custom Shape
   else if (shapeType === 'custom') {
       if (customPathData) {
           // 1. Wrap the path data in a minimal SVG structure based on UI editor size (320x320)
@@ -263,12 +270,11 @@ async function createFigmaShapeNode(particleData) {
           node.innerRadius = 0.4;
           break;
         default: 
-           // Fallback handled by main if check below
            break;
       }
   }
 
-  // Final safety check: if node wasn't created (e.g. unknown shapeType), create a default
+  // Final safety check: if node wasn't created, create a default
   if (!node) {
       node = figma.createEllipse();
       node.resize(baseWidth, baseHeight);
@@ -299,9 +305,7 @@ async function populateFrameWithConfetti(frame, particleDataList) {
     const p = particleDataList[i];
     shapeCounter++;
     
-    // Create the specific node type (async now due to font loading & svg import)
     const node = await createFigmaShapeNode(p);
-    // Safety check if node creation failed completely
     if (!node) continue; 
 
     node.name = `Particle ${shapeCounter}`;
@@ -322,7 +326,6 @@ async function populateFrameWithConfetti(frame, particleDataList) {
      
     // Apply Color only if not an emoji
     if (!p.isEmoji && p.color) {
-        // Ensure the node supports fills (VectorNodes do)
         if ('fills' in node) {
             node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
         }
@@ -341,7 +344,6 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 
     frame.appendChild(node);
 
-    // Yield to main thread periodically
     if (i % 150 === 0) await new Promise(r => setTimeout(r, 5));
   }
 }
@@ -351,13 +353,11 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 
 async function createFinalConfettiOnCanvas(settings) {
   const frameCount = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
-  
-  // Get the animation delay from settings (default 75ms if invalid)
   const animationDelayMs = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 75));
 
   const frameWidth = 1440;
   const frameHeight = 1080;
-  const gap = 200; // Increased gap
+  const gap = 200; 
   const createdOuterFrames = [];
 
   figma.notify("Initializing physics pool...");
@@ -389,20 +389,15 @@ async function createFinalConfettiOnCanvas(settings) {
         getParticleStateForFrame(p, i)
     );
 
-    // Async population now
     await populateFrameWithConfetti(innerFrame, particlesForThisFrame);
-    
     outerFrame.appendChild(innerFrame);
-
     await new Promise(r => setTimeout(r, 20));
   }
 
 
-  // --- NEW FIX: Set Flow Starting Point on Current Page ---
+  // --- Set Flow Starting Point on Current Page ---
   if (createdOuterFrames.length > 0) {
       const startFrame = createdOuterFrames[0];
-      // Flow starting points must be set on the PAGE, not the frame.
-      // We must copy the existing array to avoid mutating the read-only original array.
       const existingFlows = figma.currentPage.flowStartingPoints;
       const newFlows = [...existingFlows, {
           nodeId: startFrame.id,
@@ -418,11 +413,9 @@ async function createFinalConfettiOnCanvas(settings) {
     const currentFrame = createdOuterFrames[i];
     const nextFrame = createdOuterFrames[i + 1];
 
-    // Updated 'action' to 'actions' array as per Figma API requirement
     currentFrame.reactions = [{
       trigger: {
         type: 'AFTER_TIMEOUT',
-        // Hardcoded trigger delay to 1ms (0.001s)
         timeout: 0.001 
       },
       actions: [{
@@ -431,7 +424,6 @@ async function createFinalConfettiOnCanvas(settings) {
         navigation: 'NAVIGATE',
         transition: {
           type: 'SMART_ANIMATE',
-          // Use the UI input value for animation duration (converted to seconds)
           duration: animationDelayMs / 1000, 
           easing: { type: 'LINEAR' }
         }
@@ -468,7 +460,6 @@ figma.ui.onmessage = async (msg) => {
     figma.ui.postMessage({ type: 'preview-data', particles: previewData });
   }
   else if (msg.type === 'generate-confetti') {
-    // Wrap in try/catch for font loading errors or other async issues
     try {
         await createFinalConfettiOnCanvas(msg.settings);
     } catch (e) {
