@@ -206,34 +206,32 @@ async function createFigmaShapeNode(particleData) {
       node.textAlignVertical = 'CENTER';
       node.resize(baseWidth, baseHeight);
   } 
-  // CRITICAL FIX: Handle Custom Shape accurately by preserving the SVG container frame
+  // CRITICAL FIX: Handle Custom Shape correctly using createNodeFromSvg
   else if (shapeType === 'custom') {
       if (customPathData) {
-          // 1. Wrap the path data in an SVG with the UI editor's 320x320 viewBox.
-          // This ensures the visual relationship (whitespace, alignment) is preserved.
+          // 1. Wrap the path data in a minimal SVG structure based on UI editor size (320x320)
           const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><path d="${customPathData}" /></svg>`;
           
-          // 2. Import SVG. This returns a FrameNode of 320x320 containing the vector.
-          // We use this whole frame as the particle node.
-          node = figma.createNodeFromSvg(svgString);
+          // 2. Use the correct API to import SVG data. This returns a FrameNode.
+          const importedFrame = figma.createNodeFromSvg(svgString);
           
-          // 3. Clean up the container frame properties
-          node.fills = []; // The container itself should be transparent
-          node.clipsContent = false; // Prevent clipping issues during resizing
-
-          // 4. Clean up the inner vector node (remove default stroke)
-          if (node.children.length > 0) {
-              const vectorChild = node.children[0];
-              if ('strokes' in vectorChild) { vectorChild.strokes = []; }
-              // Note: Fill color will be applied in the main loop
+          // 3. Extract the vector node from inside the imported frame
+          if (importedFrame.children.length > 0) {
+              node = importedFrame.children[0];
+              // Move the node out of the temporary frame onto the current page temporarily
+              figma.currentPage.appendChild(node);
+              // Remove the temporary container frame
+              importedFrame.remove();
+          } else {
+              // Fallback if SVG import resulted in an empty frame for some reason
+              importedFrame.remove();
+              node = figma.createEllipse();
           }
 
-          // 5. Resize the container frame to the target particle dimensions.
-          // Figma will scale the internal vector proportionally.
+          // 4. Resize to target dimensions
           node.resize(baseWidth, baseHeight);
-
-          // 6. Mark this node so the coloring loop knows to color its child instead of the frame.
-          node.setPluginData('isCustomContainer', 'true');
+          // Ensure no strokes from the import process
+          if ('strokes' in node) { node.strokes = []; }
 
       } else {
           // Fallback if "custom" selected but no path data exists
@@ -324,21 +322,9 @@ async function populateFrameWithConfetti(frame, particleDataList) {
      
     // Apply Color only if not an emoji
     if (!p.isEmoji && p.color) {
-        const newFills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
-
-        // FIXED COLORING LOGIC FOR CUSTOM SHAPES
-        // Check if this is a custom container frame marked in createFigmaShapeNode
-        if (node.getPluginData('isCustomContainer') === 'true' && node.children.length > 0) {
-            // Apply fill to the inner vector node, not the transparent container frame
-            const vectorChild = node.children[0];
-             if ('fills' in vectorChild) {
-                vectorChild.fills = newFills;
-            }
-        } else {
-            // Standard shape: apply fill directly to the node
-            if ('fills' in node) {
-                node.fills = newFills;
-            }
+        // Ensure the node supports fills (VectorNodes do)
+        if ('fills' in node) {
+            node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
         }
     }
 
@@ -409,6 +395,20 @@ async function createFinalConfettiOnCanvas(settings) {
     outerFrame.appendChild(innerFrame);
 
     await new Promise(r => setTimeout(r, 20));
+  }
+
+
+  // --- NEW FIX: Set Flow Starting Point on Current Page ---
+  if (createdOuterFrames.length > 0) {
+      const startFrame = createdOuterFrames[0];
+      // Flow starting points must be set on the PAGE, not the frame.
+      // We must copy the existing array to avoid mutating the read-only original array.
+      const existingFlows = figma.currentPage.flowStartingPoints;
+      const newFlows = [...existingFlows, {
+          nodeId: startFrame.id,
+          name: "Start Confetti"
+      }];
+      figma.currentPage.flowStartingPoints = newFlows;
   }
 
 
