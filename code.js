@@ -46,7 +46,6 @@ function initializeParticlePool(settings, bounds) {
   const isEmojiMode = settings.shapeTab === 'emoji';
 
   if (isEmojiMode) {
-      // NEW: Handle multiple emojis from array
       if (Array.isArray(settings.selectedEmojis) && settings.selectedEmojis.length > 0) {
           shapesToUse = settings.selectedEmojis;
       } else {
@@ -116,6 +115,11 @@ function initializeParticlePool(settings, bounds) {
     if (isEmojiMode || shapeIdentifier === 'custom') {
          baseWidth = baseReferenceSize * 1.2;
          baseHeight = baseReferenceSize * 1.2;
+    }
+    // Wave tends to be taller/thinner
+    if (shapeIdentifier === 'wave') {
+         baseWidth = baseReferenceSize * 1.0;
+         baseHeight = baseReferenceSize * 1.4;
     }
 
 
@@ -269,6 +273,18 @@ async function createFigmaShapeNode(particleData) {
           node.pointCount = 5;
           node.innerRadius = 0.4;
           break;
+        case 'wave':
+          // Use path from user request
+          const wavePath = "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6";
+          const svg = `<svg viewBox="0 0 24 24"><path d="${wavePath}" stroke="black" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`;
+          const frame = figma.createNodeFromSvg(svg);
+          if (frame.children.length > 0) {
+              node = frame.children[0];
+              figma.currentPage.appendChild(node);
+              frame.remove();
+              node.resize(baseWidth, baseHeight);
+          }
+          break;
         default: 
            break;
       }
@@ -326,8 +342,20 @@ async function populateFrameWithConfetti(frame, particleDataList) {
      
     // Apply Color only if not an emoji
     if (!p.isEmoji && p.color) {
-        if ('fills' in node) {
-            node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+        if (p.shapeType === 'wave') {
+            // Waves are strokes, not fills
+             if ('strokes' in node) {
+                 node.strokes = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+                 // Calculate a proportional stroke weight based on scale, minimum 1.5
+                 const weight = Math.max(1.5, 3 * p.scale); 
+                 node.strokeWeight = weight;
+                 node.fills = []; // Ensure no fill
+             }
+        } else {
+            // All other shapes are fills
+            if ('fills' in node) {
+                node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+            }
         }
     }
 
@@ -344,6 +372,7 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 
     frame.appendChild(node);
 
+    // Yield to main thread periodically
     if (i % 150 === 0) await new Promise(r => setTimeout(r, 5));
   }
 }
@@ -353,11 +382,13 @@ async function populateFrameWithConfetti(frame, particleDataList) {
 
 async function createFinalConfettiOnCanvas(settings) {
   const frameCount = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
+  
+  // Get the animation delay from settings (default 75ms if invalid)
   const animationDelayMs = Math.max(1, validateNum(settings.frameDelay, 1, 5000, 75));
 
   const frameWidth = 1440;
   const frameHeight = 1080;
-  const gap = 200; 
+  const gap = 200; // Increased gap
   const createdOuterFrames = [];
 
   figma.notify("Initializing physics pool...");
@@ -389,8 +420,11 @@ async function createFinalConfettiOnCanvas(settings) {
         getParticleStateForFrame(p, i)
     );
 
+    // Async population now
     await populateFrameWithConfetti(innerFrame, particlesForThisFrame);
+    
     outerFrame.appendChild(innerFrame);
+
     await new Promise(r => setTimeout(r, 20));
   }
 
@@ -413,9 +447,11 @@ async function createFinalConfettiOnCanvas(settings) {
     const currentFrame = createdOuterFrames[i];
     const nextFrame = createdOuterFrames[i + 1];
 
+    // Updated 'action' to 'actions' array as per Figma API requirement
     currentFrame.reactions = [{
       trigger: {
         type: 'AFTER_TIMEOUT',
+        // Hardcoded trigger delay to 1ms (0.001s)
         timeout: 0.001 
       },
       actions: [{
@@ -424,6 +460,7 @@ async function createFinalConfettiOnCanvas(settings) {
         navigation: 'NAVIGATE',
         transition: {
           type: 'SMART_ANIMATE',
+          // Use the UI input value for animation duration (converted to seconds)
           duration: animationDelayMs / 1000, 
           easing: { type: 'LINEAR' }
         }
@@ -460,6 +497,7 @@ figma.ui.onmessage = async (msg) => {
     figma.ui.postMessage({ type: 'preview-data', particles: previewData });
   }
   else if (msg.type === 'generate-confetti') {
+    // Wrap in try/catch for font loading errors or other async issues
     try {
         await createFinalConfettiOnCanvas(msg.settings);
     } catch (e) {

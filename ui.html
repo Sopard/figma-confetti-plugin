@@ -391,13 +391,19 @@
     }
 
     /* Selectors (Shapes) */
-    .selector-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .selector-grid { 
+        display: flex; 
+        gap: 8px; /* CHANGED: Reduced gap from 12px to 8px */
+        flex-wrap: nowrap; /* CHANGED: Force single row */
+        align-items: center; 
+    }
     .selector-item {
-        width: 48px; height: 48px;
+        width: 40px; height: 40px; /* CHANGED: Reduced size from 48px to 40px */
         display: flex; align-items: center; justify-content: center;
         border: 2px solid var(--border); border-radius: var(--radius);
         color: var(--muted-foreground); cursor: pointer; position: relative;
         background: var(--background); transition: all 0.2s;
+        flex-shrink: 0; /* Prevent shrinking */
     }
     .selector-item:hover {
         border-color: var(--muted-darker); background-color: var(--muted);
@@ -416,14 +422,17 @@
     /* Vertical Divider */
     .vertical-divider {
         width: 1px;
-        height: 48px;
+        height: 40px; /* CHANGED: Matched height to new selector size */
         background-color: var(--border);
     }
     
     /* Custom Shape Button Style */
     .custom-shape-btn {
-        width: auto; padding: 0 12px; gap: 6px;
-        font-size: 14px; font-weight: 500;
+        width: auto; 
+        padding: 0 12px; 
+        gap: 6px;
+        font-size: 13px; /* CHANGED: Slightly smaller font to fit inline */
+        font-weight: 500;
     }
 
     /* Emoji Grid Styles */
@@ -760,6 +769,10 @@
                   </div>
                   <div class="selector-item" data-state="selected" data-value="star">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                   <div class="selector-item" data-value="wave">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                       <div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
                   </div>
                    <div class="vertical-divider"></div>
@@ -1802,6 +1815,20 @@
                     const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5";
                      el = createSvgElement('polygon', {
                         points: points, ...commonAttrs
+                    });
+                } else if (p.shapeType === 'wave') {
+                    // Wave is an open path, needs stroke, no fill
+                    // Path provided: 24x24 viewBox
+                    el = createSvgElement('path', {
+                        d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6",
+                        stroke: fill, // Apply the color to stroke
+                        'stroke-width': 2,
+                        'stroke-linecap': 'round',
+                        fill: 'none',
+                        'fill-opacity': 0, // Ensure no fill
+                        'stroke-opacity': opacity,
+                        // Center the 24x24 path by moving -12,-12
+                        transform: `${transformStr} translate(-12, -12)`
                     });
                 }
             }
