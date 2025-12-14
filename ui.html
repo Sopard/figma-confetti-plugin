@@ -408,7 +408,8 @@
             
             if (colorData.type === 'linear') {
                 hexDisplay = "Linear Gradient";
-                opacityDisplay = "100"; // placeholder
+                // --- NEW LOGIC: Default to first stop's alpha for display ---
+                opacityDisplay = colorData.stops.length > 0 ? Math.round(colorData.stops[0].alpha * 100) : "100";
                 // create CSS gradient string for preview
                 const stops = colorData.stops;
                 const sorted = [...stops].sort((a,b)=>a.percent-b.percent);
@@ -420,7 +421,8 @@
                 bgStyle = `background-color: ${hexDisplay}; opacity: ${colorData.a};`;
             }
 
-            row.innerHTML = `<div class="color-preview-sq" style="${bgStyle}"></div><span class="color-hex-text">${hexDisplay}</span><div style="display: flex; align-items: center; margin-right: 8px;"><input type="number" class="color-percent-input" data-index="${index}" value="${opacityDisplay}" min="0" max="100" ${colorState.isMultiColor || colorData.type==='linear' ? 'disabled' : ''}><span style="margin-left: 4px; color: var(--muted-foreground); font-size: 14px;">%</span></div><button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>`;
+            // --- UPDATED HTML: Removed disabled attribute for linear type inputs ---
+            row.innerHTML = `<div class="color-preview-sq" style="${bgStyle}"></div><span class="color-hex-text">${hexDisplay}</span><div style="display: flex; align-items: center; margin-right: 8px;"><input type="number" class="color-percent-input" data-index="${index}" value="${opacityDisplay}" min="0" max="100" ${colorState.isMultiColor ? 'disabled' : ''}><span style="margin-left: 4px; color: var(--muted-foreground); font-size: 14px;">%</span></div><button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>`;
             
             const previewSq = row.querySelector('.color-preview-sq'); 
             previewSq.addEventListener('click', () => { 
@@ -431,13 +433,23 @@
                 openPopoverToEdit(index, previewSq); 
             });
             
-            // Only attach opacity change listener for solid
-            if (colorData.type !== 'linear') {
-                const percentInput = row.querySelector('.color-percent-input'); 
-                percentInput.addEventListener('change', (e) => { 
-                    let newVal = parseInt(e.target.value); if (isNaN(newVal)) newVal = 100; newVal = Math.max(0, Math.min(100, newVal)); e.target.value = newVal; colorState.colors[index].a = newVal / 100; renderColorList(); updatePreview(true, 'color'); 
-                });
-            }
+            // --- NEW LOGIC: Handle opacity change for BOTH solid and linear ---
+            const percentInput = row.querySelector('.color-percent-input'); 
+            percentInput.addEventListener('change', (e) => { 
+                let newVal = parseInt(e.target.value); 
+                if (isNaN(newVal)) newVal = 100; 
+                newVal = Math.max(0, Math.min(100, newVal)); 
+                e.target.value = newVal; 
+                
+                if (colorData.type === 'linear') {
+                    // Update ALL stops alpha to this new value
+                    colorState.colors[index].stops.forEach(s => s.alpha = newVal / 100);
+                } else {
+                    colorState.colors[index].a = newVal / 100; 
+                }
+                renderColorList(); 
+                updatePreview(true, 'color'); 
+            });
 
             const deleteBtn = row.querySelector('.delete-color-btn'); 
             deleteBtn.addEventListener('click', () => { if (colorState.isMultiColor) return; if (editingColorIndex === index) { editingColorIndex = -1; closePopover(); } colorState.colors.splice(index, 1); renderColorList(); updatePreview(true, 'color'); });
@@ -767,7 +779,24 @@
     function closePopover() { popover.style.display = 'none'; document.removeEventListener('click', closePopoverOnClickOutside); currentTriggerElement = null; editingColorIndex = -1; }
     function closePopoverOnClickOutside(event) { const isClickInsidePopover = popover.contains(event.target); const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { closePopover(); } }
     
-    addColorBtn.addEventListener('click', () => { editingColorIndex = -1; pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; updatePickerVisuals(); cpHeaderTitle.textContent = "Add Color"; cpAddConfirmBtn.textContent = "Add Color"; openPopover(addColorBtn); });
+    addColorBtn.addEventListener('click', () => { 
+        editingColorIndex = -1; 
+        
+        // --- NEW LOGIC: RESET BOTH SOLID AND LINEAR STATES ---
+        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; 
+        gradientStops = [
+            { percent: 0, color: '#D966FF', alpha: 1 },
+            { percent: 100, color: '#823D99', alpha: 1 }
+        ];
+        isVerticalFlip = false;
+        activeStopIndex = 0;
+        
+        updatePickerVisuals(); 
+        cpHeaderTitle.textContent = "Add Color"; 
+        cpAddConfirmBtn.textContent = "Add Color"; 
+        openPopover(addColorBtn); 
+    });
+    
     cpCloseBtn.addEventListener('click', closePopover); cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
     // --- UTILS (HSL/HSV) ---
