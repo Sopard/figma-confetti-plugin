@@ -31,6 +31,29 @@
     .tabs-list { display: flex; background-color: var(--muted); padding: 4px; border-radius: var(--radius); }
     .tab-trigger { flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; position: relative; }
     .tab-trigger[data-state="active"] { background-color: var(--background); color: var(--foreground); box-shadow: var(--shadow-sm); }
+    
+    /* --- NEW CSS FOR TOOLTIP & DISABLED STATES --- */
+    .tab-trigger.disabled { opacity: 0.5; cursor: not-allowed; }
+    .color-item-row.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
+
+    [data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    /* --------------------------------------------- */
+
     .label { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .slider-container { position: relative; height: 36px; background-color: var(--slider-track); border-radius: var(--radius); overflow: hidden; }
     .slider-fill { position: absolute; height: 100%; background-color: var(--primary); border-radius: var(--radius) 0 0 var(--radius); transition: width 0.1s ease-out; }
@@ -839,7 +862,90 @@
     document.getElementById('generateBtn').addEventListener('click', () => { const settings = getSettings(); if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } });
     function resetPluginState() { document.getElementById('randomInput').value = 60; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; selectedEmojis = []; document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
-    function renderPreview() { const settings = getSettings(); previewSvg.innerHTML = ''; const globalZoom = settings.zoom / 10; previewParticles.forEach(p => { let el; const baseSize = 24; const finalScale = p.scale * globalZoom; const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`; if (p.isEmoji) { el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` }); el.textContent = p.shapeType; } else { const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); const fill = `rgb(${r}, ${g}, ${b})`; const opacity = p.color.a !== undefined ? p.color.a : 1; const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; if (p.shapeType === 'custom' && p.customPathData) { const pathScale = baseSize / 320; el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } } if(el) previewSvg.appendChild(el); }); }
+    
+    // --- UPDATED RENDER PREVIEW FUNCTION ---
+    function renderPreview() { 
+        const settings = getSettings(); 
+        previewSvg.innerHTML = ''; 
+        
+        // 1. Create a DEFS block for dynamic gradients
+        const defs = createSvgElement('defs', {});
+        previewSvg.appendChild(defs);
+
+        const globalZoom = settings.zoom / 10; 
+        
+        previewParticles.forEach((p, index) => { 
+            let el; 
+            const baseSize = 24; 
+            const finalScale = p.scale * globalZoom; 
+            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`; 
+            
+            if (p.isEmoji) { 
+                el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` }); 
+                el.textContent = p.shapeType; 
+            } else { 
+                // Color Logic Upgrade
+                let fill;
+                let opacity = 1;
+
+                if (!p.color) {
+                    // Fix: Default fallback color if none exists (startup state)
+                    fill = '#CBD5E1'; // Light grey/slate
+                } else if (p.color.type === 'linear') {
+                    // Fix: Construct SVG Linear Gradient
+                    const gradId = `p_grad_${index}`;
+                    const gradient = createSvgElement('linearGradient', {
+                        id: gradId,
+                        x1: '0%', y1: '0%',
+                        x2: p.color.isVertical ? '0%' : '100%',
+                        y2: p.color.isVertical ? '100%' : '0%'
+                    });
+                    
+                    p.color.gradientStops.forEach(stop => {
+                        const r = Math.round(stop.color.r * 255);
+                        const g = Math.round(stop.color.g * 255);
+                        const b = Math.round(stop.color.b * 255);
+                        const stopEl = createSvgElement('stop', {
+                            offset: `${stop.position * 100}%`,
+                            'stop-color': `rgb(${r},${g},${b})`,
+                            'stop-opacity': stop.color.a
+                        });
+                        gradient.appendChild(stopEl);
+                    });
+                    defs.appendChild(gradient);
+                    fill = `url(#${gradId})`;
+                } else {
+                    // Solid Color
+                    const r = Math.round(p.color.r * 255); 
+                    const g = Math.round(p.color.g * 255); 
+                    const b = Math.round(p.color.b * 255); 
+                    fill = `rgb(${r}, ${g}, ${b})`; 
+                    opacity = p.color.a !== undefined ? p.color.a : 1; 
+                }
+
+                const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; 
+                
+                if (p.shapeType === 'custom' && p.customPathData) { 
+                    const pathScale = baseSize / 320; 
+                    el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); 
+                } else if (p.shapeType === 'rectangle') { 
+                    el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); 
+                } else if (p.shapeType === 'square') { 
+                    el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); 
+                } else if (p.shapeType === 'circle') { 
+                    el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); 
+                } else if (p.shapeType === 'star') { 
+                    const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; 
+                    el = createSvgElement('polygon', { points: points, ...commonAttrs }); 
+                } else if (p.shapeType === 'wave') { 
+                    // Special handling for stroke vs fill
+                    el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); 
+                } 
+            } 
+            if(el) previewSvg.appendChild(el); 
+        }); 
+    }
+
     function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions: keepPositions, changeType: changeType } }, '*'); }
     window.onmessage = (event) => { const msg = event.data.pluginMessage; if (msg && msg.type === 'preview-data') { previewParticles = msg.particles; renderPreview(); } };
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
