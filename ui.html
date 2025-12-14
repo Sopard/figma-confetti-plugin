@@ -136,8 +136,30 @@
         background: var(--background); border-radius: 12px;
         box-shadow: var(--shadow-md); padding: 20px; z-index: 10;
         display: none; border: 1px solid var(--border); box-sizing: border-box;
-        flex-direction: column; min-height: 600px;
+        flex-direction: column; 
+        min-height: auto;
+        max-height: 85vh; /* Safety limit */
     }
+    
+    /* --- NEW MINI POPOVER STYLE --- */
+    .mini-color-popover {
+        position: fixed;
+        z-index: 100;
+        background: var(--background);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-md);
+        border-radius: 12px;
+        padding: 12px;
+        width: 260px;
+        display: none;
+    }
+    /* Compact shared picker styles when inside mini popover */
+    .mini-color-popover .cp-inputs-row { margin-bottom: 0; }
+    .mini-color-popover .cp-sat-bright-area { height: 160px; }
+    
+    #miniSaveBtn { margin-top: 12px; width: 100%; height: 32px; font-size: 13px; }
+    /* ------------------------------ */
+
     .cp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; flex-shrink: 0; }
     .cp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; }
     .cp-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
@@ -193,6 +215,7 @@
     .stop-pos-input { width: 100%; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-align: center; color: var(--foreground); }
     .stop-data-group { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; height: 32px; transition: border-color 0.2s; }
     .stop-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
+    /* MODIFIED: Removed readonly from stop-hex to make it editable */
     .stop-hex { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-transform: uppercase; width: 50px; }
     .stop-opacity-group { display: flex; align-items: center; gap: 2px; border-left: 1px solid #ddd; padding-left: 8px; }
     .stop-opacity { width: 28px; background: transparent; border: none; outline: none; font-size: 13px; }
@@ -206,6 +229,12 @@
   </style>
 </head>
 <body>
+
+  <div id="hiddenPickerStorage" style="display: none;"></div>
+  
+  <div id="miniColorPopover" class="mini-color-popover">
+      <button id="miniSaveBtn" class="btn btn-primary" onclick="event.stopPropagation(); closeMiniPopover()">Save</button>
+  </div>
 
   <div class="header">
     <div class="title"><span>🎉</span> Confetti Animator</div>
@@ -392,7 +421,9 @@
                 // create CSS gradient string for preview
                 const stops = colorData.stops;
                 const sorted = [...stops].sort((a,b)=>a.percent-b.percent);
-                const css = `linear-gradient(90deg, ${sorted.map(s => `${s.color} ${s.percent}%`).join(', ')})`;
+                // MODIFIED: Use 0deg for vertical, 90deg for horizontal (default)
+                const angle = colorData.isVertical ? '0deg' : '90deg';
+                const css = `linear-gradient(${angle}, ${sorted.map(s => `${s.color} ${s.percent}%`).join(', ')})`;
                 bgStyle = `background: ${css};`;
             } else {
                 hexDisplay = hslToHex(colorData.h, colorData.s, colorData.l);
@@ -440,7 +471,7 @@
     // --- POP OVER LOGIC (Updated) ---
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
     
-    // --- TAB LOGIC (Refactored for Shared Picker) ---
+    // --- TAB LOGIC ---
     let currentTab = 'solid';
     window.switchColorTab = function(tabName) {
         currentTab = tabName;
@@ -452,13 +483,20 @@
         if (tabName === 'solid') {
             document.getElementById('cpSolidContent').style.display = 'block';
             document.getElementById('cpLinearContent').style.display = 'none';
-            // Move picker to Solid Content
-            document.getElementById('cpSolidContent').insertBefore(sharedPicker, document.getElementById('cpSwatchGrid').parentElement);
+            // CLOSE MINI IF OPEN
+            document.getElementById('miniColorPopover').style.display = 'none';
+            // MOVE PICKER BACK TO SOLID CONTENT
+            const swatchGrid = document.getElementById('cpSwatchGrid');
+            if (swatchGrid && swatchGrid.parentElement) {
+                swatchGrid.parentElement.parentElement.insertBefore(sharedPicker, swatchGrid.parentElement);
+            }
         } else {
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
-            // Move picker to Linear Content (Replacing Preview)
-            document.getElementById('cpLinearContent').insertBefore(sharedPicker, document.getElementById('gradientSliderContainer'));
+            
+            // HIDE FROM MAIN FLOW (Move to storage)
+            document.getElementById('hiddenPickerStorage').appendChild(sharedPicker);
+            
             updateGradientVisuals(); 
         }
     }
@@ -480,7 +518,7 @@
     const gradientSliderContainer = document.getElementById('gradientSliderContainer');
     const gradientBar = document.getElementById('gradientBar');
     const stopsListContainer = document.getElementById('stopsListContainer');
-    // NOTE: Removed linearGradientPreview reference as it is replaced by the interactive picker
+    // Removed linearGradientPreview var
 
     let draggingHandleIndex = null;
 
@@ -512,11 +550,8 @@
             return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${s.alpha}) ${s.percent}%`;
         });
 
-        const cssGradient = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stopsCss.join(', ')})`;
-        
         // Bar is always horizontal
         gradientBar.style.background = `linear-gradient(90deg, ${stopsCss.join(', ')})`;
-        // NOTE: removed linearGradientPreview style update since the element is removed.
 
         renderStopsList();
     }
@@ -565,6 +600,59 @@
         updateGradientVisuals();
     }
 
+    // --- MINI POPOVER FUNCTIONS (UPDATED POSITIONING) ---
+    function openMiniColorPopover(e, idx) {
+        setActiveStop(idx);
+        const popover = document.getElementById('miniColorPopover');
+        const sharedPicker = document.getElementById('sharedPicker');
+        
+        // Move picker to mini popover BEFORE "Save" button
+        popover.insertBefore(sharedPicker, document.getElementById('miniSaveBtn'));
+        popover.style.display = 'block';
+
+        // --- POSITIONING LOGIC ---
+        // 1. Get Main Popover Rect
+        const mainPopover = document.getElementById('colorPickerPopover');
+        const mainRect = mainPopover.getBoundingClientRect();
+        
+        // 2. Calculate Position (Left side, aligned bottom)
+        const miniWidth = 286; // 260 width + 24 padding + 2 border
+        const miniHeight = 300; // approx height
+        const gap = 12;
+
+        let left = mainRect.left - miniWidth - gap;
+        let top = mainRect.bottom - miniHeight; // align bottom edges
+
+        // 3. Viewport Safety Check
+        if (left < 10) left = mainRect.right + gap; // Flip to right if no space on left
+        if (top < 10) top = 10;
+        
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
+
+        // Delay Adding Click Listener
+        setTimeout(() => document.addEventListener('click', closeMiniPopoverOnClickOutside), 0);
+    }
+
+    function closeMiniPopover() {
+        const popover = document.getElementById('miniColorPopover');
+        popover.style.display = 'none';
+        document.removeEventListener('click', closeMiniPopoverOnClickOutside);
+        // Move picker back to storage so it doesn't get lost
+        document.getElementById('hiddenPickerStorage').appendChild(document.getElementById('sharedPicker'));
+    }
+    
+    // Global exposure for the button onclick
+    window.closeMiniPopover = closeMiniPopover;
+
+    function closeMiniPopoverOnClickOutside(e) {
+        const popover = document.getElementById('miniColorPopover');
+        // Close if click outside mini popover AND not on a swatch
+        if (!popover.contains(e.target) && !e.target.classList.contains('stop-swatch')) {
+            closeMiniPopover();
+        }
+    }
+
     function renderStopsList() {
         stopsListContainer.innerHTML = '';
         gradientStops.forEach((stop, idx) => {
@@ -579,7 +667,7 @@
                 </div>
                 <div class="stop-data-group" onclick="setActiveStop(${idx})">
                     <div class="stop-swatch" style="background-color: ${stop.color};"></div>
-                    <input class="stop-hex" value="${stop.color.replace('#','')}" readonly> 
+                    <input class="stop-hex" value="${stop.color.replace('#','')}" maxlength="6"> 
                     <div class="stop-opacity-group">
                         <input class="stop-opacity" type="number" min="0" max="100" value="${Math.round(stop.alpha * 100)}" data-idx="${idx}">%
                     </div>
@@ -589,10 +677,36 @@
                 </div>
             `;
             
+            // Attach Swatch Click Listener
+            const swatch = div.querySelector('.stop-swatch');
+            swatch.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openMiniColorPopover(e, idx);
+            });
+
             // Attach Position Change Listener
             const posInput = div.querySelector('.stop-pos-input');
             posInput.addEventListener('change', (e) => updateStopPosition(e, idx));
-            posInput.addEventListener('click', (e) => e.stopPropagation()); // Prevent activating row on input click
+            posInput.addEventListener('click', (e) => e.stopPropagation()); 
+
+            // Attach HEX Change Listener (New Editable)
+            const hexInput = div.querySelector('.stop-hex');
+            hexInput.addEventListener('change', (e) => {
+                let val = e.target.value.trim();
+                // Basic validation
+                if (/^[0-9A-Fa-f]{6}$/.test(val)) {
+                    gradientStops[idx].color = '#' + val.toUpperCase();
+                    updateGradientVisuals();
+                    if(idx === activeStopIndex) {
+                        const hsl = hexToHsl('#' + val);
+                        pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
+                        updatePickerVisuals();
+                    }
+                } else {
+                    e.target.value = gradientStops[idx].color.replace('#',''); // revert on error
+                }
+            });
+            hexInput.addEventListener('click', (e) => e.stopPropagation()); // prevent row activation if clicking to type
 
             // Add Opacity listener
             const opInput = div.querySelector('.stop-opacity');
@@ -608,7 +722,6 @@
                     updatePickerVisuals();
                 }
             });
-            // Stop propagation on opacity input click to prevent re-triggering active stop logic unnecessarily
             opInput.addEventListener('click', (e) => e.stopPropagation());
 
             stopsListContainer.appendChild(div);
@@ -700,6 +813,8 @@
 
     document.getElementById('flipVerticalBtn').addEventListener('click', () => {
         isVerticalFlip = !isVerticalFlip;
+        // MODIFIED: Visual Feedback for button state
+        document.getElementById('flipVerticalBtn').style.backgroundColor = isVerticalFlip ? 'var(--muted-darker)' : 'transparent';
         updateGradientVisuals();
     });
 
@@ -775,6 +890,8 @@
             gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops));
             isVerticalFlip = colorToEdit.isVertical;
             activeStopIndex = 0;
+            // Visual Update for Button
+            document.getElementById('flipVerticalBtn').style.backgroundColor = isVerticalFlip ? 'var(--muted-darker)' : 'transparent';
             switchColorTab('linear'); // Switch to linear UI
             setActiveStop(0); // Trigger sync
         } else {
@@ -791,7 +908,22 @@
     function openPopover(triggerElement = addColorBtn) { if (colorState.isMultiColor) return; popover.style.visibility = 'hidden'; popover.style.display = 'flex'; if(editingColorIndex === -1) switchColorTab('solid'); const btnRect = triggerElement.getBoundingClientRect(); const popoverRect = popover.getBoundingClientRect(); const leftPos = btnRect.right + 12; const btnCenterY = btnRect.top + (btnRect.height / 2); let topPos = btnCenterY - (popoverRect.height / 2); const padding = 10; topPos = Math.max(padding, topPos); const maxTop = window.innerHeight - popoverRect.height - padding; topPos = Math.min(topPos, maxTop); popover.style.left = `${leftPos}px`; popover.style.top = `${topPos}px`; popover.style.visibility = 'visible'; currentTriggerElement = triggerElement; document.addEventListener('click', closePopoverOnClickOutside); }
     let currentTriggerElement = null;
     function closePopover() { popover.style.display = 'none'; document.removeEventListener('click', closePopoverOnClickOutside); currentTriggerElement = null; editingColorIndex = -1; }
-    function closePopoverOnClickOutside(event) { const isClickInsidePopover = popover.contains(event.target); const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { closePopover(); } }
+    
+    // MODIFIED: Ignore clicks inside the mini popover to prevent closing main popover
+    function closePopoverOnClickOutside(event) { 
+        const miniPopover = document.getElementById('miniColorPopover');
+        // If clicking inside the mini popover, DO NOT close the main popover
+        if (miniPopover.style.display === 'block' && miniPopover.contains(event.target)) {
+            return;
+        }
+
+        const isClickInsidePopover = popover.contains(event.target); 
+        const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); 
+        
+        if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { 
+            closePopover(); 
+        } 
+    }
     
     addColorBtn.addEventListener('click', () => { 
         editingColorIndex = -1; 
@@ -803,6 +935,8 @@
             { percent: 100, color: '#823D99', alpha: 1 }
         ];
         isVerticalFlip = false;
+        // Visual Update for Button
+        document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent';
         activeStopIndex = 0;
         
         updatePickerVisuals(); 
@@ -923,90 +1057,7 @@
     document.getElementById('generateBtn').addEventListener('click', () => { const settings = getSettings(); if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } });
     function resetPluginState() { document.getElementById('randomInput').value = 60; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; selectedEmojis = []; document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
-    
-    // --- UPDATED RENDER PREVIEW FUNCTION ---
-    function renderPreview() { 
-        const settings = getSettings(); 
-        previewSvg.innerHTML = ''; 
-        
-        // 1. Create a DEFS block for dynamic gradients
-        const defs = createSvgElement('defs', {});
-        previewSvg.appendChild(defs);
-
-        const globalZoom = settings.zoom / 10; 
-        
-        previewParticles.forEach((p, index) => { 
-            let el; 
-            const baseSize = 24; 
-            const finalScale = p.scale * globalZoom; 
-            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`; 
-            
-            if (p.isEmoji) { 
-                el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` }); 
-                el.textContent = p.shapeType; 
-            } else { 
-                // Color Logic Upgrade
-                let fill;
-                let opacity = 1;
-
-                if (!p.color) {
-                    // Fix: Default fallback color if none exists (startup state)
-                    fill = '#CBD5E1'; // Light grey/slate
-                } else if (p.color.type === 'linear') {
-                    // Fix: Construct SVG Linear Gradient
-                    const gradId = `p_grad_${index}`;
-                    const gradient = createSvgElement('linearGradient', {
-                        id: gradId,
-                        x1: '0%', y1: '0%',
-                        x2: p.color.isVertical ? '0%' : '100%',
-                        y2: p.color.isVertical ? '100%' : '0%'
-                    });
-                    
-                    p.color.gradientStops.forEach(stop => {
-                        const r = Math.round(stop.color.r * 255);
-                        const g = Math.round(stop.color.g * 255);
-                        const b = Math.round(stop.color.b * 255);
-                        const stopEl = createSvgElement('stop', {
-                            offset: `${stop.position * 100}%`,
-                            'stop-color': `rgb(${r},${g},${b})`,
-                            'stop-opacity': stop.color.a
-                        });
-                        gradient.appendChild(stopEl);
-                    });
-                    defs.appendChild(gradient);
-                    fill = `url(#${gradId})`;
-                } else {
-                    // Solid Color
-                    const r = Math.round(p.color.r * 255); 
-                    const g = Math.round(p.color.g * 255); 
-                    const b = Math.round(p.color.b * 255); 
-                    fill = `rgb(${r}, ${g}, ${b})`; 
-                    opacity = p.color.a !== undefined ? p.color.a : 1; 
-                }
-
-                const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; 
-                
-                if (p.shapeType === 'custom' && p.customPathData) { 
-                    const pathScale = baseSize / 320; 
-                    el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); 
-                } else if (p.shapeType === 'rectangle') { 
-                    el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); 
-                } else if (p.shapeType === 'square') { 
-                    el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); 
-                } else if (p.shapeType === 'circle') { 
-                    el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); 
-                } else if (p.shapeType === 'star') { 
-                    const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; 
-                    el = createSvgElement('polygon', { points: points, ...commonAttrs }); 
-                } else if (p.shapeType === 'wave') { 
-                    // Special handling for stroke vs fill
-                    el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); 
-                } 
-            } 
-            if(el) previewSvg.appendChild(el); 
-        }); 
-    }
-
+    function renderPreview() { const settings = getSettings(); previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); const globalZoom = settings.zoom / 10; previewParticles.forEach((p, index) => { let el; const baseSize = 24; const finalScale = p.scale * globalZoom; const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`; if (p.isEmoji) { el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` }); el.textContent = p.shapeType; } else { let fill; let opacity = 1; if (!p.color) { fill = '#CBD5E1'; } else if (p.color.type === 'linear') { const gradId = `p_grad_${index}`; const gradient = createSvgElement('linearGradient', { id: gradId, x1: '0%', y1: '0%', x2: p.color.isVertical ? '0%' : '100%', y2: p.color.isVertical ? '100%' : '0%' }); p.color.gradientStops.forEach(stop => { const r = Math.round(stop.color.r * 255); const g = Math.round(stop.color.g * 255); const b = Math.round(stop.color.b * 255); const stopEl = createSvgElement('stop', { offset: `${stop.position * 100}%`, 'stop-color': `rgb(${r},${g},${b})`, 'stop-opacity': stop.color.a }); gradient.appendChild(stopEl); }); defs.appendChild(gradient); fill = `url(#${gradId})`; } else { const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); fill = `rgb(${r}, ${g}, ${b})`; opacity = p.color.a !== undefined ? p.color.a : 1; } const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; if (p.shapeType === 'custom' && p.customPathData) { const pathScale = baseSize / 320; el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } } if(el) previewSvg.appendChild(el); }); }
     function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions: keepPositions, changeType: changeType } }, '*'); }
     window.onmessage = (event) => { const msg = event.data.pluginMessage; if (msg && msg.type === 'preview-data') { previewParticles = msg.particles; renderPreview(); } };
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
