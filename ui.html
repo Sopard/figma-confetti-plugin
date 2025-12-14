@@ -19,18 +19,10 @@
     }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: var(--background); color: var(--foreground); height: 100vh; display: flex; flex-direction: column; }
 
-    /* --- GLOBAL INPUT TWEAKS (ARROWS & ALIGNMENT) --- */
-    /* Remove Spinners */
+    /* --- GLOBAL INPUT TWEAKS --- */
     input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"] {
-      -moz-appearance: textfield; /* Firefox */
-      text-align: center; /* Center Content */
-    }
-    /* ------------------------------------------------ */
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; text-align: center; }
 
     /* LAYOUT */
     .header { height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -50,18 +42,9 @@
 
     [data-tooltip]:hover::after {
         content: attr(data-tooltip);
-        position: absolute;
-        bottom: 110%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #1e293b;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        white-space: nowrap;
-        pointer-events: none;
-        z-index: 100;
+        position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+        background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px;
+        font-size: 11px; white-space: nowrap; pointer-events: none; z-index: 100;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
@@ -99,8 +82,6 @@
     .color-item-row { display: flex; align-items: center; gap: 12px; transition: opacity 0.3s; padding: 4px 0; }
     .color-preview-sq { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; cursor: pointer; }
     .color-hex-text { flex: 1; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
-    
-    /* MODIFIED: Increased width from 36px to 48px to prevent cutoff */
     .color-percent-input { width: 48px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--foreground); border: 1px solid transparent; background: transparent; border-radius: 4px; padding: 2px 4px; }
     
     /* SHAPES */
@@ -214,8 +195,6 @@
     .stop-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
     .stop-hex { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-transform: uppercase; width: 50px; }
     .stop-opacity-group { display: flex; align-items: center; gap: 2px; border-left: 1px solid #ddd; padding-left: 8px; }
-    
-    /* MODIFIED: Removed text-align: right to inherit global center */
     .stop-opacity { width: 28px; background: transparent; border: none; outline: none; font-size: 13px; }
     
     .stop-remove-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; color: #888; margin-left: 4px; }
@@ -284,9 +263,11 @@
       <div class="cp-content-scrollable">
           
           <div id="cpSolidContent">
-              <div class="cp-sat-bright-area" id="cpSatBrightArea"><div class="cp-sb-selector" id="cpSbSelector"></div></div>
-              <div class="cp-sliders"><div class="cp-slider-track cp-hue-slider" id="cpHueSlider"><div class="cp-slider-thumb" id="cpHueThumb"></div></div><div class="cp-slider-track cp-alpha-slider" id="cpAlphaSlider"><div class="cp-alpha-slider-bar" id="cpAlphaBar"></div><div class="cp-slider-thumb" id="cpAlphaThumb"></div></div></div>
-              <div class="cp-inputs-row"><div class="cp-input-wrapper cp-hex-wrapper"><span>Hex</span><input type="text" id="cpHexInput" class="cp-input-field" value="FF0000" maxlength="6"></div><div class="cp-input-wrapper cp-alpha-wrapper"><input type="number" id="cpAlphaInput" class="cp-input-field" value="100" min="0" max="100"><span>%</span></div></div>
+              <div id="sharedPicker">
+                  <div class="cp-sat-bright-area" id="cpSatBrightArea"><div class="cp-sb-selector" id="cpSbSelector"></div></div>
+                  <div class="cp-sliders"><div class="cp-slider-track cp-hue-slider" id="cpHueSlider"><div class="cp-slider-thumb" id="cpHueThumb"></div></div><div class="cp-slider-track cp-alpha-slider" id="cpAlphaSlider"><div class="cp-alpha-slider-bar" id="cpAlphaBar"></div><div class="cp-slider-thumb" id="cpAlphaThumb"></div></div></div>
+                  <div class="cp-inputs-row"><div class="cp-input-wrapper cp-hex-wrapper"><span>Hex</span><input type="text" id="cpHexInput" class="cp-input-field" value="FF0000" maxlength="6"></div><div class="cp-input-wrapper cp-alpha-wrapper"><input type="number" id="cpAlphaInput" class="cp-input-field" value="100" min="0" max="100"><span>%</span></div></div>
+              </div>
               <div class="cp-swatches-section"><div class="label" style="margin-bottom: 8px;">Preset Colors</div><div class="cp-swatch-grid" id="cpSwatchGrid"></div></div>
           </div>
 
@@ -313,8 +294,6 @@
                       </button>
                   </div>
               </div>
-
-              <div class="cp-sat-bright-area" id="linearGradientPreview" style="margin-bottom:8px; height: 120px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%);"></div>
 
               <div class="gradient-slider-container" id="gradientSliderContainer">
                   <div class="gradient-bar" id="gradientBar"></div>
@@ -461,18 +440,25 @@
     // --- POP OVER LOGIC (Updated) ---
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
     
-    // --- TAB LOGIC ---
+    // --- TAB LOGIC (Refactored for Shared Picker) ---
     let currentTab = 'solid';
     window.switchColorTab = function(tabName) {
         currentTab = tabName;
         document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
         document.querySelector(`.cp-tab[data-tab="${tabName}"]`).classList.add('active');
+        
+        const sharedPicker = document.getElementById('sharedPicker');
+        
         if (tabName === 'solid') {
             document.getElementById('cpSolidContent').style.display = 'block';
             document.getElementById('cpLinearContent').style.display = 'none';
+            // Move picker to Solid Content
+            document.getElementById('cpSolidContent').insertBefore(sharedPicker, document.getElementById('cpSwatchGrid').parentElement);
         } else {
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
+            // Move picker to Linear Content (Replacing Preview)
+            document.getElementById('cpLinearContent').insertBefore(sharedPicker, document.getElementById('gradientSliderContainer'));
             updateGradientVisuals(); 
         }
     }
@@ -494,7 +480,7 @@
     const gradientSliderContainer = document.getElementById('gradientSliderContainer');
     const gradientBar = document.getElementById('gradientBar');
     const stopsListContainer = document.getElementById('stopsListContainer');
-    const linearGradientPreview = document.getElementById('linearGradientPreview');
+    // NOTE: Removed linearGradientPreview reference as it is replaced by the interactive picker
 
     let draggingHandleIndex = null;
 
@@ -530,7 +516,7 @@
         
         // Bar is always horizontal
         gradientBar.style.background = `linear-gradient(90deg, ${stopsCss.join(', ')})`;
-        linearGradientPreview.style.background = cssGradient;
+        // NOTE: removed linearGradientPreview style update since the element is removed.
 
         renderStopsList();
     }
@@ -559,6 +545,26 @@
         }
     }
 
+    function updateStopPosition(e, index) {
+        let val = parseInt(e.target.value);
+        if (isNaN(val)) val = 0;
+        val = Math.max(0, Math.min(100, val));
+        
+        // Get the active object BEFORE sort
+        const activeObj = gradientStops[activeStopIndex];
+        
+        // Update
+        gradientStops[index].percent = val;
+        
+        // Sort
+        gradientStops.sort((a,b) => a.percent - b.percent);
+        
+        // Re-find Active Index
+        activeStopIndex = gradientStops.indexOf(activeObj);
+        
+        updateGradientVisuals();
+    }
+
     function renderStopsList() {
         stopsListContainer.innerHTML = '';
         gradientStops.forEach((stop, idx) => {
@@ -566,10 +572,10 @@
             div.className = 'stop-row';
             if (idx === activeStopIndex) div.classList.add('active');
             
-            // New Layout
+            // New Layout with EDITABLE Position
             div.innerHTML = `
                 <div class="stop-pos-group">
-                    <input class="stop-pos-input" value="${Math.round(stop.percent)}" readonly>%
+                    <input class="stop-pos-input" type="number" min="0" max="100" value="${Math.round(stop.percent)}">%
                 </div>
                 <div class="stop-data-group" onclick="setActiveStop(${idx})">
                     <div class="stop-swatch" style="background-color: ${stop.color};"></div>
@@ -583,6 +589,11 @@
                 </div>
             `;
             
+            // Attach Position Change Listener
+            const posInput = div.querySelector('.stop-pos-input');
+            posInput.addEventListener('change', (e) => updateStopPosition(e, idx));
+            posInput.addEventListener('click', (e) => e.stopPropagation()); // Prevent activating row on input click
+
             // Add Opacity listener
             const opInput = div.querySelector('.stop-opacity');
             opInput.addEventListener('change', (e) => {
@@ -641,7 +652,10 @@
             gradientStops.push(newStop);
         }
         
-        activeStopIndex = gradientStops.length - 1;
+        // Re-sort to find new index
+        gradientStops.sort((a,b) => a.percent - b.percent);
+        activeStopIndex = gradientStops.indexOf(gradientStops.find(s => s.percent === newPercent || s === gradientStops[gradientStops.length-1]));
+        
         updateGradientVisuals();
     });
 
