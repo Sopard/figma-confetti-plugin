@@ -163,7 +163,6 @@ function initializeParticlePool(settings, bounds) {
 }
 
 // --- STYLE UPDATE HELPER ---
-// Handles partial updates (Color, Scale, Rotation) separately to prevent unwanted randomization of other properties.
 function updateStyleAttributes(particles, settings, changeType) {
     const colorPalette = getColorPalette(settings);
     const zoom = validateNum(settings.zoom, 0, 50, 10);
@@ -182,18 +181,15 @@ function updateStyleAttributes(particles, settings, changeType) {
         }
 
         // 2. UPDATE SCALE
-        // Only recalculate scale if 'scale' is requested (or full update)
         if (changeType === 'scale' || !changeType) {
             let scaleFactor = zoom / 10;
             if (randomizeSize) {
-                 // We re-roll random size, but only if specifically updating scale
                  scaleFactor *= (0.5 + Math.random());
             }
             updates.scale = Math.max(scaleFactor, 0.1);
         }
 
         // 3. UPDATE ROTATION
-        // Only recalculate rotation if 'rotation' is requested (or full update)
         if (changeType === 'rotation' || !changeType) {
             updates.initialRotation = randomizeRotation ? Math.random() * 360 : 0;
             updates.rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness : 0;
@@ -295,6 +291,7 @@ async function createFigmaShapeNode(particleData) {
   return node;
 }
 
+// CHANGED: Removed solid fill, now uses empty array for transparency
 function createBaseFrame(x_pos, name) {
   const frameWidth = 1440;
   const frameHeight = 1080; 
@@ -303,7 +300,8 @@ function createBaseFrame(x_pos, name) {
   frame.resize(frameWidth, frameHeight);
   frame.x = x_pos; 
   frame.clipsContent = true; 
-  frame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
+  // Transparent background
+  frame.fills = []; 
   figma.currentPage.appendChild(frame);
   return frame;
 }
@@ -386,7 +384,7 @@ async function createFinalConfettiOnCanvas(settings) {
     const innerFrame = figma.createFrame();
     innerFrame.name = "Particle Container";
     innerFrame.resize(frameWidth, frameHeight);
-    innerFrame.fills = []; 
+    innerFrame.fills = []; // Inner frame is already transparent
     innerFrame.clipsContent = false; 
 
     figma.notify(`Calculating Frame ${i + 1}/${frameCount}...`);
@@ -440,10 +438,8 @@ figma.ui.onmessage = async (msg) => {
     const simulatedFrameIndex = 10; 
     
     if (msg.keepPositions && cachedParticles.length > 0) {
-        // Pass changeType ('scale', 'rotation', or 'color')
         cachedParticles = updateStyleAttributes(cachedParticles, msg.settings, msg.changeType);
     } else {
-        // Full Regeneration
         const settingsWithFrameCount = Object.assign({}, msg.settings, { frameCount: simulatedTotalFrames });
         cachedParticles = initializeParticlePool(settingsWithFrameCount, previewBounds);
     }
