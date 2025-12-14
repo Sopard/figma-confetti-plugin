@@ -1,12 +1,10 @@
 // code.js
 
-// Set UI dimensions
 figma.showUI(__html__, { width: 960, height: 800, themeColors: false });
 
-// --- GLOBAL CACHE FOR PREVIEW ---
 let cachedParticles = [];
 
-// --- HELPER FUNCTIONS ---
+// --- HELPERS ---
 
 function validateNum(val, min, max, def) {
   const num = parseFloat(val);
@@ -14,50 +12,65 @@ function validateNum(val, min, max, def) {
   return num;
 }
 
-// Helper to convert HSL to Figma RGBA format (returns floats 0-1)
 function hslToRgba(h, s, l, a) {
-  s /= 100;
-  l /= 100;
+  s /= 100; l /= 100;
   const k = (n) => (n + h / 30) % 12;
   const a_hsl = s * Math.min(l, 1 - l);
   const f = (n) => l - a_hsl * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
-  return {
-    r: f(0),
-    g: f(8),
-    b: f(4),
-    a: a !== undefined ? a : 1.0,
-  };
+  return { r: f(0), g: f(8), b: f(4), a: a !== undefined ? a : 1.0 };
 }
 
-// --- COLOR PALETTE GENERATOR ---
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16) / 255,
+    g: parseInt(result[2], 16) / 255,
+    b: parseInt(result[3], 16) / 255
+  } : { r: 0, g: 0, b: 0 };
+}
+
+// --- PALETTE GENERATOR ---
 function getColorPalette(settings) {
     if (settings.shapeTab === 'emoji') return [];
 
     if (settings.colorData.isMultiColor) {
         return [
-          { r: 1, g: 0.2, b: 0.2, a: 1 },
-          { r: 1, g: 0.6, b: 0, a: 1 },
-          { r: 1, g: 0.9, b: 0, a: 1 },
-          { r: 0.2, g: 0.8, b: 0.2, a: 1 },
-          { r: 0.2, g: 0.6, b: 1, a: 1 },
-          { r: 0.6, g: 0.2, b: 0.8, a: 1 },
+          { type: 'solid', r: 1, g: 0.2, b: 0.2, a: 1 },
+          { type: 'solid', r: 1, g: 0.6, b: 0, a: 1 },
+          { type: 'solid', r: 1, g: 0.9, b: 0, a: 1 },
+          { type: 'solid', r: 0.2, g: 0.8, b: 0.2, a: 1 },
+          { type: 'solid', r: 0.2, g: 0.6, b: 1, a: 1 },
+          { type: 'solid', r: 0.6, g: 0.2, b: 0.8, a: 1 },
         ];
     } else {
-        const palette = settings.colorData.customColors.map((hsla) =>
-          hslToRgba(hsla.h, hsla.s, hsla.l, hsla.a)
-        );
-        if (palette.length === 0) {
-          return [{ r: 0.5, g: 0.5, b: 0.5, a: 1.0 }];
-        }
-        return palette;
+        return settings.colorData.customColors.map((c) => {
+            if (c.type === 'linear') {
+                // Pre-process stops for Figma
+                const figmaStops = c.stops.map(stop => {
+                    const rgb = hexToRgb(stop.color);
+                    return {
+                        position: stop.percent / 100,
+                        color: { r: rgb.r, g: rgb.g, b: rgb.b, a: stop.alpha }
+                    };
+                });
+                return {
+                    type: 'linear',
+                    gradientStops: figmaStops,
+                    isVertical: c.isVertical
+                };
+            } else {
+                // It's HSLA (Solid)
+                const rgba = hslToRgba(c.h, c.s, c.l, c.a);
+                rgba.type = 'solid';
+                return rgba;
+            }
+        });
     }
 }
 
-// --- CORE DATA GENERATOR (Creates Geometry & Physics) ---
-
+// --- DATA POOL ---
 function initializeParticlePool(settings, bounds) {
   const { width: boundsWidth, height: boundsHeight } = bounds;
-
   const randomness = validateNum(settings.randomness, 0, 100, 60) / 100; 
   const amount = validateNum(settings.amount, 0, 100, 60);
   const zoom = validateNum(settings.zoom, 0, 50, 10);
@@ -72,73 +85,44 @@ function initializeParticlePool(settings, bounds) {
   if (isEmojiMode) {
       if (Array.isArray(settings.selectedEmojis) && settings.selectedEmojis.length > 0) {
           shapesToUse = settings.selectedEmojis;
-      } else {
-          shapesToUse = ['😀']; 
-      }
+      } else { shapesToUse = ['😀']; }
   } else if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
       shapesToUse = settings.selectedShapes;
-  } else {
-      shapesToUse = ['rectangle', 'circle', 'star'];
-  }
+  } else { shapesToUse = ['rectangle', 'circle', 'star']; }
 
   const colorPalette = getColorPalette(settings);
-
   const baseDivider = 3000;
   const densityMultiplier = 0.1 + (amount / 100) * 2.9; 
-  const currentArea = boundsWidth * boundsHeight;
-  const count = Math.floor((currentArea / baseDivider) * densityMultiplier);
-
+  const count = Math.floor((boundsWidth * boundsHeight / baseDivider) * densityMultiplier);
   const particles = [];
 
   for (let i = 0; i < count; i++) {
     const shapeIdentifier = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
     
-    let colorBtn = null;
+    let colorObj = null;
     if (!isEmojiMode && colorPalette.length > 0) {
-         colorBtn = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+         colorObj = colorPalette[Math.floor(Math.random() * colorPalette.length)];
     }
 
     const baseReferenceSize = 20; 
     let baseWidth = baseReferenceSize;
     let baseHeight = baseReferenceSize;
     
-    if (shapeIdentifier === 'rectangle') {
-        baseWidth = baseReferenceSize * 1.5;
-        baseHeight = baseReferenceSize * 0.9;
-    }
-    if (isEmojiMode || shapeIdentifier === 'custom') {
-         baseWidth = baseReferenceSize * 1.2;
-         baseHeight = baseReferenceSize * 1.2;
-    }
-    if (shapeIdentifier === 'wave') {
-         baseWidth = baseReferenceSize * 1.0;
-         baseHeight = baseReferenceSize * 1.4;
-    }
+    if (shapeIdentifier === 'rectangle') { baseWidth = baseReferenceSize * 1.5; baseHeight = baseReferenceSize * 0.9; }
+    if (isEmojiMode || shapeIdentifier === 'custom') { baseWidth = baseReferenceSize * 1.2; baseHeight = baseReferenceSize * 1.2; }
+    if (shapeIdentifier === 'wave') { baseWidth = baseReferenceSize * 1.0; baseHeight = baseReferenceSize * 1.4; }
 
     let scaleFactor = zoom / 10;
-    if (randomizeSize) {
-      scaleFactor *= (0.5 + Math.random());
-    }
+    if (randomizeSize) scaleFactor *= (0.5 + Math.random());
     scaleFactor = Math.max(scaleFactor, 0.1);
     const actualHeight = baseHeight * scaleFactor;
 
-    const estimatedFinalWidth = baseWidth * scaleFactor;
-    const safeMaxX = Math.max(0, boundsWidth - estimatedFinalWidth);
-    const xPos = Math.random() * safeMaxX;
-
-    const startBuffer = 50; 
-    const verticalSpread = boundsHeight * 1.5;
-    const randomYOffset = Math.random() * verticalSpread;
-    const startY = -actualHeight - startBuffer - randomYOffset;
+    const xPos = Math.random() * Math.max(0, boundsWidth - (baseWidth * scaleFactor));
+    const startY = -actualHeight - 50 - (Math.random() * boundsHeight * 1.5);
+    const targetEndY = boundsHeight + ((speedSetting / 100) * boundsHeight * 2);
     
-    const extraDistance = (speedSetting / 100) * boundsHeight * 2;
-    const targetEndY = boundsHeight + extraDistance;
-
-    const totalDistanceToTravel = targetEndY - startY;
     const steps = Math.max(1, totalFrames - 1);
-    const basePixelsPerFrame = totalDistanceToTravel / steps;
-    const individualVariance = 1 + ((Math.random() - 0.5) * 0.6 * randomness);
-    const finalPixelsPerFrame = basePixelsPerFrame * individualVariance;
+    const finalPixelsPerFrame = ((targetEndY - startY) / steps) * (1 + ((Math.random() - 0.5) * 0.6 * randomness));
 
     const initialRotation = randomizeRotation ? Math.random() * 360 : 0;
     const rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness : 0;
@@ -147,7 +131,7 @@ function initializeParticlePool(settings, bounds) {
       isEmoji: isEmojiMode,
       shapeType: shapeIdentifier,
       customPathData: shapeIdentifier === 'custom' ? settings.customShapePath : null,
-      color: colorBtn,
+      color: colorObj,
       baseWidth: baseWidth,
       baseHeight: baseHeight,
       scale: scaleFactor,
@@ -158,11 +142,9 @@ function initializeParticlePool(settings, bounds) {
       rotationSpeed: rotationSpeed
     });
   }
-
   return particles;
 }
 
-// --- STYLE UPDATE HELPER ---
 function updateStyleAttributes(particles, settings, changeType) {
     const colorPalette = getColorPalette(settings);
     const zoom = validateNum(settings.zoom, 0, 50, 10);
@@ -172,45 +154,32 @@ function updateStyleAttributes(particles, settings, changeType) {
 
     return particles.map(p => {
         let updates = {};
-
-        // 1. UPDATE COLOR
         if (changeType === 'color' || !changeType) {
             if (!p.isEmoji && colorPalette.length > 0) {
                  updates.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
             }
         }
-
-        // 2. UPDATE SCALE
         if (changeType === 'scale' || !changeType) {
             let scaleFactor = zoom / 10;
-            if (randomizeSize) {
-                 scaleFactor *= (0.5 + Math.random());
-            }
+            if (randomizeSize) scaleFactor *= (0.5 + Math.random());
             updates.scale = Math.max(scaleFactor, 0.1);
         }
-
-        // 3. UPDATE ROTATION
         if (changeType === 'rotation' || !changeType) {
             updates.initialRotation = randomizeRotation ? Math.random() * 360 : 0;
             updates.rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness : 0;
         }
-
         return Object.assign({}, p, updates);
     });
 }
 
 function getParticleStateForFrame(particle, frameIndex) {
-    const currentY = particle.startY + (particle.pixelsPerFrame * frameIndex);
-    const currentRotation = particle.initialRotation + (particle.rotationSpeed * frameIndex);
     return Object.assign({}, particle, {
-        y: currentY,
-        rotation: currentRotation
+        y: particle.startY + (particle.pixelsPerFrame * frameIndex),
+        rotation: particle.initialRotation + (particle.rotationSpeed * frameIndex)
     });
 }
 
-
-// --- NODE CREATION & FRAME GENERATION ---
-
+// --- NODE CREATION ---
 async function createFigmaShapeNode(particleData) {
   const { shapeType, isEmoji, baseWidth, baseHeight, customPathData } = particleData;
   let node;
@@ -280,28 +249,19 @@ async function createFigmaShapeNode(particleData) {
               node.resize(baseWidth, baseHeight);
           }
           break;
-        default: break;
+        default: node = figma.createEllipse(); node.resize(baseWidth, baseHeight); break;
       }
-  }
-
-  if (!node) {
-      node = figma.createEllipse();
-      node.resize(baseWidth, baseHeight);
   }
   return node;
 }
 
-// CHANGED: Removed solid fill, now uses empty array for transparency
 function createBaseFrame(x_pos, name) {
-  const frameWidth = 1440;
-  const frameHeight = 1080; 
   const frame = figma.createFrame();
   frame.name = name;
-  frame.resize(frameWidth, frameHeight);
+  frame.resize(1440, 1080);
   frame.x = x_pos; 
   frame.clipsContent = true; 
-  // Transparent background
-  frame.fills = []; 
+  frame.fills = []; // Transparent background
   figma.currentPage.appendChild(frame);
   return frame;
 }
@@ -327,16 +287,38 @@ async function populateFrameWithConfetti(frame, particleDataList) {
     }
       
     if (!p.isEmoji && p.color) {
+        // Construct Fill Object
+        let newFill;
+        if (p.color.type === 'linear') {
+            // Apply Gradient
+            const matrix = p.color.isVertical 
+                ? [[0, 1, 0], [-1, 0, 1]] // 90deg rotation approximation
+                : [[1, 0, 0], [0, 1, 0]]; // Standard horizontal
+            
+            newFill = {
+                type: 'GRADIENT_LINEAR',
+                gradientStops: p.color.gradientStops,
+                gradientTransform: matrix
+            };
+        } else {
+            // Apply Solid
+            newFill = { 
+                type: 'SOLID', 
+                color: { r: p.color.r, g: p.color.g, b: p.color.b }, 
+                opacity: p.color.a 
+            };
+        }
+
         if (p.shapeType === 'wave') {
              if ('strokes' in node) {
-                 node.strokes = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+                 node.strokes = [newFill];
                  const weight = Math.max(1.5, 3 * p.scale); 
                  node.strokeWeight = weight;
                  node.fills = [];
              }
         } else {
             if ('fills' in node) {
-                node.fills = [{ type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a }];
+                node.fills = [newFill];
             }
         }
     }
@@ -374,17 +356,15 @@ async function createFinalConfettiOnCanvas(settings) {
 
   for (let i = 0; i < frameCount; i++) {
     const xPos = i * (frameWidth + gap);
-    let frameName = `Confetti Seq - Frame ${i + 1}`;
-    if (i === 0) frameName += " (Start)";
-    if (i === frameCount - 1) frameName += " (End)";
-
+    const frameName = `Confetti Seq - Frame ${i + 1}`;
+    
     const outerFrame = createBaseFrame(xPos, frameName);
     createdOuterFrames.push(outerFrame);
 
     const innerFrame = figma.createFrame();
     innerFrame.name = "Particle Container";
     innerFrame.resize(frameWidth, frameHeight);
-    innerFrame.fills = []; // Inner frame is already transparent
+    innerFrame.fills = []; 
     innerFrame.clipsContent = false; 
 
     figma.notify(`Calculating Frame ${i + 1}/${frameCount}...`);
@@ -429,36 +409,21 @@ function createEmptyConfettiFrame() {
   figma.viewport.scrollAndZoomIntoView([frame]);
 }
 
-// --- MAIN MESSAGE ROUTER ---
-
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'preview-confetti') {
     const previewBounds = { width: 1440, height: 1080 };
-    const simulatedTotalFrames = 20;
-    const simulatedFrameIndex = 10; 
-    
     if (msg.keepPositions && cachedParticles.length > 0) {
         cachedParticles = updateStyleAttributes(cachedParticles, msg.settings, msg.changeType);
     } else {
-        const settingsWithFrameCount = Object.assign({}, msg.settings, { frameCount: simulatedTotalFrames });
+        const settingsWithFrameCount = Object.assign({}, msg.settings, { frameCount: 20 });
         cachedParticles = initializeParticlePool(settingsWithFrameCount, previewBounds);
     }
-
-    const previewData = cachedParticles.map(p => getParticleStateForFrame(p, simulatedFrameIndex));
+    const previewData = cachedParticles.map(p => getParticleStateForFrame(p, 10));
     figma.ui.postMessage({ type: 'preview-data', particles: previewData });
   }
   else if (msg.type === 'generate-confetti') {
-    try {
-        await createFinalConfettiOnCanvas(msg.settings);
-    } catch (e) {
-        figma.notify("Error generating: " + e.message, { error: true });
-        console.error(e);
-    }
+    try { await createFinalConfettiOnCanvas(msg.settings); } catch (e) { figma.notify("Error: " + e.message, { error: true }); }
   }
-  else if (msg.type === 'generate-empty-frame') {
-    createEmptyConfettiFrame();
-  }
-  else if (msg.type === 'close-plugin') {
-    figma.closePlugin();
-  }
+  else if (msg.type === 'generate-empty-frame') { createEmptyConfettiFrame(); }
+  else if (msg.type === 'close-plugin') { figma.closePlugin(); }
 };
