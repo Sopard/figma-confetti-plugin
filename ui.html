@@ -324,6 +324,8 @@
                   </div>
               </div>
 
+              <div class="cp-sat-bright-area" id="linearGradientPreviewBlock" style="height: 120px; margin-bottom: 16px;"></div>
+
               <div class="gradient-slider-container" id="gradientSliderContainer">
                   <div class="gradient-bar" id="gradientBar"></div>
                   </div>
@@ -550,8 +552,14 @@
             return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${s.alpha}) ${s.percent}%`;
         });
 
+        const cssGradient = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stopsCss.join(', ')})`;
+        
         // Bar is always horizontal
         gradientBar.style.background = `linear-gradient(90deg, ${stopsCss.join(', ')})`;
+        
+        // MODIFIED: Update the new big preview block
+        const previewBlock = document.getElementById('linearGradientPreviewBlock');
+        if(previewBlock) previewBlock.style.background = cssGradient;
 
         renderStopsList();
     }
@@ -600,7 +608,7 @@
         updateGradientVisuals();
     }
 
-    // --- MINI POPOVER FUNCTIONS (UPDATED POSITIONING) ---
+    // --- MINI POPOVER FUNCTIONS (UPDATED POSITIONING & STACK BEHAVIOR) ---
     function openMiniColorPopover(e, idx) {
         setActiveStop(idx);
         const popover = document.getElementById('miniColorPopover');
@@ -630,7 +638,10 @@
         popover.style.top = `${top}px`;
         popover.style.left = `${left}px`;
 
-        // Delay Adding Click Listener
+        // MODIFIED: Remove main listener temporarily so clicking outside doesn't close main popover
+        document.removeEventListener('click', closePopoverOnClickOutside);
+        
+        // Delay Adding Mini Click Listener
         setTimeout(() => document.addEventListener('click', closeMiniPopoverOnClickOutside), 0);
     }
 
@@ -638,8 +649,12 @@
         const popover = document.getElementById('miniColorPopover');
         popover.style.display = 'none';
         document.removeEventListener('click', closeMiniPopoverOnClickOutside);
+        
         // Move picker back to storage so it doesn't get lost
         document.getElementById('hiddenPickerStorage').appendChild(document.getElementById('sharedPicker'));
+        
+        // MODIFIED: Re-attach main listener after a tiny delay so it doesn't fire immediately
+        setTimeout(() => document.addEventListener('click', closePopoverOnClickOutside), 10);
     }
     
     // Global exposure for the button onclick
@@ -813,8 +828,7 @@
 
     document.getElementById('flipVerticalBtn').addEventListener('click', () => {
         isVerticalFlip = !isVerticalFlip;
-        // MODIFIED: Visual Feedback for button state
-        document.getElementById('flipVerticalBtn').style.backgroundColor = isVerticalFlip ? 'var(--muted-darker)' : 'transparent';
+        // MODIFIED: Removed color styling logic as requested
         updateGradientVisuals();
     });
 
@@ -891,7 +905,7 @@
             isVerticalFlip = colorToEdit.isVertical;
             activeStopIndex = 0;
             // Visual Update for Button
-            document.getElementById('flipVerticalBtn').style.backgroundColor = isVerticalFlip ? 'var(--muted-darker)' : 'transparent';
+            document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent';
             switchColorTab('linear'); // Switch to linear UI
             setActiveStop(0); // Trigger sync
         } else {
