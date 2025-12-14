@@ -86,9 +86,15 @@ function initializeParticlePool(settings, bounds) {
       if (Array.isArray(settings.selectedEmojis) && settings.selectedEmojis.length > 0) {
           shapesToUse = settings.selectedEmojis;
       } else { shapesToUse = ['😀']; }
-  } else if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
-      shapesToUse = settings.selectedShapes;
-  } else { shapesToUse = ['rectangle', 'circle', 'star']; }
+  } else {
+      // PRESET / CUSTOM MODE
+      if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
+          shapesToUse = settings.selectedShapes;
+      } else { 
+          // If no shapes are selected, return empty array (Clear Preview)
+          return []; 
+      }
+  }
 
   const colorPalette = getColorPalette(settings);
   const baseDivider = 3000;
@@ -200,7 +206,6 @@ async function createFigmaShapeNode(particleData) {
       node.resize(baseWidth, baseHeight);
   } else if (shapeType === 'custom') {
       if (customPathData) {
-          // Fix: Added fill="#D9D9D9" to fallback to gray if no color is applied
           const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><path d="${customPathData}" fill="#D9D9D9" /></svg>`;
           const importedFrame = figma.createNodeFromSvg(svgString);
           if (importedFrame.children.length > 0) {
@@ -241,7 +246,6 @@ async function createFigmaShapeNode(particleData) {
           break;
         case 'wave':
           const wavePath = "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6";
-          // Fix: Changed stroke to #D9D9D9 (default gray) from black
           const svg = `<svg viewBox="0 0 24 24"><path d="${wavePath}" stroke="#D9D9D9" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`;
           const frame = figma.createNodeFromSvg(svg);
           if (frame.children.length > 0) {
