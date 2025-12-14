@@ -160,9 +160,14 @@ function updateStyleAttributes(particles, settings, changeType) {
 
     return particles.map(p => {
         let updates = {};
+        // MODIFIED: Added logic to clear color if palette is empty
         if (changeType === 'color' || !changeType) {
-            if (!p.isEmoji && colorPalette.length > 0) {
-                 updates.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            if (!p.isEmoji) {
+                if (colorPalette.length > 0) {
+                    updates.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+                } else {
+                    updates.color = null; // Explicitly revert to default (gray)
+                }
             }
         }
         if (changeType === 'scale' || !changeType) {
