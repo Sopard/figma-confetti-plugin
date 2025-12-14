@@ -75,8 +75,11 @@
     .section-disabled { opacity: 0.4; pointer-events: none; filter: grayscale(100%); transition: all 0.3s; }
     .color-header-box { display: flex; justify-content: space-between; align-items: center; background-color: var(--muted); padding: 8px 12px; border-radius: var(--radius); margin-bottom: 8px; height: 40px; box-sizing: border-box; }
     .color-count-text { font-size: 14px; font-weight: 500; }
+    
+    /* MODIFIED: Added :disabled state styles */
     .icon-btn-flat { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--foreground); cursor: pointer; padding: 0; border-radius: 4px; transition: background-color 0.2s; }
     .icon-btn-flat:hover:not(:disabled) { background-color: var(--muted-darker); }
+    .icon-btn-flat:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .color-list-container { display: flex; flex-direction: column; gap: 12px; }
     .color-toggle-row { display: flex; align-items: center; justify-content: space-between; }
