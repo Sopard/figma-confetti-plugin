@@ -203,9 +203,9 @@
     .linear-actions { display: flex; gap: 4px; }
 
     /* GRADIENT SLIDER FIXED */
-    /* Height 120px to effectively be the preview */
-    .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 0 18px 40px 18px; }
-    .gradient-bar { width: 100%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
+    /* MODIFIED: Gradient slider becomes the main preview block */
+    .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 16px 18px 40px 18px; }
+    .gradient-bar { width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
     
     /* MODIFIED: Rotated handles (180deg) to point upwards into the bottom of the bar */
     .gradient-handle { position: absolute; top: 100%; margin-top: 2px; width: 28px; height: 31px; cursor: grab; transform: translateX(-50%) rotate(180deg); z-index: 10; overflow: visible; }
@@ -335,9 +335,7 @@
                       </button>
                   </div>
               </div>
-
-              <div class="cp-sat-bright-area" id="linearGradientPreviewBlock" style="height: 120px; margin-bottom: 16px; display: none;"></div>
-
+              
               <div class="gradient-slider-container" id="gradientSliderContainer">
                   <div class="gradient-bar" id="gradientBar"></div>
                   </div>
@@ -532,8 +530,7 @@
     const gradientSliderContainer = document.getElementById('gradientSliderContainer');
     const gradientBar = document.getElementById('gradientBar');
     const stopsListContainer = document.getElementById('stopsListContainer');
-    // Removed linearGradientPreview var
-
+    
     let draggingHandleIndex = null;
 
     function renderHandles() {
@@ -564,15 +561,9 @@
             return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${s.alpha}) ${s.percent}%`;
         });
 
-        const cssGradient = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stopsCss.join(', ')})`;
-        
         // Bar is always horizontal
         gradientBar.style.background = `linear-gradient(90deg, ${stopsCss.join(', ')})`;
         
-        // MODIFIED: Update the new big preview block
-        const previewBlock = document.getElementById('linearGradientPreviewBlock');
-        if(previewBlock) previewBlock.style.background = cssGradient;
-
         renderStopsList();
     }
 
@@ -875,8 +866,24 @@
             if (editingColorIndex > -1) { colorState.colors[editingColorIndex] = newColorData; } else { colorState.colors.push(newColorData); }
         }
         renderColorList();
-        updatePreview(true, 'color');
+        updatePreview(true, 'color'); 
         closePopover();
+
+        // --- RESET GRADIENT STATE (ADDED) ---
+        gradientStops = [
+            { percent: 0, color: '#D966FF', alpha: 1 },
+            { percent: 100, color: '#823D99', alpha: 1 }
+        ];
+        isVerticalFlip = false;
+        activeStopIndex = 0;
+
+        // Reset Picker to default start color of the new default gradient
+        const defaultHsl = hexToHsl(gradientStops[0].color);
+        pickerHSLA = { h: defaultHsl.h, s: defaultHsl.s, l: defaultHsl.l, a: 1.0 };
+        
+        // Refresh Visuals so defaults are shown next time
+        updateGradientVisuals();
+        updatePickerVisuals();
     }
 
     // --- (Existing Solid Logic Variables & Listeners) ---
