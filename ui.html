@@ -161,8 +161,10 @@
     /* ------------------------------ */
 
     .cp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; flex-shrink: 0; }
-    .cp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; }
-    .cp-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    
+    /* MODIFIED: Left Aligned Tabs */
+    .cp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; justify-content: flex-start; gap: 8px; }
+    .cp-tab { text-align: center; padding: 10px 16px; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .cp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .cp-tab svg path { fill: currentColor; }
 
@@ -197,7 +199,8 @@
     .linear-actions { display: flex; gap: 4px; }
 
     /* GRADIENT SLIDER FIXED */
-    .gradient-slider-container { position: relative; height: 48px; display: flex; align-items: center; overflow: visible; padding: 0 14px; margin-bottom: 8px; }
+    /* MODIFIED: Margin based spacing instead of padding to prevent handle clipping */
+    .gradient-slider-container { position: relative; height: 48px; display: flex; align-items: center; overflow: visible; margin: 0 18px 16px 18px; }
     .gradient-bar { width: 100%; height: 24px; border-radius: 4px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
     .gradient-handle { position: absolute; top: -6px; width: 28px; height: 31px; cursor: grab; transform: translateX(-50%); z-index: 10; overflow: visible; }
     .gradient-handle svg { width: 100%; height: 100%; drop-shadow: 0 2px 2px rgba(0,0,0,0.2); }
@@ -746,7 +749,7 @@
     // MODIFIED: Re-written Add Stop Logic for Safety and Real-time Update
     document.getElementById('addStopBtn').addEventListener('click', () => {
         // Create a copy for sorting calculation
-        const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
+        const sorted = [...gradientStops].map((s, i) => ({...s, origIndex: i})).sort((a,b) => a.percent - b.percent);
         
         let newStop = null;
 
@@ -817,8 +820,8 @@
     function onHandleDrag(e) {
         if (draggingHandleIndex === null) return;
         const rect = gradientSliderContainer.getBoundingClientRect();
-        const trackWidth = rect.width - 28; // Padding correction
-        const offsetX = e.clientX - rect.left - 14;
+        const trackWidth = rect.width;
+        const offsetX = e.clientX - rect.left;
         
         let percent = (offsetX / trackWidth) * 100;
         percent = Math.max(0, Math.min(100, percent));
@@ -934,43 +937,9 @@
     function openPopover(triggerElement = addColorBtn) { if (colorState.isMultiColor) return; popover.style.visibility = 'hidden'; popover.style.display = 'flex'; if(editingColorIndex === -1) switchColorTab('solid'); const btnRect = triggerElement.getBoundingClientRect(); const popoverRect = popover.getBoundingClientRect(); const leftPos = btnRect.right + 12; const btnCenterY = btnRect.top + (btnRect.height / 2); let topPos = btnCenterY - (popoverRect.height / 2); const padding = 10; topPos = Math.max(padding, topPos); const maxTop = window.innerHeight - popoverRect.height - padding; topPos = Math.min(topPos, maxTop); popover.style.left = `${leftPos}px`; popover.style.top = `${topPos}px`; popover.style.visibility = 'visible'; currentTriggerElement = triggerElement; document.addEventListener('click', closePopoverOnClickOutside); }
     let currentTriggerElement = null;
     function closePopover() { popover.style.display = 'none'; document.removeEventListener('click', closePopoverOnClickOutside); currentTriggerElement = null; editingColorIndex = -1; }
+    function closePopoverOnClickOutside(event) { const isClickInsidePopover = popover.contains(event.target); const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { closePopover(); } }
     
-    // MODIFIED: Ignore clicks inside the mini popover to prevent closing main popover
-    function closePopoverOnClickOutside(event) { 
-        const miniPopover = document.getElementById('miniColorPopover');
-        // If clicking inside the mini popover, DO NOT close the main popover
-        if (miniPopover.style.display === 'block' && miniPopover.contains(event.target)) {
-            return;
-        }
-
-        const isClickInsidePopover = popover.contains(event.target); 
-        const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); 
-        
-        if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { 
-            closePopover(); 
-        } 
-    }
-    
-    addColorBtn.addEventListener('click', () => { 
-        editingColorIndex = -1; 
-        
-        // --- NEW LOGIC: RESET BOTH SOLID AND LINEAR STATES ---
-        pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; 
-        gradientStops = [
-            { percent: 0, color: '#D966FF', alpha: 1 },
-            { percent: 100, color: '#823D99', alpha: 1 }
-        ];
-        isVerticalFlip = false;
-        // Visual Update for Button
-        document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent';
-        activeStopIndex = 0;
-        
-        updatePickerVisuals(); 
-        cpHeaderTitle.textContent = "Add Color"; 
-        cpAddConfirmBtn.textContent = "Add Color"; 
-        openPopover(addColorBtn); 
-    });
-    
+    addColorBtn.addEventListener('click', () => { editingColorIndex = -1; pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; updatePickerVisuals(); cpHeaderTitle.textContent = "Add Color"; cpAddConfirmBtn.textContent = "Add Color"; openPopover(addColorBtn); });
     cpCloseBtn.addEventListener('click', closePopover); cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
     // --- UTILS (HSL/HSV) ---
