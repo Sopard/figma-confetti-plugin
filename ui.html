@@ -743,48 +743,60 @@
         });
     }
 
-    // ADD STOP LOGIC (Interpolation)
+    // MODIFIED: Re-written Add Stop Logic for Safety and Real-time Update
     document.getElementById('addStopBtn').addEventListener('click', () => {
-        // Sort current stops to find gaps
-        const sorted = [...gradientStops].map((s, i) => ({...s, origIndex: i})).sort((a,b) => a.percent - b.percent);
+        // Create a copy for sorting calculation
+        const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
         
-        // Find largest gap
-        let maxGap = 0;
-        let gapIndex = 0; // index in sorted array after which to insert
-        
+        let newStop = null;
+
         if (sorted.length < 2) {
-            // Fallback
-            gradientStops.push({ percent: 50, color: '#FF0000', alpha: 1 });
+            // Fallback for edge cases
+            newStop = { percent: 50, color: '#FF0000', alpha: 1 };
         } else {
-            for(let i=0; i<sorted.length - 1; i++) {
+            // Find biggest gap
+            let maxGap = 0;
+            let gapIndex = 0;
+            for(let i = 0; i < sorted.length - 1; i++) {
                 const gap = sorted[i+1].percent - sorted[i].percent;
                 if(gap > maxGap) { maxGap = gap; gapIndex = i; }
             }
             
             const start = sorted[gapIndex];
             const end = sorted[gapIndex+1];
+            
             const newPercent = start.percent + (maxGap / 2);
             
-            // Interpolate Color
-            const c1 = hexToRgb(start.color);
-            const c2 = hexToRgb(end.color);
-            const r = Math.round((c1.r + c2.r)/2);
-            const g = Math.round((c1.g + c2.g)/2);
-            const b = Math.round((c1.b + c2.b)/2);
-            const newColor = rgbToHex(r,g,b);
+            // Safe interpolation
+            let newColor = '#FF0000'; // Default fallback
+            try {
+                const c1 = hexToRgb(start.color);
+                const c2 = hexToRgb(end.color);
+                if (c1 && c2) {
+                    const r = Math.round((c1.r + c2.r)/2);
+                    const g = Math.round((c1.g + c2.g)/2);
+                    const b = Math.round((c1.b + c2.b)/2);
+                    newColor = rgbToHex(r,g,b);
+                }
+            } catch(e) { console.log('Color parsing error', e); }
             
-            // Interpolate Alpha
             const newAlpha = (start.alpha + end.alpha) / 2;
             
-            const newStop = { percent: newPercent, color: newColor, alpha: newAlpha };
-            gradientStops.push(newStop);
+            newStop = { percent: newPercent, color: newColor, alpha: newAlpha };
         }
         
-        // Re-sort to find new index
-        gradientStops.sort((a,b) => a.percent - b.percent);
-        activeStopIndex = gradientStops.indexOf(gradientStops.find(s => s.percent === newPercent || s === gradientStops[gradientStops.length-1]));
-        
-        updateGradientVisuals();
+        if (newStop) {
+            gradientStops.push(newStop);
+            // Sort main array
+            gradientStops.sort((a,b) => a.percent - b.percent);
+            
+            // Update Active Index to the newly created stop
+            activeStopIndex = gradientStops.indexOf(newStop);
+            
+            // Force Render
+            updateGradientVisuals();
+            setActiveStop(activeStopIndex);
+        }
     });
 
     window.removeGradientStop = function(index) {
