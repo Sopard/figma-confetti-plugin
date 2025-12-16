@@ -552,20 +552,12 @@
     }
 
     function updateGradientVisuals() {
-        renderHandles();
-        
-        const sortedStops = [...gradientStops].sort((a,b) => a.percent - b.percent);
-        // Map hex + alpha to rgba string for preview
-        const stopsCss = sortedStops.map(s => {
-            const rgb = hexToRgb(s.color);
-            return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${s.alpha}) ${s.percent}%`;
-        });
-
-        // Bar is always horizontal
-        gradientBar.style.background = `linear-gradient(90deg, ${stopsCss.join(', ')})`;
-        
-        renderStopsList();
-    }
+    renderHandles();
+    const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
+    const stops = sorted.map(s => { const rgb = hexToRgb(s.color); return `rgba(${rgb.r},${rgb.g},${rgb.b},${s.alpha}) ${s.percent}%`; });
+    gradientBar.style.background = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stops.join(', ')})`;
+    renderStopsList();
+}
 
     function setActiveStop(index) {
         activeStopIndex = index;
@@ -904,11 +896,7 @@
         updateGradientVisuals();
     });
 
-    document.getElementById('flipVerticalBtn').addEventListener('click', () => {
-        isVerticalFlip = !isVerticalFlip;
-        // MODIFIED: Removed color styling logic as requested
-        updateGradientVisuals();
-    });
+    document.getElementById('flipVerticalBtn').addEventListener('click', () => { isVerticalFlip = !isVerticalFlip; updateGradientVisuals(); });
 
 
     // --- CONFIRM COLOR (Updated) ---
