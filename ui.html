@@ -203,8 +203,8 @@
     .linear-actions { display: flex; gap: 4px; }
 
     /* GRADIENT SLIDER FIXED */
-    /* MODIFIED: Gradient slider becomes the main preview block */
-    .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 16px 18px 40px 18px; }
+    /* MODIFIED: Cursor crosshair added to indicate click-to-add */
+    .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 16px 18px 40px 18px; cursor: crosshair; }
     .gradient-bar { width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
     
     /* MODIFIED: Rotated handles (180deg) to point upwards into the bottom of the bar */
@@ -746,6 +746,69 @@
         });
     }
 
+    // --- CLICK TO ADD STOP (NEW LOGIC) ---
+    gradientSliderContainer.addEventListener('click', (e) => {
+        // Handle stop propagation prevents this from firing if a handle is clicked,
+        // but double check target just in case
+        if (e.target.closest('.gradient-handle')) return;
+
+        const rect = gradientSliderContainer.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        let percent = (offsetX / rect.width) * 100;
+        percent = Math.max(0, Math.min(100, percent));
+        
+        addStopAtPercent(percent);
+    });
+
+    function addStopAtPercent(percent) {
+        // Sort current stops to find neighbors
+        const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
+        
+        // Find neighbors
+        let start = sorted[0];
+        let end = sorted[sorted.length - 1];
+        
+        for (let i = 0; i < sorted.length - 1; i++) {
+            if (percent >= sorted[i].percent && percent <= sorted[i+1].percent) {
+                start = sorted[i];
+                end = sorted[i+1];
+                break;
+            }
+        }
+        
+        // Interpolate Color
+        let newColor = '#FF0000';
+        let newAlpha = 1;
+
+        if (start && end && start !== end) {
+            const range = end.percent - start.percent;
+            const ratio = range === 0 ? 0 : (percent - start.percent) / range;
+            
+            const c1 = hexToRgb(start.color);
+            const c2 = hexToRgb(end.color);
+            
+            if (c1 && c2) {
+                const r = Math.round(c1.r + (c2.r - c1.r) * ratio);
+                const g = Math.round(c1.g + (c2.g - c1.g) * ratio);
+                const b = Math.round(c1.b + (c2.b - c1.b) * ratio);
+                newColor = rgbToHex(r,g,b);
+            }
+            newAlpha = start.alpha + (end.alpha - start.alpha) * ratio;
+        } else if (start) {
+             newColor = start.color;
+             newAlpha = start.alpha;
+        }
+
+        const newStop = { percent: percent, color: newColor, alpha: newAlpha };
+        gradientStops.push(newStop);
+        gradientStops.sort((a,b) => a.percent - b.percent);
+        activeStopIndex = gradientStops.indexOf(newStop);
+        
+        updateGradientVisuals();
+        setActiveStop(activeStopIndex);
+    }
+
+
     // MODIFIED: Re-written Add Stop Logic for Safety and Real-time Update
     document.getElementById('addStopBtn').addEventListener('click', () => {
         // Create a copy for sorting calculation
@@ -993,7 +1056,7 @@
        });
     });
 
-    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
     
     modernEmojis.forEach(emojiChar => {
         const emojiItem = document.createElement('div');
