@@ -45,7 +45,6 @@ function getColorPalette(settings) {
     } else {
         return settings.colorData.customColors.map((c) => {
             if (c.type === 'linear') {
-                // Pre-process stops for Figma
                 const figmaStops = c.stops.map(stop => {
                     const rgb = hexToRgb(stop.color);
                     return {
@@ -59,7 +58,6 @@ function getColorPalette(settings) {
                     isVertical: c.isVertical
                 };
             } else {
-                // It's HSLA (Solid)
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
                 return rgba;
@@ -74,6 +72,11 @@ function initializeParticlePool(settings, bounds) {
   const randomness = validateNum(settings.randomness, 0, 100, 60) / 100; 
   const amount = validateNum(settings.amount, 0, 100, 60);
   const zoom = validateNum(settings.zoom, 0, 50, 10);
+  
+  // NEW: Flutter setting (Default 50 maps to 1.0 multiplier)
+  // 0 = No spin/flip, 100 = Double speed
+  const flutter = validateNum(settings.flutter, 0, 100, 50) / 50; 
+
   const randomizeSize = settings.randomizeSize === true;
   const randomizeRotation = settings.randomizeRotation === true;
   const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
@@ -87,11 +90,9 @@ function initializeParticlePool(settings, bounds) {
           shapesToUse = settings.selectedEmojis;
       } else { shapesToUse = ['😀']; }
   } else {
-      // PRESET / CUSTOM MODE
       if (Array.isArray(settings.selectedShapes) && settings.selectedShapes.length > 0) {
           shapesToUse = settings.selectedShapes;
       } else { 
-          // If no shapes are selected, return empty array (Clear Preview)
           return []; 
       }
   }
@@ -131,7 +132,17 @@ function initializeParticlePool(settings, bounds) {
     const finalPixelsPerFrame = ((targetEndY - startY) / steps) * (1 + ((Math.random() - 0.5) * 0.6 * randomness));
 
     const initialRotation = randomizeRotation ? Math.random() * 360 : 0;
-    const rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness : 0;
+    
+    // UPDATED: rotationSpeed is now scaled by 'flutter'
+    const rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness * flutter : 0;
+
+    const driftAmp = 10 + (Math.random() * 80 * randomness); 
+    const driftSpeed = 0.05 + (Math.random() * 0.15 * randomness);
+    const driftPhase = Math.random() * Math.PI * 2;
+
+    // UPDATED: flipSpeed is now scaled by 'flutter'
+    const flipSpeed = (0.1 + (Math.random() * 0.4 * randomness)) * flutter;
+    const flipPhase = Math.random() * Math.PI * 2;
 
     particles.push({
       isEmoji: isEmojiMode,
@@ -141,11 +152,16 @@ function initializeParticlePool(settings, bounds) {
       baseWidth: baseWidth,
       baseHeight: baseHeight,
       scale: scaleFactor,
-      x: xPos, 
+      startX: xPos,
       startY: startY,
       pixelsPerFrame: finalPixelsPerFrame,
       initialRotation: initialRotation,
-      rotationSpeed: rotationSpeed
+      rotationSpeed: rotationSpeed,
+      driftAmp: driftAmp,
+      driftSpeed: driftSpeed,
+      driftPhase: driftPhase,
+      flipSpeed: flipSpeed,
+      flipPhase: flipPhase
     });
   }
   return particles;
@@ -157,16 +173,18 @@ function updateStyleAttributes(particles, settings, changeType) {
     const randomizeSize = settings.randomizeSize === true;
     const randomizeRotation = settings.randomizeRotation === true;
     const randomness = validateNum(settings.randomness, 0, 100, 60) / 100;
+    
+    // NEW: Retrieve flutter multiplier for updates
+    const flutter = validateNum(settings.flutter, 0, 100, 50) / 50;
 
     return particles.map(p => {
         let updates = {};
-        // MODIFIED: Added logic to clear color if palette is empty
         if (changeType === 'color' || !changeType) {
             if (!p.isEmoji) {
                 if (colorPalette.length > 0) {
                     updates.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
                 } else {
-                    updates.color = null; // Explicitly revert to default (gray)
+                    updates.color = null; 
                 }
             }
         }
@@ -175,18 +193,37 @@ function updateStyleAttributes(particles, settings, changeType) {
             if (randomizeSize) scaleFactor *= (0.5 + Math.random());
             updates.scale = Math.max(scaleFactor, 0.1);
         }
-        if (changeType === 'rotation' || !changeType) {
+        
+        // UPDATED: Recalculate speeds if Rotation OR Flutter (changeType) changes
+        // We'll treat 'rotation' changeType as covering 'flutter' updates too
+        if (changeType === 'rotation' || changeType === 'flutter' || !changeType) {
             updates.initialRotation = randomizeRotation ? Math.random() * 360 : 0;
-            updates.rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness : 0;
+            
+            // Apply new flutter multiplier to both speeds
+            updates.rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness * flutter : 0;
+            updates.flipSpeed = (0.1 + (Math.random() * 0.4 * randomness)) * flutter;
+            
+            updates.driftAmp = 10 + (Math.random() * 80 * randomness);
         }
         return Object.assign({}, p, updates);
     });
 }
 
 function getParticleStateForFrame(particle, frameIndex) {
+    const t = frameIndex;
+    const linearY = particle.startY + (particle.pixelsPerFrame * t);
+    
+    // 1. DRIFT
+    const driftOffset = Math.sin(particle.driftPhase + (particle.driftSpeed * t)) * particle.driftAmp;
+    
+    // 2. FLIP (Using Cosine of flipPhase + (speed * t))
+    const flipFactor = Math.cos(particle.flipPhase + (particle.flipSpeed * t));
+
     return Object.assign({}, particle, {
-        y: particle.startY + (particle.pixelsPerFrame * frameIndex),
-        rotation: particle.initialRotation + (particle.rotationSpeed * frameIndex)
+        x: particle.startX + driftOffset, 
+        y: linearY,
+        rotation: particle.initialRotation + (particle.rotationSpeed * t),
+        flipFactor: flipFactor 
     });
 }
 
@@ -289,22 +326,27 @@ async function populateFrameWithConfetti(frame, particleDataList) {
     node.name = `Particle ${shapeCounter}`;
     if (!p.isEmoji) { node.rotation = p.rotation; }
 
+    // --- APPLY 3D FLIP SIMULATION ---
+    const flipScale = Math.max(0.01, Math.abs(p.flipFactor));
+
     if (p.isEmoji) {
-        const newSize = p.baseHeight * p.scale;
-        node.fontSize = newSize;
-        node.resize(newSize, newSize);
+        const finalW = p.baseWidth * p.scale;
+        const finalH = p.baseHeight * p.scale * flipScale;
+        node.resize(finalW, finalH);
+        node.fontSize = p.baseHeight * p.scale; 
     } else {
-        node.rescale(p.scale);
+        const finalW = p.baseWidth * p.scale;
+        const finalH = p.baseHeight * p.scale * flipScale;
+        node.resize(finalW, finalH);
     }
       
     if (!p.isEmoji && p.color) {
         // Construct Fill Object
         let newFill;
         if (p.color.type === 'linear') {
-            // Apply Gradient
             const matrix = p.color.isVertical 
-                ? [[0, 1, 0], [-1, 0, 1]] // 90deg rotation approximation
-                : [[1, 0, 0], [0, 1, 0]]; // Standard horizontal
+                ? [[0, 1, 0], [-1, 0, 1]] 
+                : [[1, 0, 0], [0, 1, 0]]; 
             
             newFill = {
                 type: 'GRADIENT_LINEAR',
@@ -312,7 +354,6 @@ async function populateFrameWithConfetti(frame, particleDataList) {
                 gradientTransform: matrix
             };
         } else {
-            // Apply Solid
             newFill = { 
                 type: 'SOLID', 
                 color: { r: p.color.r, g: p.color.g, b: p.color.b }, 

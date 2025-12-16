@@ -129,8 +129,7 @@
     .grouped-settings-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .grouped-settings-box .number-input-row { margin-bottom: 0; }
 
-    /* -------------------------------- */
-    /* --- UPDATED COLOR PICKER STYLES --- */
+    /* --- COLOR PICKER STYLES --- */
     .color-picker-popover {
         position: absolute; top: 0; left: 0; width: 320px;
         background: var(--background); border-radius: 12px;
@@ -138,37 +137,25 @@
         display: none; border: 1px solid var(--border); box-sizing: border-box;
         flex-direction: column; 
         min-height: auto;
-        max-height: 85vh; /* Safety limit */
+        max-height: 85vh;
     }
     
-    /* --- NEW MINI POPOVER STYLE --- */
     .mini-color-popover {
-        position: fixed;
-        z-index: 100;
-        background: var(--background);
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-md);
-        border-radius: 12px;
-        padding: 12px;
-        width: 260px;
-        display: none;
+        position: fixed; z-index: 100;
+        background: var(--background); border: 1px solid var(--border);
+        box-shadow: var(--shadow-md); border-radius: 12px;
+        padding: 12px; width: 260px; display: none;
     }
-    /* Compact shared picker styles when inside mini popover */
     .mini-color-popover .cp-inputs-row { margin-bottom: 0; }
     .mini-color-popover .cp-sat-bright-area { height: 160px; }
-    
     #miniSaveBtn { margin-top: 12px; width: 100%; height: 32px; font-size: 13px; }
-    /* ------------------------------ */
 
     .cp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; flex-shrink: 0; }
-    
-    /* Left Aligned Tabs */
     .cp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; justify-content: flex-start; gap: 8px; }
     .cp-tab { text-align: center; padding: 10px 16px; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .cp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .cp-tab svg path { fill: currentColor; }
 
-    /* SHARED PICKER CONTROLS */
     .cp-content-scrollable { flex: 1; overflow-y: auto; margin-bottom: 16px; padding-right: 4px; -ms-overflow-style: none; scrollbar-width: none; }
     .cp-content-scrollable::-webkit-scrollbar { display: none; }
     .cp-sat-bright-area { width: 100%; height: 200px; border-radius: 8px; position: relative; background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); background-color: red; cursor: crosshair; margin-bottom: 16px; flex-shrink: 0; }
@@ -181,10 +168,7 @@
     .cp-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: var(--shadow-sm); transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border); }
     .cp-inputs-row { display: flex; gap: 8px; margin-bottom: 16px; flex-shrink: 0; }
     .cp-input-wrapper { display: flex; align-items: center; background: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; height: 36px; box-sizing: border-box; }
-    
-    /* MODIFIED: Divider for Hex Input */
     .cp-hex-wrapper span { border-right: 1px solid var(--border); padding-right: 8px; margin-right: 8px; color: var(--muted-foreground); font-size: 13px; font-weight: 500; height: 20px; display: flex; align-items: center; }
-    
     .cp-input-field { border: none; background: transparent; outline: none; font-family: inherit; font-weight: 500; font-size: 14px; color: var(--foreground); flex: 1; width: 100%; }
     .cp-hex-wrapper { flex: 2; } .cp-alpha-wrapper { flex: 1; }
     .cp-swatches-section { flex-shrink: 0; }
@@ -202,42 +186,28 @@
     .dropdown-item.selected { background: #f0f9ff; color: var(--primary); }
     .linear-actions { display: flex; gap: 4px; }
 
-    /* GRADIENT SLIDER FIXED */
-    /* MODIFIED: Cursor crosshair added to indicate click-to-add */
     .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 0 18px 40px 18px; cursor: crosshair; }
     .gradient-bar { width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
-    
-    /* MODIFIED: Rotated handles (180deg) to point upwards into the bottom of the bar */
     .gradient-handle { position: absolute; top: 100%; margin-top: 2px; width: 28px; height: 31px; cursor: grab; transform: translateX(-50%) rotate(180deg); z-index: 10; overflow: visible; }
     .gradient-handle svg { width: 100%; height: 100%; drop-shadow: 0 -2px 2px rgba(0,0,0,0.2); }
     .gradient-handle.active svg path { stroke: var(--primary) !important; stroke-width: 3px !important; z-index: 20; }
     .gradient-handle:active { cursor: grabbing; }
 
-    /* STOPS LIST LAYOUT */
     .stops-section { display: flex; flex-direction: column; gap: 8px; }
     .stops-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
     .stops-list { display: flex; flex-direction: column; gap: 8px; }
     .stop-row { display: flex; align-items: center; gap: 12px; }
     .stop-row.active .stop-data-group { border-color: var(--primary); }
-    
-    /* MODIFIED: Tighter width (52px) and gap for Stop Input */
     .stop-pos-group { background: var(--muted); border: 1px solid var(--border); border-radius: 6px; width: 52px; padding: 0 4px 0 0; display: flex; align-items: center; justify-content: center; height: 32px; gap: 2px; }
     .stop-pos-input { width: 100%; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-align: right; color: var(--foreground); padding-right: 0; }
-    
     .stop-data-group { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; height: 32px; transition: border-color 0.2s; }
     .stop-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
     .stop-hex { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-transform: uppercase; width: 50px; }
-    
-    /* MODIFIED: Added padding right for % icon spacing */
     .stop-opacity-group { display: flex; align-items: center; gap: 2px; border-left: 1px solid #ddd; padding-left: 8px; padding-right: 8px; }
     .stop-opacity { width: 28px; background: transparent; border: none; outline: none; font-size: 13px; }
-    
     .stop-remove-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; color: #888; margin-left: 4px; }
     .stop-remove-btn:hover { color: #d00; }
-
-    /* Button Fix */
     #cpAddConfirmBtn { flex-shrink: 0; height: 46px; min-height: 46px; font-size: 14px; font-weight: 600; flex-grow: 0; margin-top: auto; }
-
   </style>
 </head>
 <body>
@@ -261,7 +231,9 @@
     <div style="margin-bottom: 4px; margin-top: 0px;"><div class="shape-tabs"><div class="shape-tabs-triggers"><div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div><div class="shape-tab-trigger" data-target="emoji">Emoji</div></div></div><div id="presetShapesContainer" style="display: block;"><div class="selector-grid id-shape-selector"><div class="selector-item" data-state="selected" data-value="rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="wave"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="vertical-divider"></div><div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg><span>Custom</span><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div></div></div><div id="emojiShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="emojiGrid"></div></div></div></div>
     <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 0 0 12px 0;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Randomize Particles</div><div class="slider-container"><div class="slider-fill" id="randomFill" style="width: 60%;"></div><input type="text" class="slider-value-input" id="randomValueInput" value="60%"><input type="range" id="randomInput" class="slider-input" min="0" max="100" value="60"></div><div class="slider-labels-row"><span>Uniform</span><span>Chaotic</span></div></div><div><div class="label">Particle Amount</div><div class="slider-container"><div class="slider-fill" id="amountFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="amountValueInput" value="20%"><input type="range" id="amountInput" class="slider-input" min="0" max="100" value="20"></div><div class="slider-labels-row"><span>Less</span><span>More</span></div></div></div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Particle Size</div><div class="slider-container"><div class="slider-fill" id="zoomFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="zoomValueInput" value="x1.0"><input type="range" id="zoomInput" class="slider-input" min="0" max="50" value="10"></div><div class="slider-labels-row"><span>x0.0</span><span>x5.0</span></div></div><div></div></div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Particle Size</div><div class="slider-container"><div class="slider-fill" id="zoomFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="zoomValueInput" value="x1.0"><input type="range" id="zoomInput" class="slider-input" min="0" max="50" value="10"></div><div class="slider-labels-row"><span>x0.0</span><span>x5.0</span></div></div><div><div class="label">Flutter</div><div class="slider-container"><div class="slider-fill" id="flutterFill" style="width: 50%;"></div><input type="text" class="slider-value-input" id="flutterValueInput" value="50%"><input type="range" id="flutterInput" class="slider-input" min="0" max="100" value="50"></div><div class="slider-labels-row"><span>Static</span><span>Spinny</span></div></div></div>
+    
     <div class="toggle-row-container"><div class="toggle-row"><span class="toggle-label">Randomize Size</span><label class="switch"><input type="checkbox" id="checkSize" checked><span class="switch-slider"></span></label></div><div class="toggle-row"><span class="toggle-label">Randomize Rotation</span><label class="switch"><input type="checkbox" id="checkRotation" checked><span class="switch-slider"></span></label></div></div>
     <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 8px 0 0 0;">
     <div id="particleColorSection"><div class="label" style="margin-top: 4px; margin-bottom: 24px;">Confetti Color</div><div class="color-toggle-row" style="margin-bottom: 12px;"><div class="color-toggle-label"><div class="rainbow-icon"></div><span>Multi-color</span></div><label class="switch"><input type="checkbox" id="multiColorSwitch"><span class="switch-slider"></span></label></div><div class="color-header-box"><span class="color-count-text" id="colorCounter">0 Colors</span><button class="icon-btn-flat" id="addColorBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div><div class="color-list-container"><div class="scrollable-grid-container"><div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
@@ -358,9 +330,8 @@
   <div id="customShapePopover" class="custom-shape-popover">
       <div class="cp-header"><span>Custom Shape Editor</span><button id="csCloseBtn" class="icon-btn-flat"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div style="font-size: 12px; color: var(--muted-foreground); margin-bottom: 8px;">Drag points to customize shape.</div><div class="cs-canvas-container"><svg id="csEditorSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"></svg><div id="csResetIcon" class="cs-reset-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div></div><button id="csSaveBtn" class="btn btn-primary">Save Shape</button>
   </div>
-
   <script>
-    // --- (Globals & Previous Logic Unchanged) ---
+    // --- (Globals & Previous Logic) ---
     const previewSvg = document.getElementById('previewSvg');
     const panzoomContainer = document.getElementById('panzoomContainer');
     const customShapeBtn = document.getElementById('customShapeBtn');
@@ -388,15 +359,21 @@
     ];
     let isVerticalFlip = false; 
     let activeStopIndex = 0; 
+    let pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; 
 
-    // --- SETUP SLIDERS (Unchanged) ---
+    // --- SETUP SLIDERS ---
     function setupSlider(sliderInputId, fillId, textInputId, format, regenerateOnChange = true) {
       const sliderInput = document.getElementById(sliderInputId); const fill = document.getElementById(fillId); const textInput = document.getElementById(textInputId);
       const min = parseFloat(sliderInput.min) || 0; const max = parseFloat(sliderInput.max) || 100;
       function updateFromSlider() {
         let val = parseFloat(sliderInput.value); const percent = ((val - min) / (max - min)) * 100; fill.style.width = `${percent}%`;
         if (format === 'percent') { textInput.value = `${Math.round(val)}%`; } else if (format === 'zoom') { textInput.value = `x${(val / 10).toFixed(1)}`; }
-        if (!regenerateOnChange) { triggerPreviewUpdate(true, 'scale'); } else { triggerPreviewUpdate(false); }
+        // For flutter/rotation, we want to regenerate physics, so check changeType
+        if (!regenerateOnChange) { triggerPreviewUpdate(true, 'scale'); } else { 
+            // If it's the flutter slider, pass 'flutter' type to update specific props
+            const type = sliderInputId === 'flutterInput' ? 'flutter' : undefined;
+            triggerPreviewUpdate(true, type); 
+        }
       }
       function updateFromText() {
           let rawValue = textInput.value; let numericValue;
@@ -407,7 +384,12 @@
       function triggerPreviewUpdate(keepPositions, changeType) { updatePreview(keepPositions, changeType); }
       sliderInput.addEventListener('input', updateFromSlider); textInput.addEventListener('change', updateFromText); textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.target.blur(); } });
     }
-    setupSlider('randomInput', 'randomFill', 'randomValueInput', 'percent', true); setupSlider('amountInput', 'amountFill', 'amountValueInput', 'percent', true); setupSlider('zoomInput', 'zoomFill', 'zoomValueInput', 'zoom', false);
+    
+    setupSlider('randomInput', 'randomFill', 'randomValueInput', 'percent', true); 
+    setupSlider('amountInput', 'amountFill', 'amountValueInput', 'percent', true); 
+    setupSlider('zoomInput', 'zoomFill', 'zoomValueInput', 'zoom', false);
+    // NEW: Setup Flutter Slider
+    setupSlider('flutterInput', 'flutterFill', 'flutterValueInput', 'percent', true);
 
     document.querySelectorAll('.tabs-list .tab-trigger:not(.disabled)').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.tabs-list .tab-trigger').forEach(t => t.removeAttribute('data-state')); tab.setAttribute('data-state', 'active'); updatePreview(false); }); });
     document.getElementById('checkSize').addEventListener('change', () => updatePreview(true, 'scale')); document.getElementById('checkRotation').addEventListener('change', () => updatePreview(true, 'rotation'));
@@ -420,19 +402,11 @@
         addColorBtn.disabled = colorState.isMultiColor; colorRowsContainer.innerHTML = '';
         colorState.colors.forEach((colorData, index) => {
             const row = document.createElement('div'); row.className = `color-item-row ${colorState.isMultiColor ? 'disabled' : ''}`;
-            // Handle display logic for Linear vs Solid in the LIST
-            let hexDisplay = "";
-            let opacityDisplay = "";
-            let bgStyle = "";
-            
+            let hexDisplay = ""; let opacityDisplay = ""; let bgStyle = "";
             if (colorData.type === 'linear') {
                 hexDisplay = "Linear Gradient";
-                // --- NEW LOGIC: Default to first stop's alpha for display ---
                 opacityDisplay = colorData.stops.length > 0 ? Math.round(colorData.stops[0].alpha * 100) : "100";
-                // create CSS gradient string for preview
-                const stops = colorData.stops;
-                const sorted = [...stops].sort((a,b)=>a.percent-b.percent);
-                // MODIFIED: Use 0deg for vertical, 90deg for horizontal (default)
+                const stops = colorData.stops; const sorted = [...stops].sort((a,b)=>a.percent-b.percent);
                 const angle = colorData.isVertical ? '0deg' : '90deg';
                 const css = `linear-gradient(${angle}, ${sorted.map(s => `${s.color} ${s.percent}%`).join(', ')})`;
                 bgStyle = `background: ${css};`;
@@ -441,37 +415,12 @@
                 opacityDisplay = Math.round(colorData.a * 100);
                 bgStyle = `background-color: ${hexDisplay}; opacity: ${colorData.a};`;
             }
-
-            // --- UPDATED HTML: Removed disabled attribute for linear type inputs ---
             row.innerHTML = `<div class="color-preview-sq" style="${bgStyle}"></div><span class="color-hex-text">${hexDisplay}</span><div style="display: flex; align-items: center; margin-right: 8px;"><input type="number" class="color-percent-input" data-index="${index}" value="${opacityDisplay}" min="0" max="100" ${colorState.isMultiColor ? 'disabled' : ''}><span style="margin-left: 4px; color: var(--muted-foreground); font-size: 14px;">%</span></div><button class="icon-btn-flat delete-color-btn" data-index="${index}" ${colorState.isMultiColor ? 'disabled' : ''}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>`;
             
             const previewSq = row.querySelector('.color-preview-sq'); 
-            previewSq.addEventListener('click', () => { 
-                if (colorState.isMultiColor) return; 
-                // Logic to open edit for this color
-                // Ideally checks type and opens correct tab. For now assuming solid edit flow or recreating gradient logic is complex.
-                // Just opening popover
-                openPopoverToEdit(index, previewSq); 
-            });
-            
-            // --- NEW LOGIC: Handle opacity change for BOTH solid and linear ---
+            previewSq.addEventListener('click', () => { if (colorState.isMultiColor) return; openPopoverToEdit(index, previewSq); });
             const percentInput = row.querySelector('.color-percent-input'); 
-            percentInput.addEventListener('change', (e) => { 
-                let newVal = parseInt(e.target.value); 
-                if (isNaN(newVal)) newVal = 100; 
-                newVal = Math.max(0, Math.min(100, newVal)); 
-                e.target.value = newVal; 
-                
-                if (colorData.type === 'linear') {
-                    // Update ALL stops alpha to this new value
-                    colorState.colors[index].stops.forEach(s => s.alpha = newVal / 100);
-                } else {
-                    colorState.colors[index].a = newVal / 100; 
-                }
-                renderColorList(); 
-                updatePreview(true, 'color'); 
-            });
-
+            percentInput.addEventListener('change', (e) => { let newVal = parseInt(e.target.value); if (isNaN(newVal)) newVal = 100; newVal = Math.max(0, Math.min(100, newVal)); e.target.value = newVal; if (colorData.type === 'linear') { colorState.colors[index].stops.forEach(s => s.alpha = newVal / 100); } else { colorState.colors[index].a = newVal / 100; } renderColorList(); updatePreview(true, 'color'); });
             const deleteBtn = row.querySelector('.delete-color-btn'); 
             deleteBtn.addEventListener('click', () => { if (colorState.isMultiColor) return; if (editingColorIndex === index) { editingColorIndex = -1; closePopover(); } colorState.colors.splice(index, 1); renderColorList(); updatePreview(true, 'color'); });
             colorRowsContainer.prepend(row);
@@ -479,469 +428,155 @@
     }
     multiColorSwitch.addEventListener('change', (e) => { colorState.isMultiColor = e.target.checked; if (colorState.isMultiColor) { closePopover(); editingColorIndex = -1; } renderColorList(); updatePreview(true, 'color'); });
 
-    // --- POP OVER LOGIC (Updated) ---
+    // --- POP OVER LOGIC ---
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
-    
-    // --- TAB LOGIC ---
     let currentTab = 'solid';
     window.switchColorTab = function(tabName) {
         currentTab = tabName;
         document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
         document.querySelector(`.cp-tab[data-tab="${tabName}"]`).classList.add('active');
-        
         const sharedPicker = document.getElementById('sharedPicker');
-        
         if (tabName === 'solid') {
             document.getElementById('cpSolidContent').style.display = 'block';
             document.getElementById('cpLinearContent').style.display = 'none';
-            // CLOSE MINI IF OPEN
             document.getElementById('miniColorPopover').style.display = 'none';
-            // MOVE PICKER BACK TO SOLID CONTENT
             const swatchGrid = document.getElementById('cpSwatchGrid');
-            if (swatchGrid && swatchGrid.parentElement) {
-                swatchGrid.parentElement.parentElement.insertBefore(sharedPicker, swatchGrid.parentElement);
-            }
+            if (swatchGrid && swatchGrid.parentElement) { swatchGrid.parentElement.parentElement.insertBefore(sharedPicker, swatchGrid.parentElement); }
         } else {
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
-            
-            // HIDE FROM MAIN FLOW (Move to storage)
             document.getElementById('hiddenPickerStorage').appendChild(sharedPicker);
-            
             updateGradientVisuals(); 
         }
     }
-
-    // --- LINEAR UI LOGIC ---
-    function toggleLinearDropdown() {
-        document.getElementById('linearDropdownContent').classList.toggle('show');
-    }
+    function toggleLinearDropdown() { document.getElementById('linearDropdownContent').classList.toggle('show'); }
     window.toggleLinearDropdown = toggleLinearDropdown;
-    
-    function selectLinearType(type) {
-        document.getElementById('linearTypeLabel').textContent = type;
-        document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
-        document.getElementById('linearDropdownContent').classList.remove('show');
-    }
+    function selectLinearType(type) { document.getElementById('linearTypeLabel').textContent = type; document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected')); document.getElementById('linearDropdownContent').classList.remove('show'); }
     window.selectLinearType = selectLinearType;
 
-    // --- GRADIENT SLIDER LOGIC ---
-    const gradientSliderContainer = document.getElementById('gradientSliderContainer');
-    const gradientBar = document.getElementById('gradientBar');
-    const stopsListContainer = document.getElementById('stopsListContainer');
-    
+    const gradientSliderContainer = document.getElementById('gradientSliderContainer'); const gradientBar = document.getElementById('gradientBar'); const stopsListContainer = document.getElementById('stopsListContainer');
     let draggingHandleIndex = null;
 
     function renderHandles() {
-        // Clear handles (keeping bar)
-        const handles = gradientSliderContainer.querySelectorAll('.gradient-handle');
-        handles.forEach(h => h.remove());
-
+        const handles = gradientSliderContainer.querySelectorAll('.gradient-handle'); handles.forEach(h => h.remove());
         gradientStops.forEach((stop, index) => {
-            const handle = document.createElement('div');
-            handle.className = 'gradient-handle';
+            const handle = document.createElement('div'); handle.className = 'gradient-handle';
             if (index === activeStopIndex) handle.classList.add('active');
             handle.style.left = `${stop.percent}%`;
             handle.innerHTML = `<svg viewBox="0 0 28 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 4.5C1.5 2.84315 2.84315 1.5 4.5 1.5H23.5C25.1569 1.5 26.5 2.84315 26.5 4.5V21.5C26.5 23.1569 25.1569 24.5 23.5 24.5H20.8526C19.8857 24.5 18.978 24.9661 18.4146 25.7519L16.6805 28.1702C15.5617 29.7306 13.2856 29.8529 12.006 28.4216L9.39447 25.5005C8.82534 24.8639 8.01187 24.5 7.15794 24.5H4.5C2.84315 24.5 1.5 23.1569 1.5 21.5V4.5Z" fill="${stop.color}" stroke="${index === activeStopIndex ? '#1890FF' : 'transparent'}" stroke-width="3"/></svg>`;
-            
             handle.addEventListener('mousedown', (e) => onHandleMouseDown(e, index));
             handle.addEventListener('click', (e) => { e.stopPropagation(); setActiveStop(index); });
             gradientSliderContainer.appendChild(handle);
         });
     }
-
     function updateGradientVisuals() {
-    renderHandles();
-    const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
-    const stops = sorted.map(s => { const rgb = hexToRgb(s.color); return `rgba(${rgb.r},${rgb.g},${rgb.b},${s.alpha}) ${s.percent}%`; });
-    gradientBar.style.background = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stops.join(', ')})`;
-    renderStopsList();
-}
-
+        renderHandles();
+        const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
+        const stops = sorted.map(s => { const rgb = hexToRgb(s.color); return `rgba(${rgb.r},${rgb.g},${rgb.b},${s.alpha}) ${s.percent}%`; });
+        gradientBar.style.background = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stops.join(', ')})`;
+        renderStopsList();
+    }
     function setActiveStop(index) {
         activeStopIndex = index;
-        
-        // SYNC MAIN PICKER TO ACTIVE STOP
         const activeStop = gradientStops[index];
         const hsl = hexToHsl(activeStop.color);
         pickerHSLA = { h: hsl.h, s: hsl.s, l: hsl.l, a: activeStop.alpha };
-        updatePickerVisuals(); // Update visual sliders
-        
-        updateGradientVisuals();
+        updatePickerVisuals(); updateGradientVisuals();
     }
-
-    // LISTENER for Main Picker Change (Slider drags)
-    // We hook into the updatePickerVisuals cycle essentially by observing when pickerHSLA changes via mouse events
-    // But updatePickerVisuals is UI only. We need a function that applies pickerHSLA back to data.
     function applyPickerToActive() {
         if (currentTab === 'linear') {
             const hex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
-            gradientStops[activeStopIndex].color = hex;
-            gradientStops[activeStopIndex].alpha = pickerHSLA.a;
+            gradientStops[activeStopIndex].color = hex; gradientStops[activeStopIndex].alpha = pickerHSLA.a;
             updateGradientVisuals();
         }
     }
-
     function updateStopPosition(e, index) {
-        let val = parseInt(e.target.value);
-        if (isNaN(val)) val = 0;
-        val = Math.max(0, Math.min(100, val));
-        
-        // Get the active object BEFORE sort
+        let val = parseInt(e.target.value); if (isNaN(val)) val = 0; val = Math.max(0, Math.min(100, val));
         const activeObj = gradientStops[activeStopIndex];
-        
-        // Update
-        gradientStops[index].percent = val;
-        
-        // Sort
-        gradientStops.sort((a,b) => a.percent - b.percent);
-        
-        // Re-find Active Index
-        activeStopIndex = gradientStops.indexOf(activeObj);
-        
-        updateGradientVisuals();
+        gradientStops[index].percent = val; gradientStops.sort((a,b) => a.percent - b.percent);
+        activeStopIndex = gradientStops.indexOf(activeObj); updateGradientVisuals();
     }
-
-    // --- MINI POPOVER FUNCTIONS (UPDATED POSITIONING & STACK BEHAVIOR) ---
     function openMiniColorPopover(e, idx) {
         setActiveStop(idx);
         const popover = document.getElementById('miniColorPopover');
         const sharedPicker = document.getElementById('sharedPicker');
-        
-        // Move picker to mini popover BEFORE "Save" button
         popover.insertBefore(sharedPicker, document.getElementById('miniSaveBtn'));
         popover.style.display = 'block';
-
-        // --- POSITIONING LOGIC ---
-        // 1. Get Main Popover Rect
-        const mainPopover = document.getElementById('colorPickerPopover');
-        const mainRect = mainPopover.getBoundingClientRect();
-        
-        // 2. Calculate Position (Left side, aligned bottom)
-        const miniWidth = 286; // 260 width + 24 padding + 2 border
-        const miniHeight = 300; // approx height
-        const gap = 12;
-
-        let left = mainRect.left - miniWidth - gap;
-        let top = mainRect.bottom - miniHeight; // align bottom edges
-
-        // 3. Viewport Safety Check
-        if (left < 10) left = mainRect.right + gap; // Flip to right if no space on left
-        if (top < 10) top = 10;
-        
-        popover.style.top = `${top}px`;
-        popover.style.left = `${left}px`;
-
-        // MODIFIED: Remove main listener temporarily so clicking outside doesn't close main popover
+        const mainPopover = document.getElementById('colorPickerPopover'); const mainRect = mainPopover.getBoundingClientRect();
+        const miniWidth = 286; const miniHeight = 300; const gap = 12;
+        let left = mainRect.left - miniWidth - gap; let top = mainRect.bottom - miniHeight;
+        if (left < 10) left = mainRect.right + gap; if (top < 10) top = 10;
+        popover.style.top = `${top}px`; popover.style.left = `${left}px`;
         document.removeEventListener('click', closePopoverOnClickOutside);
-        
-        // Delay Adding Mini Click Listener
         setTimeout(() => document.addEventListener('click', closeMiniPopoverOnClickOutside), 0);
     }
-
     function closeMiniPopover() {
-        const popover = document.getElementById('miniColorPopover');
-        popover.style.display = 'none';
+        const popover = document.getElementById('miniColorPopover'); popover.style.display = 'none';
         document.removeEventListener('click', closeMiniPopoverOnClickOutside);
-        
-        // Move picker back to storage so it doesn't get lost
         document.getElementById('hiddenPickerStorage').appendChild(document.getElementById('sharedPicker'));
-        
-        // MODIFIED: Re-attach main listener after a tiny delay so it doesn't fire immediately
         setTimeout(() => document.addEventListener('click', closePopoverOnClickOutside), 10);
     }
-    
-    // Global exposure for the button onclick
     window.closeMiniPopover = closeMiniPopover;
-
-    function closeMiniPopoverOnClickOutside(e) {
-        const popover = document.getElementById('miniColorPopover');
-        // Close if click outside mini popover AND not on a swatch
-        if (!popover.contains(e.target) && !e.target.classList.contains('stop-swatch')) {
-            closeMiniPopover();
-        }
-    }
-
+    function closeMiniPopoverOnClickOutside(e) { const popover = document.getElementById('miniColorPopover'); if (!popover.contains(e.target) && !e.target.classList.contains('stop-swatch')) { closeMiniPopover(); } }
     function renderStopsList() {
         stopsListContainer.innerHTML = '';
         gradientStops.forEach((stop, idx) => {
-            const div = document.createElement('div'); 
-            div.className = 'stop-row';
-            if (idx === activeStopIndex) div.classList.add('active');
-            
-            // New Layout with EDITABLE Position
-            div.innerHTML = `
-                <div class="stop-pos-group">
-                    <input class="stop-pos-input" type="number" min="0" max="100" value="${Math.round(stop.percent)}">%
-                </div>
-                <div class="stop-data-group" onclick="setActiveStop(${idx})">
-                    <div class="stop-swatch" style="background-color: ${stop.color};"></div>
-                    <input class="stop-hex" value="${stop.color.replace('#','')}" maxlength="6"> 
-                    <div class="stop-opacity-group">
-                        <input class="stop-opacity" type="number" min="0" max="100" value="${Math.round(stop.alpha * 100)}" data-idx="${idx}">%
-                    </div>
-                    <button class="stop-remove-btn" onclick="event.stopPropagation(); removeGradientStop(${idx})">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    </button>
-                </div>
-            `;
-            
-            // Attach Swatch Click Listener
-            const swatch = div.querySelector('.stop-swatch');
-            swatch.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openMiniColorPopover(e, idx);
-            });
-
-            // Attach Position Change Listener
-            const posInput = div.querySelector('.stop-pos-input');
-            posInput.addEventListener('change', (e) => updateStopPosition(e, idx));
-            posInput.addEventListener('click', (e) => e.stopPropagation()); 
-
-            // Attach HEX Change Listener (New Editable)
-            const hexInput = div.querySelector('.stop-hex');
-            hexInput.addEventListener('change', (e) => {
-                let val = e.target.value.trim();
-                // Basic validation
-                if (/^[0-9A-Fa-f]{6}$/.test(val)) {
-                    gradientStops[idx].color = '#' + val.toUpperCase();
-                    updateGradientVisuals();
-                    if(idx === activeStopIndex) {
-                        const hsl = hexToHsl('#' + val);
-                        pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l;
-                        updatePickerVisuals();
-                    }
-                } else {
-                    e.target.value = gradientStops[idx].color.replace('#',''); // revert on error
-                }
-            });
-            hexInput.addEventListener('click', (e) => e.stopPropagation()); // prevent row activation if clicking to type
-
-            // Add Opacity listener
-            const opInput = div.querySelector('.stop-opacity');
-            opInput.addEventListener('change', (e) => {
-                let val = parseInt(e.target.value);
-                if(isNaN(val)) val = 100;
-                val = Math.max(0, Math.min(100, val));
-                gradientStops[idx].alpha = val / 100;
-                updateGradientVisuals();
-                // Also update main picker if this is active
-                if(idx === activeStopIndex) {
-                    pickerHSLA.a = val / 100;
-                    updatePickerVisuals();
-                }
-            });
-            opInput.addEventListener('click', (e) => e.stopPropagation());
-
+            const div = document.createElement('div'); div.className = 'stop-row'; if (idx === activeStopIndex) div.classList.add('active');
+            div.innerHTML = `<div class="stop-pos-group"><input class="stop-pos-input" type="number" min="0" max="100" value="${Math.round(stop.percent)}">%</div><div class="stop-data-group" onclick="setActiveStop(${idx})"><div class="stop-swatch" style="background-color: ${stop.color};"></div><input class="stop-hex" value="${stop.color.replace('#','')}" maxlength="6"><div class="stop-opacity-group"><input class="stop-opacity" type="number" min="0" max="100" value="${Math.round(stop.alpha * 100)}" data-idx="${idx}">%</div><button class="stop-remove-btn" onclick="event.stopPropagation(); removeGradientStop(${idx})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+            const swatch = div.querySelector('.stop-swatch'); swatch.addEventListener('click', (e) => { e.stopPropagation(); openMiniColorPopover(e, idx); });
+            const posInput = div.querySelector('.stop-pos-input'); posInput.addEventListener('change', (e) => updateStopPosition(e, idx)); posInput.addEventListener('click', (e) => e.stopPropagation()); 
+            const hexInput = div.querySelector('.stop-hex'); hexInput.addEventListener('change', (e) => { let val = e.target.value.trim(); if (/^[0-9A-Fa-f]{6}$/.test(val)) { gradientStops[idx].color = '#' + val.toUpperCase(); updateGradientVisuals(); if(idx === activeStopIndex) { const hsl = hexToHsl('#' + val); pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l; updatePickerVisuals(); } } else { e.target.value = gradientStops[idx].color.replace('#',''); } }); hexInput.addEventListener('click', (e) => e.stopPropagation());
+            const opInput = div.querySelector('.stop-opacity'); opInput.addEventListener('change', (e) => { let val = parseInt(e.target.value); if(isNaN(val)) val = 100; val = Math.max(0, Math.min(100, val)); gradientStops[idx].alpha = val / 100; updateGradientVisuals(); if(idx === activeStopIndex) { pickerHSLA.a = val / 100; updatePickerVisuals(); } }); opInput.addEventListener('click', (e) => e.stopPropagation());
             stopsListContainer.appendChild(div);
         });
     }
-
-    // --- CLICK TO ADD STOP (NEW LOGIC) ---
     gradientSliderContainer.addEventListener('click', (e) => {
-        // Handle stop propagation prevents this from firing if a handle is clicked,
-        // but double check target just in case
         if (e.target.closest('.gradient-handle')) return;
-
         const rect = gradientSliderContainer.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        let percent = (offsetX / rect.width) * 100;
-        percent = Math.max(0, Math.min(100, percent));
-        
+        const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
         addStopAtPercent(percent);
     });
-
     function addStopAtPercent(percent) {
-        // Sort current stops to find neighbors
         const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
-        
-        // Find neighbors
-        let start = sorted[0];
-        let end = sorted[sorted.length - 1];
-        
-        for (let i = 0; i < sorted.length - 1; i++) {
-            if (percent >= sorted[i].percent && percent <= sorted[i+1].percent) {
-                start = sorted[i];
-                end = sorted[i+1];
-                break;
-            }
-        }
-        
-        // Interpolate Color
-        let newColor = '#FF0000';
-        let newAlpha = 1;
-
+        let start = sorted[0]; let end = sorted[sorted.length - 1];
+        for (let i = 0; i < sorted.length - 1; i++) { if (percent >= sorted[i].percent && percent <= sorted[i+1].percent) { start = sorted[i]; end = sorted[i+1]; break; } }
+        let newColor = '#FF0000'; let newAlpha = 1;
         if (start && end && start !== end) {
-            const range = end.percent - start.percent;
-            const ratio = range === 0 ? 0 : (percent - start.percent) / range;
-            
-            const c1 = hexToRgb(start.color);
-            const c2 = hexToRgb(end.color);
-            
-            if (c1 && c2) {
-                const r = Math.round(c1.r + (c2.r - c1.r) * ratio);
-                const g = Math.round(c1.g + (c2.g - c1.g) * ratio);
-                const b = Math.round(c1.b + (c2.b - c1.b) * ratio);
-                newColor = rgbToHex(r,g,b);
-            }
+            const range = end.percent - start.percent; const ratio = range === 0 ? 0 : (percent - start.percent) / range;
+            const c1 = hexToRgb(start.color); const c2 = hexToRgb(end.color);
+            if (c1 && c2) { newColor = rgbToHex(Math.round(c1.r + (c2.r - c1.r) * ratio), Math.round(c1.g + (c2.g - c1.g) * ratio), Math.round(c1.b + (c2.b - c1.b) * ratio)); }
             newAlpha = start.alpha + (end.alpha - start.alpha) * ratio;
-        } else if (start) {
-             newColor = start.color;
-             newAlpha = start.alpha;
-        }
-
+        } else if (start) { newColor = start.color; newAlpha = start.alpha; }
         const newStop = { percent: percent, color: newColor, alpha: newAlpha };
-        gradientStops.push(newStop);
-        gradientStops.sort((a,b) => a.percent - b.percent);
-        activeStopIndex = gradientStops.indexOf(newStop);
-        
-        updateGradientVisuals();
-        setActiveStop(activeStopIndex);
+        gradientStops.push(newStop); gradientStops.sort((a,b) => a.percent - b.percent);
+        activeStopIndex = gradientStops.indexOf(newStop); updateGradientVisuals(); setActiveStop(activeStopIndex);
     }
-
-
-    // MODIFIED: Re-written Add Stop Logic for Safety and Real-time Update
-    document.getElementById('addStopBtn').addEventListener('click', () => {
-        // Create a copy for sorting calculation
-        const sorted = [...gradientStops].map((s, i) => ({...s, origIndex: i})).sort((a,b) => a.percent - b.percent);
-        
-        let newStop = null;
-
-        if (sorted.length < 2) {
-            // Fallback for edge cases
-            newStop = { percent: 50, color: '#FF0000', alpha: 1 };
-        } else {
-            // Find biggest gap
-            let maxGap = 0;
-            let gapIndex = 0;
-            for(let i = 0; i < sorted.length - 1; i++) {
-                const gap = sorted[i+1].percent - sorted[i].percent;
-                if(gap > maxGap) { maxGap = gap; gapIndex = i; }
-            }
-            
-            const start = sorted[gapIndex];
-            const end = sorted[gapIndex+1];
-            
-            const newPercent = start.percent + (maxGap / 2);
-            
-            // Safe interpolation
-            let newColor = '#FF0000'; // Default fallback
-            try {
-                const c1 = hexToRgb(start.color);
-                const c2 = hexToRgb(end.color);
-                if (c1 && c2) {
-                    const r = Math.round((c1.r + c2.r)/2);
-                    const g = Math.round((c1.g + c2.g)/2);
-                    const b = Math.round((c1.b + c2.b)/2);
-                    newColor = rgbToHex(r,g,b);
-                }
-            } catch(e) { console.log('Color parsing error', e); }
-            
-            const newAlpha = (start.alpha + end.alpha) / 2;
-            
-            newStop = { percent: newPercent, color: newColor, alpha: newAlpha };
-        }
-        
-        if (newStop) {
-            gradientStops.push(newStop);
-            // Sort main array
-            gradientStops.sort((a,b) => a.percent - b.percent);
-            
-            // Update Active Index to the newly created stop
-            activeStopIndex = gradientStops.indexOf(newStop);
-            
-            // Force Render
-            updateGradientVisuals();
-            setActiveStop(activeStopIndex);
-        }
-    });
-
-    window.removeGradientStop = function(index) {
-        if (gradientStops.length <= 2) return; 
-        gradientStops.splice(index, 1);
-        if (activeStopIndex >= gradientStops.length) activeStopIndex = gradientStops.length - 1;
-        updateGradientVisuals();
-    }
-
-    function onHandleMouseDown(e, index) {
-        draggingHandleIndex = index;
-        setActiveStop(index);
-        document.addEventListener('mousemove', onHandleDrag);
-        document.addEventListener('mouseup', onHandleStopDrag);
-        e.preventDefault(); 
-    }
-
-    function onHandleDrag(e) {
-        if (draggingHandleIndex === null) return;
-        const rect = gradientSliderContainer.getBoundingClientRect();
-        const trackWidth = rect.width;
-        const offsetX = e.clientX - rect.left;
-        
-        let percent = (offsetX / trackWidth) * 100;
-        percent = Math.max(0, Math.min(100, percent));
-        
-        gradientStops[draggingHandleIndex].percent = percent;
-        updateGradientVisuals();
-    }
-
-    function onHandleStopDrag() {
-        draggingHandleIndex = null;
-        document.removeEventListener('mousemove', onHandleDrag);
-        document.removeEventListener('mouseup', onHandleStopDrag);
-    }
-
-    document.getElementById('flipHorizontalBtn').addEventListener('click', () => {
-        gradientStops.forEach(stop => { stop.percent = 100 - stop.percent; });
-        updateGradientVisuals();
-    });
-
+    document.getElementById('addStopBtn').addEventListener('click', () => { addStopAtPercent(50); });
+    window.removeGradientStop = function(index) { if (gradientStops.length <= 2) return; gradientStops.splice(index, 1); if (activeStopIndex >= gradientStops.length) activeStopIndex = gradientStops.length - 1; updateGradientVisuals(); }
+    function onHandleMouseDown(e, index) { draggingHandleIndex = index; setActiveStop(index); document.addEventListener('mousemove', onHandleDrag); document.addEventListener('mouseup', onHandleStopDrag); e.preventDefault(); }
+    function onHandleDrag(e) { if (draggingHandleIndex === null) return; const rect = gradientSliderContainer.getBoundingClientRect(); const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)); gradientStops[draggingHandleIndex].percent = percent; updateGradientVisuals(); }
+    function onHandleStopDrag() { draggingHandleIndex = null; document.removeEventListener('mousemove', onHandleDrag); document.removeEventListener('mouseup', onHandleStopDrag); }
+    document.getElementById('flipHorizontalBtn').addEventListener('click', () => { gradientStops.forEach(stop => { stop.percent = 100 - stop.percent; }); updateGradientVisuals(); });
     document.getElementById('flipVerticalBtn').addEventListener('click', () => { isVerticalFlip = !isVerticalFlip; updateGradientVisuals(); });
 
-
-    // --- CONFIRM COLOR (Updated) ---
     function confirmAddColor() {
         if (currentTab === 'solid') {
             const newColorData = { h: pickerHSLA.h, s: pickerHSLA.s, l: pickerHSLA.l, a: pickerHSLA.a, type: 'solid' };
             if (editingColorIndex > -1) { colorState.colors[editingColorIndex] = newColorData; } else { colorState.colors.push(newColorData); }
         } else {
-            // Linear Gradient
-            // We need to pass all stops
-            const newColorData = {
-                type: 'linear',
-                isVertical: isVerticalFlip,
-                stops: JSON.parse(JSON.stringify(gradientStops)) // deep copy
-            };
-            // Note: Gradient editing index support is complex, assuming new add for now unless editing index was linear type
-            // If editingColorIndex > -1, we overwrite
+            const newColorData = { type: 'linear', isVertical: isVerticalFlip, stops: JSON.parse(JSON.stringify(gradientStops)) };
             if (editingColorIndex > -1) { colorState.colors[editingColorIndex] = newColorData; } else { colorState.colors.push(newColorData); }
         }
-        renderColorList();
-        updatePreview(true, 'color'); 
-        closePopover();
-
-        // --- RESET GRADIENT STATE (ADDED) ---
-        gradientStops = [
-            { percent: 0, color: '#D966FF', alpha: 1 },
-            { percent: 100, color: '#823D99', alpha: 1 }
-        ];
-        isVerticalFlip = false;
-        activeStopIndex = 0;
-
-        // Reset Picker to default start color of the new default gradient
-        const defaultHsl = hexToHsl(gradientStops[0].color);
-        pickerHSLA = { h: defaultHsl.h, s: defaultHsl.s, l: defaultHsl.l, a: 1.0 };
-        
-        // Refresh Visuals so defaults are shown next time
-        updateGradientVisuals();
-        updatePickerVisuals();
+        renderColorList(); updatePreview(true, 'color'); closePopover();
+        gradientStops = [{ percent: 0, color: '#D966FF', alpha: 1 }, { percent: 100, color: '#823D99', alpha: 1 }]; isVerticalFlip = false; activeStopIndex = 0;
+        const defaultHsl = hexToHsl(gradientStops[0].color); pickerHSLA = { h: defaultHsl.h, s: defaultHsl.s, l: defaultHsl.l, a: 1.0 };
+        updateGradientVisuals(); updatePickerVisuals();
     }
 
-    // --- (Existing Solid Logic Variables & Listeners) ---
     const cpSatBrightArea = document.getElementById('cpSatBrightArea'); const cpSbSelector = document.getElementById('cpSbSelector'); const cpHueSlider = document.getElementById('cpHueSlider'); const cpHueThumb = document.getElementById('cpHueThumb'); const cpAlphaSlider = document.getElementById('cpAlphaSlider'); const cpAlphaThumb = document.getElementById('cpAlphaThumb'); const cpAlphaBar = document.getElementById('cpAlphaBar'); const cpHexInput = document.getElementById('cpHexInput'); const cpAlphaInput = document.getElementById('cpAlphaInput');
     let isDraggingSB = false; let isDraggingHue = false; let isDraggingAlpha = false;
 
     function updatePickerVisuals() {
-        // Shared visual update for sliders
         cpSatBrightArea.style.backgroundColor = `hsl(${pickerHSLA.h}, 100%, 50%)`;
         const hsv = hslToHsv(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
         cpSbSelector.style.left = `${hsv.s}%`; cpSbSelector.style.top = `${100 - hsv.v}%`;
@@ -951,18 +586,10 @@
         cpAlphaBar.style.background = `linear-gradient(to right, transparent, ${baseHex})`;
         cpHexInput.value = baseHex.substring(1); cpAlphaInput.value = Math.round(pickerHSLA.a * 100);
     }
-
-    // MAIN LISTENER MODIFICATIONS FOR SYNC
-    function onPickerChange() {
-        updatePickerVisuals();
-        // Propagate to Linear Active Stop if needed
-        applyPickerToActive();
-    }
-
+    function onPickerChange() { updatePickerVisuals(); applyPickerToActive(); }
     cpSatBrightArea.addEventListener('mousedown', (e) => { isDraggingSB = true; updateSBFromEvent(e); });
     document.addEventListener('mousemove', (e) => { if(isDraggingSB) updateSBFromEvent(e); if(isDraggingHue) updateHueFromEvent(e); if(isDraggingAlpha) updateAlphaFromEvent(e); });
     document.addEventListener('mouseup', () => { isDraggingSB = false; isDraggingHue = false; isDraggingAlpha = false; });
-
     function updateSBFromEvent(e) { const rect = cpSatBrightArea.getBoundingClientRect(); let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width)); let y = Math.max(0, Math.min(e.clientY - rect.top, rect.height)); const newHSL = hsvToHsl(pickerHSLA.h, (x / rect.width) * 100, 100 - ((y / rect.height) * 100)); pickerHSLA.s = newHSL.s; pickerHSLA.l = newHSL.l; onPickerChange(); }
     cpHueSlider.addEventListener('mousedown', (e) => { isDraggingHue = true; updateHueFromEvent(e); });
     function updateHueFromEvent(e) { const rect = cpHueSlider.getBoundingClientRect(); let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width)); pickerHSLA.h = (x / rect.width) * 360; onPickerChange(); }
@@ -977,28 +604,9 @@
     function setPickerColorFromHex(hex) { const hsl = hexToHsl(hex); pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l; pickerHSLA.a = 1.0; onPickerChange(); }
 
     function openPopoverToEdit(index, triggerElement) { 
-        editingColorIndex = index; 
-        const colorToEdit = colorState.colors[index]; 
-        
-        if (colorToEdit.type === 'linear') {
-            // LOAD LINEAR STATE
-            gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops));
-            isVerticalFlip = colorToEdit.isVertical;
-            activeStopIndex = 0;
-            // Visual Update for Button
-            document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent';
-            switchColorTab('linear'); // Switch to linear UI
-            setActiveStop(0); // Trigger sync
-        } else {
-            // LOAD SOLID STATE
-            pickerHSLA = { h: colorToEdit.h, s: colorToEdit.s, l: colorToEdit.l, a: colorToEdit.a };
-            updatePickerVisuals(); 
-            switchColorTab('solid');
-        }
-        
-        cpHeaderTitle.textContent = "Edit Color"; 
-        cpAddConfirmBtn.textContent = "Save Color"; 
-        openPopover(triggerElement); 
+        editingColorIndex = index; const colorToEdit = colorState.colors[index]; 
+        if (colorToEdit.type === 'linear') { gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops)); isVerticalFlip = colorToEdit.isVertical; activeStopIndex = 0; document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent'; switchColorTab('linear'); setActiveStop(0); } else { pickerHSLA = { h: colorToEdit.h, s: colorToEdit.s, l: colorToEdit.l, a: colorToEdit.a }; updatePickerVisuals(); switchColorTab('solid'); }
+        cpHeaderTitle.textContent = "Edit Color"; cpAddConfirmBtn.textContent = "Save Color"; openPopover(triggerElement); 
     }
     function openPopover(triggerElement = addColorBtn) { if (colorState.isMultiColor) return; popover.style.visibility = 'hidden'; popover.style.display = 'flex'; if(editingColorIndex === -1) switchColorTab('solid'); const btnRect = triggerElement.getBoundingClientRect(); const popoverRect = popover.getBoundingClientRect(); const leftPos = btnRect.right + 12; const btnCenterY = btnRect.top + (btnRect.height / 2); let topPos = btnCenterY - (popoverRect.height / 2); const padding = 10; topPos = Math.max(padding, topPos); const maxTop = window.innerHeight - popoverRect.height - padding; topPos = Math.min(topPos, maxTop); popover.style.left = `${leftPos}px`; popover.style.top = `${topPos}px`; popover.style.visibility = 'visible'; currentTriggerElement = triggerElement; document.addEventListener('click', closePopoverOnClickOutside); }
     let currentTriggerElement = null;
@@ -1008,56 +616,31 @@
    addColorBtn.addEventListener('click', () => { editingColorIndex = -1; pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; gradientStops = [{ percent: 0, color: '#D966FF', alpha: 1 }, { percent: 100, color: '#823D99', alpha: 1 }]; isVerticalFlip = false; activeStopIndex = 0; updatePickerVisuals(); updateGradientVisuals(); cpHeaderTitle.textContent = "Add Color"; cpAddConfirmBtn.textContent = "Add Color"; openPopover(addColorBtn); });
    cpCloseBtn.addEventListener('click', closePopover); cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
-    // --- UTILS (HSL/HSV) ---
     function hslToHex(h, s, l) { l /= 100; const a = s * Math.min(l, 1 - l) / 100; const f = n => { const k = (n + h / 30) % 12; const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1); return Math.round(255 * color).toString(16).padStart(2, '0'); }; return `#${f(0)}${f(8)}${f(4)}`.toUpperCase(); }
     function hexToHsl(hex) { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); if (!result) return { h: 0, s: 0, l: 0 }; let r = parseInt(result[1], 16) / 255; let g = parseInt(result[2], 16) / 255; let b = parseInt(result[3], 16) / 255; const max = Math.max(r, g, b), min = Math.min(r, g, b); let h, s, l = (max + min) / 2; if (max === min) { h = s = 0; } else { const d = max - min; s = l > 0.5 ? d / (2 - max - min) : d / (max + min); switch (max) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; case b: h = (r - g) / d + 4; break; } h *= 60; } return { h: h, s: s * 100, l: l * 100 }; }
     function hsvToHsl(h, s, v) { s /= 100; v /= 100; let l = (2 - s) * v / 2; if (l !== 0) { if (l === 1) { s = 0; } else if (l < 0.5) { s = s * v / (l * 2); } else { s = s * v / (2 - l * 2); } } return { h: h, s: s * 100, l: l * 100 }; }
     function hslToHsv(h, s, l) { s /= 100; l /= 100; let v = l + s * Math.min(l, 1 - l); let sv = l === 0 ? 0 : 2 * (1 - l / v); return { h: h, s: sv * 100, v: v * 100 }; }
 
-    // --- SHAPE TABS & LOGIC ---
     document.querySelectorAll('.shape-tab-trigger').forEach(tab => {
         tab.addEventListener('click', () => {
-            document.querySelectorAll('.shape-tab-trigger').forEach(t => t.removeAttribute('data-state'));
-            tab.setAttribute('data-state', 'active');
-            activeShapeTab = tab.getAttribute('data-target');
-            if (activeShapeTab === 'preset') {
-                presetShapesContainer.style.display = 'block';
-                emojiShapesContainer.style.display = 'none';
-                particleColorSection.classList.remove('section-disabled');
-            } else {
-                presetShapesContainer.style.display = 'none';
-                emojiShapesContainer.style.display = 'block';
-                particleColorSection.classList.add('section-disabled');
-            }
+            document.querySelectorAll('.shape-tab-trigger').forEach(t => t.removeAttribute('data-state')); tab.setAttribute('data-state', 'active'); activeShapeTab = tab.getAttribute('data-target');
+            if (activeShapeTab === 'preset') { presetShapesContainer.style.display = 'block'; emojiShapesContainer.style.display = 'none'; particleColorSection.classList.remove('section-disabled'); } else { presetShapesContainer.style.display = 'none'; emojiShapesContainer.style.display = 'block'; particleColorSection.classList.add('section-disabled'); }
             updatePreview(false); 
         });
     });
 
     document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => {
        item.addEventListener('click', () => {
-           const val = item.getAttribute('data-value');
-           if (val === 'custom') return; 
-           const currentState = item.getAttribute('data-state');
-           item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected');
-           updatePreview(false);
+           const val = item.getAttribute('data-value'); if (val === 'custom') return; 
+           const currentState = item.getAttribute('data-state'); item.setAttribute('data-state', currentState === 'selected' ? '' : 'selected'); updatePreview(false);
        });
     });
 
     const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😛', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
-    
     modernEmojis.forEach(emojiChar => {
-        const emojiItem = document.createElement('div');
-        emojiItem.className = 'emoji-item';
-        emojiItem.textContent = emojiChar;
+        const emojiItem = document.createElement('div'); emojiItem.className = 'emoji-item'; emojiItem.textContent = emojiChar;
         emojiItem.addEventListener('click', () => {
-            const index = selectedEmojis.indexOf(emojiChar);
-            if (index > -1) {
-                selectedEmojis.splice(index, 1);
-                emojiItem.removeAttribute('data-state');
-            } else {
-                selectedEmojis.push(emojiChar);
-                emojiItem.setAttribute('data-state', 'selected');
-            }
+            const index = selectedEmojis.indexOf(emojiChar); if (index > -1) { selectedEmojis.splice(index, 1); emojiItem.removeAttribute('data-state'); } else { selectedEmojis.push(emojiChar); emojiItem.setAttribute('data-state', 'selected'); }
             updatePreview(false);
         });
         emojiGrid.appendChild(emojiItem);
@@ -1065,34 +648,16 @@
 
     // --- CUSTOM SHAPE EDITOR ---
     const initialCsState = { anchors: [{x: 60, y: 60}, {x: 260, y: 60}, {x: 260, y: 260}, {x: 60, y: 260}], controls: [{dx: 0, dy: -30}, {dx: -30, dy: 0}, {dx: 30, dy: 0}, {dx: 0, dy: -30}, {dx: 0, dy: 30}, {dx: 30, dy: 0}, {dx: -30, dy: 0}, {dx: 0, dy: 30}] };
-    let csState = JSON.parse(JSON.stringify(initialCsState));
-    let draggingElement = null;
-    let dragStartIndex = -1; 
-
+    let csState = JSON.parse(JSON.stringify(initialCsState)); let draggingElement = null; let dragStartIndex = -1; 
     function renderEditorCanvas() {
-        csEditorSvg.innerHTML = ''; 
-        const a = csState.anchors; const c = csState.controls;
-        let d = `M ${a[0].x},${a[0].y} `;
-        d += `C ${a[0].x + c[0].dx},${a[0].y + c[0].dy} ${a[1].x + c[3].dx},${a[1].y + c[3].dy} ${a[1].x},${a[1].y} `;
-        d += `C ${a[1].x + c[2].dx},${a[1].y + c[2].dy} ${a[2].x + c[5].dx},${a[2].y + c[5].dy} ${a[2].x},${a[2].y} `;
-        d += `C ${a[2].x + c[4].dx},${a[2].y + c[4].dy} ${a[3].x + c[7].dx},${a[3].y + c[7].dy} ${a[3].x},${a[3].y} `;
-        d += `C ${a[3].x + c[6].dx},${a[3].y + c[6].dy} ${a[0].x + c[1].dx},${a[0].y + c[1].dy} ${a[0].x},${a[0].y} Z`;
-        const pathPreview = createSvgElement('path', { d: d, class: 'cs-path-preview' });
-        csEditorSvg.appendChild(pathPreview);
+        csEditorSvg.innerHTML = ''; const a = csState.anchors; const c = csState.controls;
+        let d = `M ${a[0].x},${a[0].y} `; d += `C ${a[0].x + c[0].dx},${a[0].y + c[0].dy} ${a[1].x + c[3].dx},${a[1].y + c[3].dy} ${a[1].x},${a[1].y} `; d += `C ${a[1].x + c[2].dx},${a[1].y + c[2].dy} ${a[2].x + c[5].dx},${a[2].y + c[5].dy} ${a[2].x},${a[2].y} `; d += `C ${a[2].x + c[4].dx},${a[2].y + c[4].dy} ${a[3].x + c[7].dx},${a[3].y + c[7].dy} ${a[3].x},${a[3].y} `; d += `C ${a[3].x + c[6].dx},${a[3].y + c[6].dy} ${a[0].x + c[1].dx},${a[0].y + c[1].dy} ${a[0].x},${a[0].y} Z`;
+        const pathPreview = createSvgElement('path', { d: d, class: 'cs-path-preview' }); csEditorSvg.appendChild(pathPreview);
         const drawCircle = (x, y, cls, idx, type) => { const circle = createSvgElement('circle', { cx: x, cy: y, r: 6, class: cls }); circle.addEventListener('mousedown', (e) => startDrag(e, idx, type)); return circle; };
         const drawLine = (x1, y1, x2, y2) => createSvgElement('line', { x1, y1, x2, y2, class: 'cs-connector' });
-        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy));
-        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy));
-        csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy));
-        csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy));
-        csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy));
-        csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy));
-        csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy));
-        csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
-        c.forEach((ctrl, i) => { const anchorIdx = Math.floor(i / 2); const absX = a[anchorIdx].x + ctrl.dx; const absY = a[anchorIdx].y + ctrl.dy; csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control')); });
-        a.forEach((p, i) => { csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor')); });
+        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy)); csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
+        c.forEach((ctrl, i) => { const anchorIdx = Math.floor(i / 2); const absX = a[anchorIdx].x + ctrl.dx; const absY = a[anchorIdx].y + ctrl.dy; csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control')); }); a.forEach((p, i) => { csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor')); });
     }
-
     function startDrag(e, index, type) { csHistory.push(JSON.parse(JSON.stringify(csState))); draggingElement = type; dragStartIndex = index; document.addEventListener('mousemove', onDrag); document.addEventListener('mouseup', stopDrag); }
     function onDrag(e) { if (!draggingElement) return; const rect = csEditorSvg.getBoundingClientRect(); const x = Math.max(0, Math.min(320, e.clientX - rect.left)); const y = Math.max(0, Math.min(320, e.clientY - rect.top)); if (draggingElement === 'anchor') { csState.anchors[dragStartIndex] = {x, y}; } else if (draggingElement === 'control') { const anchorIdx = Math.floor(dragStartIndex / 2); const anchor = csState.anchors[anchorIdx]; csState.controls[dragStartIndex] = { dx: x - anchor.x, dy: y - anchor.y }; } renderEditorCanvas(); }
     function stopDrag() { draggingElement = null; dragStartIndex = -1; document.removeEventListener('mousemove', onDrag); document.removeEventListener('mouseup', stopDrag); }
@@ -1109,6 +674,8 @@
         return {
             shapeTab: activeShapeTab, selectedShapes: selectedShapes, selectedEmojis: selectedEmojis, customShapePath: customPath, 
             randomness: parseInt(document.getElementById('randomInput').value), amount: parseInt(document.getElementById('amountInput').value), zoom: parseInt(document.getElementById('zoomInput').value),
+            // NEW: Add flutter value
+            flutter: parseInt(document.getElementById('flutterInput').value),
             randomizeSize: document.getElementById('checkSize').checked, randomizeRotation: document.getElementById('checkRotation').checked,
             colorData: { isMultiColor: colorState.isMultiColor, customColors: colorState.colors },
             frameCount: parseInt(document.getElementById('frameCountInput').value) || 1, frameDelay: parseInt(document.getElementById('frameDelayInput').value) || 50
@@ -1116,9 +683,59 @@
     }
     document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     document.getElementById('generateBtn').addEventListener('click', () => { const settings = getSettings(); if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } });
-    function resetPluginState() { document.getElementById('randomInput').value = 60; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; selectedEmojis = []; document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); }
+    
+    function resetPluginState() { 
+        document.getElementById('randomInput').value = 60; 
+        document.getElementById('amountInput').value = 20; 
+        document.getElementById('zoomInput').value = 10;
+        // NEW: Reset flutter
+        document.getElementById('flutterInput').value = 50;
+        
+        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; selectedEmojis = []; document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; 
+        
+        // Dispatch inputs
+        document.getElementById('randomInput').dispatchEvent(new Event('input')); 
+        document.getElementById('amountInput').dispatchEvent(new Event('input')); 
+        document.getElementById('zoomInput').dispatchEvent(new Event('input')); 
+        document.getElementById('flutterInput').dispatchEvent(new Event('input'));
+        
+        updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
+    }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
-    function renderPreview() { const settings = getSettings(); previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); const globalZoom = settings.zoom / 10; previewParticles.forEach((p, index) => { let el; const baseSize = 24; const finalScale = p.scale * globalZoom; const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale})`; if (p.isEmoji) { el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': `translate(${p.x}, ${p.y}) scale(${finalScale})` }); el.textContent = p.shapeType; } else { let fill; let opacity = 1; if (!p.color) { fill = '#CBD5E1'; } else if (p.color.type === 'linear') { const gradId = `p_grad_${index}`; const gradient = createSvgElement('linearGradient', { id: gradId, x1: '0%', y1: '0%', x2: p.color.isVertical ? '0%' : '100%', y2: p.color.isVertical ? '100%' : '0%' }); p.color.gradientStops.forEach(stop => { const r = Math.round(stop.color.r * 255); const g = Math.round(stop.color.g * 255); const b = Math.round(stop.color.b * 255); const stopEl = createSvgElement('stop', { offset: `${stop.position * 100}%`, 'stop-color': `rgb(${r},${g},${b})`, 'stop-opacity': stop.color.a }); gradient.appendChild(stopEl); }); defs.appendChild(gradient); fill = `url(#${gradId})`; } else { const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); fill = `rgb(${r}, ${g}, ${b})`; opacity = p.color.a !== undefined ? p.color.a : 1; } const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; if (p.shapeType === 'custom' && p.customPathData) { const pathScale = baseSize / 320; el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } } if(el) previewSvg.appendChild(el); }); }
+
+    // --- RENDER PREVIEW (UPDATED FOR FALLING LEAF) ---
+    function renderPreview() {
+        const settings = getSettings(); 
+        previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); 
+        const globalZoom = settings.zoom / 10; 
+        
+        previewParticles.forEach((p, index) => { 
+            let el; 
+            const baseSize = 24; 
+            const finalScale = p.scale * globalZoom;
+            
+            // --- SIMULATE 3D FLIP IN PREVIEW ---
+            // flipFactor is calculated in code.js and passed here.
+            // If it's missing (e.g., older version logic), default to 1 (no flip).
+            const flipScale = Math.max(0.01, Math.abs(p.flipFactor !== undefined ? p.flipFactor : 1));
+
+            // Apply NON-UNIFORM scale to simulate X-axis rotation (squash on Y)
+            // Transform Order: Translate -> Rotate -> Scale(Uniform + Flip)
+            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale}, ${finalScale * flipScale})`; 
+
+            if (p.isEmoji) { 
+                el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': transformStr }); 
+                el.textContent = p.shapeType; 
+            } else { 
+                let fill; let opacity = 1; 
+                if (!p.color) { fill = '#CBD5E1'; } else if (p.color.type === 'linear') { const gradId = `p_grad_${index}`; const gradient = createSvgElement('linearGradient', { id: gradId, x1: '0%', y1: '0%', x2: p.color.isVertical ? '0%' : '100%', y2: p.color.isVertical ? '100%' : '0%' }); p.color.gradientStops.forEach(stop => { const r = Math.round(stop.color.r * 255); const g = Math.round(stop.color.g * 255); const b = Math.round(stop.color.b * 255); const stopEl = createSvgElement('stop', { offset: `${stop.position * 100}%`, 'stop-color': `rgb(${r},${g},${b})`, 'stop-opacity': stop.color.a }); gradient.appendChild(stopEl); }); defs.appendChild(gradient); fill = `url(#${gradId})`; } else { const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); fill = `rgb(${r}, ${g}, ${b})`; opacity = p.color.a !== undefined ? p.color.a : 1; } 
+                const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; 
+                if (p.shapeType === 'custom' && p.customPathData) { const pathScale = baseSize / 320; el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } 
+            } 
+            if(el) previewSvg.appendChild(el); 
+        }); 
+    }
+
     function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions: keepPositions, changeType: changeType } }, '*'); }
     window.onmessage = (event) => { const msg = event.data.pluginMessage; if (msg && msg.type === 'preview-data') { previewParticles = msg.particles; renderPreview(); } };
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
