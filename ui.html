@@ -1018,8 +1018,8 @@
     function closePopover() { popover.style.display = 'none'; document.removeEventListener('click', closePopoverOnClickOutside); currentTriggerElement = null; editingColorIndex = -1; }
     function closePopoverOnClickOutside(event) { const isClickInsidePopover = popover.contains(event.target); const isClickOnTrigger = currentTriggerElement && currentTriggerElement.contains(event.target); if (!isClickInsidePopover && !isClickOnTrigger && popover.style.display === 'flex') { closePopover(); } }
     
-    addColorBtn.addEventListener('click', () => { editingColorIndex = -1; pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; updatePickerVisuals(); cpHeaderTitle.textContent = "Add Color"; cpAddConfirmBtn.textContent = "Add Color"; openPopover(addColorBtn); });
-    cpCloseBtn.addEventListener('click', closePopover); cpAddConfirmBtn.addEventListener('click', confirmAddColor);
+   addColorBtn.addEventListener('click', () => { editingColorIndex = -1; pickerHSLA = { h: 0, s: 100, l: 50, a: 1 }; gradientStops = [{ percent: 0, color: '#D966FF', alpha: 1 }, { percent: 100, color: '#823D99', alpha: 1 }]; isVerticalFlip = false; activeStopIndex = 0; updatePickerVisuals(); updateGradientVisuals(); cpHeaderTitle.textContent = "Add Color"; cpAddConfirmBtn.textContent = "Add Color"; openPopover(addColorBtn); });
+   cpCloseBtn.addEventListener('click', closePopover); cpAddConfirmBtn.addEventListener('click', confirmAddColor);
 
     // --- UTILS (HSL/HSV) ---
     function hslToHex(h, s, l) { l /= 100; const a = s * Math.min(l, 1 - l) / 100; const f = n => { const k = (n + h / 30) % 12; const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1); return Math.round(255 * color).toString(16).padStart(2, '0'); }; return `#${f(0)}${f(8)}${f(4)}`.toUpperCase(); }
