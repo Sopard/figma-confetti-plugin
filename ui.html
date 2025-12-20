@@ -444,15 +444,17 @@
         });
     }
     multiColorSwitch.addEventListener('change', (e) => { colorState.isMultiColor = e.target.checked; if (colorState.isMultiColor) { closePopover(); editingColorIndex = -1; } renderColorList(); updatePreview(true, 'color'); });
-
     // --- POPOVER LOGIC ---
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
     let currentTab = 'solid';
+
     window.switchColorTab = function(tabName) {
+        const previousTab = currentTab;
         currentTab = tabName;
         document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
         document.querySelector(`.cp-tab[data-tab="${tabName}"]`).classList.add('active');
         const sharedPicker = document.getElementById('sharedPicker');
+        
         if (tabName === 'solid') {
             document.getElementById('cpSolidContent').style.display = 'block';
             document.getElementById('cpLinearContent').style.display = 'none';
@@ -463,6 +465,26 @@
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
             document.getElementById('hiddenPickerStorage').appendChild(sharedPicker);
+            
+            // INHERIT COLOR LOGIC: If switching from Solid to Linear, inherit the color
+            if (previousTab === 'solid') {
+                // Get current solid color
+                const startHex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
+                
+                // Create a darker shade for the end stop (reduce Lightness by 30%)
+                const darkL = Math.max(0, pickerHSLA.l - 30);
+                const endHex = hslToHex(pickerHSLA.h, pickerHSLA.s, darkL);
+
+                // Overwrite gradient stops with the new solid-based gradient
+                gradientStops = [
+                    { percent: 0, color: startHex, alpha: pickerHSLA.a },
+                    { percent: 100, color: endHex, alpha: pickerHSLA.a }
+                ];
+                
+                // Set active stop to 0 so the picker shows the primary color
+                activeStopIndex = 0;
+            }
+
             updateGradientVisuals(); 
         }
     }
@@ -523,20 +545,45 @@
         gradientStops[index].percent = val; gradientStops.sort((a,b) => a.percent - b.percent);
         activeStopIndex = gradientStops.indexOf(activeObj); updateGradientVisuals();
     }
+
+    // --- FIX: Positioning Logic for Mini Popover ---
     function openMiniColorPopover(e, idx) {
         setActiveStop(idx);
         const popover = document.getElementById('miniColorPopover');
         const sharedPicker = document.getElementById('sharedPicker');
         popover.insertBefore(sharedPicker, document.getElementById('miniSaveBtn'));
         popover.style.display = 'block';
-        const mainPopover = document.getElementById('colorPickerPopover'); const mainRect = mainPopover.getBoundingClientRect();
-        const miniWidth = 286; const miniHeight = 300; const gap = 12;
-        let left = mainRect.left - miniWidth - gap; let top = mainRect.bottom - miniHeight;
-        if (left < 10) left = mainRect.right + gap; if (top < 10) top = 10;
-        popover.style.top = `${top}px`; popover.style.left = `${left}px`;
+        
+        const mainPopover = document.getElementById('colorPickerPopover'); 
+        const mainRect = mainPopover.getBoundingClientRect();
+        
+        // Get dimensions
+        const popRect = popover.getBoundingClientRect();
+        const miniWidth = popRect.width || 286;
+        const miniHeight = popRect.height || 300;
+        const gap = 12;
+        const padding = 10;
+
+        // Horizontal Position
+        let left = mainRect.left - miniWidth - gap;
+        if (left < padding) left = mainRect.right + gap;
+        if (left + miniWidth > window.innerWidth - padding) { left = window.innerWidth - miniWidth - padding; }
+        if (left < padding) left = padding;
+
+        // Vertical Position (Check bottom overflow)
+        let top = mainRect.bottom - miniHeight;
+        if (top + miniHeight > window.innerHeight - padding) {
+            top = window.innerHeight - miniHeight - padding;
+        }
+        if (top < padding) top = padding;
+
+        popover.style.top = `${top}px`; 
+        popover.style.left = `${left}px`;
+        
         document.removeEventListener('click', closePopoverOnClickOutside);
         setTimeout(() => document.addEventListener('click', closeMiniPopoverOnClickOutside), 0);
     }
+
     function closeMiniPopover() {
         const popover = document.getElementById('miniColorPopover'); popover.style.display = 'none';
         document.removeEventListener('click', closeMiniPopoverOnClickOutside);
