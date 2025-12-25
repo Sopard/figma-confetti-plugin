@@ -58,7 +58,12 @@ function getColorPalette(settings) {
                     const rgb = hexToRgb(stop.color);
                     return { position: stop.percent / 100, color: { r: rgb.r, g: rgb.g, b: rgb.b, a: stop.alpha } };
                 });
-                return { type: 'linear', gradientStops: figmaStops, isVertical: c.isVertical };
+                return { 
+                    type: 'linear', 
+                    subtype: c.gradientSubtype || 'Linear', // Fixed: Pass through the gradient type
+                    gradientStops: figmaStops, 
+                    isVertical: c.isVertical 
+                };
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
@@ -94,9 +99,7 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   if (shapesToUse.length === 0) return [];
 
   const colorPalette = getColorPalette(settings);
-  const baseDivider = 3000;
-  const densityMultiplier = 0.1 + (amount / 100) * 2.9; 
-  const count = Math.floor((boundsWidth * boundsHeight / baseDivider) * densityMultiplier);
+  const count = Math.floor((boundsWidth * boundsHeight / 3000) * (0.1 + (amount / 100) * 2.9));
   const particles = [];
 
   for (let i = 0; i < count; i++) {
@@ -192,10 +195,8 @@ async function createFigmaShapeNode(p) {
       const ratio = node.width > 0 && node.height > 0 ? node.width / node.height : 1.5;
       node.setPluginData('aspectRatio', ratio.toString());
   } else if (p.shapeType === 'custom' && p.customPathData) {
-      // Fix: Use settings-provided viewBox for correct geometry scaling
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${p.customViewBox}"><path d="${p.customPathData}" fill="#D9D9D9" /></svg>`;
       const imported = figma.createNodeFromSvg(svg);
-      // We target the path inside the frame to apply gradients correctly
       if (imported.children.length > 0) { node = imported.children[0]; figma.currentPage.appendChild(node); imported.remove(); }
       else { imported.remove(); node = figma.createEllipse(); }
       node.resize(p.baseWidth, p.baseHeight);
@@ -225,6 +226,7 @@ async function populateFrameWithConfetti(frame, pList) {
     node.name = `Particle ${i+1}`;
     node.rotation = p.rotation;
     const flipScale = Math.max(0.01, Math.abs(p.flipFactor));
+
     if (p.shapeType === 'flag') {
         const aspectRatio = parseFloat(node.getPluginData('aspectRatio') || "1.5");
         const targetArea = 960; 
@@ -238,12 +240,26 @@ async function populateFrameWithConfetti(frame, pList) {
     if (p.isEmoji) node.fontSize = p.baseHeight * p.scale;
     if (!p.isEmoji && p.shapeType !== 'flag' && p.color) {
         let fill;
-        if (p.color.type === 'linear') fill = { type: 'GRADIENT_LINEAR', gradientStops: p.color.gradientStops, gradientTransform: p.color.isVertical ? [[0, 1, 0], [-1, 0, 1]] : [[1, 0, 0], [0, 1, 0]] };
-        else fill = { type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a };
+        if (p.color.type === 'linear') {
+            // FIX: Correct mapping for all gradient subtypes
+            let figmaType = 'GRADIENT_LINEAR';
+            if (p.color.subtype === 'Radial') figmaType = 'GRADIENT_RADIAL';
+            if (p.color.subtype === 'Angular') figmaType = 'GRADIENT_ANGULAR';
+            if (p.color.subtype === 'Diamond') figmaType = 'GRADIENT_DIAMOND';
+
+            // Center the gradient transform for radial/diamond styles
+            const transform = (figmaType === 'GRADIENT_LINEAR') 
+                ? (p.color.isVertical ? [[0, 1, 0], [-1, 0, 1]] : [[1, 0, 0], [0, 1, 0]])
+                : [[0.5, 0, 0.5], [0, 0.5, 0.5]];
+
+            fill = { type: figmaType, gradientStops: p.color.gradientStops, gradientTransform: transform };
+        } else {
+            fill = { type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a };
+        }
         if (p.shapeType === 'wave') { if ('strokes' in node) { node.strokes = [fill]; node.strokeWeight = Math.max(1.5, 3 * p.scale); node.fills = []; } }
         else if ('fills' in node) node.fills = [fill];
     }
-    node.x = p.x - (node.width / 2); node.y = p.y - (node.height / 2) + (p.isEmoji ? node.height * 0.1 : 0);
+    node.x = p.x - (node.width / 2); node.y = p.y - (node.height / 2);
     frame.appendChild(node);
     if (i % 150 === 0) await new Promise(r => setTimeout(r, 5));
   }
@@ -256,9 +272,9 @@ async function createFinalConfettiOnCanvas(settings) {
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
 
   for (let i = 0; i < fCount; i++) {
-    const outer = figma.createFrame(); outer.name = `Confetti Seq - Frame ${i+1}`; outer.resize(1440, 1080); outer.x = i * 1640; outer.fills = []; outer.clipsContent = true;
+    const outer = figma.createFrame(); outer.resize(1440, 1080); outer.x = i * 1640; outer.fills = []; outer.clipsContent = true;
     figma.currentPage.appendChild(outer); createdFrames.push(outer);
-    const inner = figma.createFrame(); inner.name = "Particle Container"; inner.resize(1440, 1080); inner.fills = []; inner.clipsContent = false;
+    const inner = figma.createFrame(); inner.resize(1440, 1080); inner.fills = []; inner.clipsContent = false;
     await populateFrameWithConfetti(inner, pool.map(p => getParticleStateForFrame(p, i))); outer.appendChild(inner);
     await new Promise(r => setTimeout(r, 20));
   }
@@ -266,7 +282,6 @@ async function createFinalConfettiOnCanvas(settings) {
   for (let i = 0; i < createdFrames.length - 1; i++) {
     createdFrames[i].reactions = [{ trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 }, actions: [{ type: 'NODE', destinationId: createdFrames[i+1].id, navigation: 'NAVIGATE', transition: { type: 'SMART_ANIMATE', duration: delay / 1000, easing: { type: 'LINEAR' } } }] }];
   }
-  figma.currentPage.selection = createdFrames; figma.viewport.scrollAndZoomIntoView(createdFrames);
 }
 
 figma.ui.onmessage = async (msg) => {
@@ -275,8 +290,6 @@ figma.ui.onmessage = async (msg) => {
     else cachedParticles = initializeParticlePool(msg.settings, { width: 1440, height: 1080 }, true);
     figma.ui.postMessage({ type: 'preview-data', particles: cachedParticles.map(p => getParticleStateForFrame(p, 0)) });
   } else if (msg.type === 'generate-confetti') {
-    try { await createFinalConfettiOnCanvas(msg.settings); } catch (e) { figma.notify("Error: " + e.message, { error: true }); }
-  } else if (msg.type === 'generate-empty-frame') {
-    const f = figma.createFrame(); f.resize(1440, 1080); figma.currentPage.appendChild(f); figma.currentPage.selection = [f]; figma.viewport.scrollAndZoomIntoView([f]);
+    await createFinalConfettiOnCanvas(msg.settings);
   } else if (msg.type === 'close-plugin') figma.closePlugin();
 };
