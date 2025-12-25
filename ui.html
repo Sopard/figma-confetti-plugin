@@ -36,12 +36,9 @@
     .tabs-list { display: flex; background-color: var(--muted); padding: 4px; border-radius: var(--radius); position: relative; }
     .tab-trigger { flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; position: relative; }
     .tab-trigger[data-state="active"] { background-color: var(--background); color: var(--foreground); box-shadow: var(--shadow-sm); }
-    
     .tab-trigger.disabled { opacity: 0.8; cursor: not-allowed; color: var(--muted-foreground); background-color: var(--muted); }
     
-    /* UPDATED: Premium icon positioning */
     .premium-icon { position: absolute; top: 0px; right: 0px; pointer-events: none; }
-
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
 
     [data-tooltip]:hover::after {
@@ -102,8 +99,9 @@
     .vertical-divider { width: 1px; height: 40px; background-color: var(--border); flex-shrink: 0; flex-grow: 0; }
     .custom-shape-btn { flex: 2; padding: 0 4px; gap: 6px; font-size: 13px; font-weight: 500; white-space: nowrap; }
     .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
-    .emoji-item { width: 40px; height: 40px; font-size: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
-    .emoji-item[data-state="selected"] { background-color: #f0f9ff; border-color: var(--primary); }
+    .emoji-item, .flag-item { width: 40px; height: 40px; font-size: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; overflow: hidden; }
+    .emoji-item[data-state="selected"], .flag-item[data-state="selected"] { background-color: #f0f9ff; border-color: var(--primary); }
+    .flag-item img { width: 80%; height: 80%; object-fit: contain; }
 
     /* CUSTOM SHAPE EDITOR POPOVER */
     .custom-shape-popover { position: fixed; top: 50%; left: 65%; transform: translate(-50%, -50%); width: 380px; min-height: 500px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 20; display: none; flex-direction: column; border: 1px solid var(--border); box-sizing: border-box; justify-content: space-between; }
@@ -141,7 +139,6 @@
         display: none; border: 1px solid var(--border); box-sizing: border-box;
         flex-direction: column; 
         min-height: auto;
-        /* UPDATED: Increased max-height */
         max-height: 90vh;
     }
     
@@ -160,7 +157,6 @@
     .cp-tab { text-align: center; padding: 10px 16px; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .cp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     
-    /* UPDATED: Inactive icon color update */
     .cp-tab svg path { fill: currentColor; }
     .cp-tab:not(.active) svg path { fill: #E5E5EA !important; }
 
@@ -242,7 +238,7 @@
             <svg class="premium-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5 3C11.4183 3.00002 11.3378 3.02007 11.2656 3.0584C11.1934 3.09673 11.1318 3.15217 11.086 3.21987C11.0402 3.28757 11.0117 3.36545 11.003 3.44672C10.9943 3.52798 11.0056 3.61014 11.036 3.686L13.036 8.686C13.0732 8.77869 13.1372 8.85813 13.2199 8.91409C13.3026 8.97006 13.4002 8.99998 13.5 9H17.5C17.5885 9.00002 17.6754 8.97657 17.7518 8.93203C17.8282 8.8875 17.8915 8.82349 17.9351 8.74652C17.9787 8.66956 18.0011 8.58239 18.0001 8.49394C17.999 8.40548 17.9745 8.31889 17.929 8.243L14.929 3.243C14.8846 3.16888 14.8217 3.10753 14.7465 3.06495C14.6714 3.02236 14.5864 2.99998 14.5 3H11.5Z" fill="url(#paint0_linear_2353_132718)"/><path d="M5.50001 3C5.4136 2.99998 5.32866 3.02236 5.25348 3.06495C5.17829 3.10753 5.11543 3.16888 5.07101 3.243L2.07101 8.243C2.02554 8.31889 2.00102 8.40548 1.99995 8.49394C1.99887 8.40548 2.02129 8.66956 2.06491 8.74652C2.10852 8.82349 2.17178 8.8875 2.24822 8.93203C2.32466 8.97657 2.41155 9.00002 2.50001 9H6.50001C6.59987 8.99998 6.69743 8.97006 6.78012 8.91409C6.86282 8.85813 6.92687 8.77869 6.96401 8.686L8.96401 3.686C8.99442 3.61014 9.00576 3.52798 8.99705 3.44672C8.98834 3.36545 8.95984 3.28757 8.91405 3.21987C8.86827 3.15217 8.80658 3.09673 8.7344 3.0584C8.66222 3.02007 8.58174 3.00002 8.50001 3H5.50001Z" fill="url(#paint1_linear_2353_132718)"/><path d="M8.50001 3C8.40015 3.00002 8.30259 3.02994 8.2199 3.08591C8.1372 3.14187 8.07315 3.22131 8.03601 3.314L6.03601 8.314C6.0056 8.38986 5.99426 8.47202 6.00297 8.55328C6.01168 8.63455 6.04018 8.71243 6.08596 8.78013C6.13175 8.84783 6.19344 8.90327 6.26562 8.9416C6.3378 8.97993 6.41828 8.99998 6.50001 9H13.5C13.5817 8.99998 13.6622 8.97993 13.7344 8.9416C13.8066 8.90327 13.8683 8.84783 13.914 8.78013C13.9598 8.71243 13.9883 8.63455 13.997 8.55328C14.0058 8.47202 13.9944 8.38986 13.964 8.314L11.964 3.314C11.9269 3.22131 11.8628 3.14187 11.7801 3.08591C11.6974 3.02994 11.5999 3.00002 11.5 3H8.50001Z" fill="url(#paint2_linear_2353_132718)"/><path d="M13.5 8C13.3992 8.00002 13.3008 8.03049 13.2177 8.08741C13.1345 8.14434 13.0705 8.22506 13.034 8.319L9.53401 17.319C9.49126 17.4295 9.48915 17.5516 9.52806 17.6636C9.56697 17.7755 9.64436 17.87 9.74645 17.9301C9.84853 17.9903 9.96867 18.0123 10.0854 17.9921C10.2022 17.9719 10.308 17.9109 10.384 17.82L17.884 8.82C17.9448 8.747 17.9836 8.65818 17.9957 8.56396C18.0079 8.46973 17.9929 8.37399 17.9526 8.28795C17.9123 8.20191 17.8484 8.12913 17.7682 8.07814C17.688 8.02714 17.595 8.00004 17.5 8H13.5Z" fill="url(#paint3_linear_2353_132718)"/><path d="M2.50003 8C2.40502 8.00004 2.31199 8.02714 2.23183 8.07814C2.15167 8.12913 2.0877 8.20191 2.0474 8.28795C2.00711 8.37399 1.99217 8.46973 2.00432 8.56396C2.01647 8.65818 2.05522 8.747 2.11603 8.82L9.61603 17.82C9.69201 17.9109 9.79782 17.9719 9.91459 17.9921C10.0314 18.0123 10.1515 17.9903 10.2536 17.9301C10.3557 17.87 10.4331 17.7755 10.472 17.6636C10.5109 17.5516 10.5088 17.4295 10.466 17.319L6.96603 8.319C6.92955 8.22506 6.86553 8.14434 6.78237 8.08741C6.69922 8.03049 6.6008 8.00002 6.50003 8H2.50003Z" fill="url(#paint4_linear_2353_132718)"/><path d="M6.16 8C6.16 8 5.938 8.387 6.034 8.681L9.534 17.681C9.57052 17.7749 9.63455 17.8556 9.7177 17.9125C9.80086 17.9693 9.89925 17.9998 10 17.9998C10.1007 17.9998 10.1991 17.9693 10.2823 17.9125C10.3655 17.8556 10.4295 17.7749 10.466 17.681L13.966 8.681C14.091 8.36 13.84 8 13.84 8H6.16Z" fill="url(#paint5_linear_2353_132718)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.07103 3.243C5.11544 3.16888 5.17831 3.10753 5.25349 3.06495C5.32868 3.02236 5.41362 2.99998 5.50003 3H14.5C14.5864 2.99998 14.6714 3.02236 14.7466 3.06495C14.8217 3.10753 14.8846 3.16888 14.929 3.243L17.925 8.236C17.9806 8.3252 18.0066 8.42963 17.9994 8.53447C17.9922 8.6393 17.9522 8.73921 17.885 8.82L10.387 17.817L10.344 17.863C10.2942 17.9103 10.2351 17.9468 10.1705 17.9703C10.1059 17.9937 10.0371 18.0036 9.9685 17.9993C9.8999 17.995 9.83293 17.9765 9.77177 17.9452C9.71061 17.9138 9.65657 17.8702 9.61302 17.817L2.11902 8.823C2.0512 8.74315 2.01018 8.644 2.00174 8.53957C1.99331 8.43514 2.0179 8.3307 2.07202 8.241L5.07103 3.243Z" fill="url(#paint6_linear_2353_132718)" fill-opacity="0.7"/><defs><linearGradient id="paint0_linear_2353_132718" x1="13.5" y1="3" x2="17.5" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#0FAFFF"/><stop offset="1" stop-color="#102784"/></linearGradient><linearGradient id="paint1_linear_2353_132718" x1="8.00001" y1="0.5" x2="4.50001" y2="8" gradientUnits="userSpaceOnUse"><stop stop-color="#9FF0F9"/><stop offset="1" stop-color="#29C3FF"/></linearGradient><linearGradient id="paint2_linear_2353_132718" x1="10" y1="3" x2="10" y2="10.5" gradientUnits="userSpaceOnUse"><stop stop-color="#3BD5FF"/><stop offset="1" stop-color="#367AF2"/></linearGradient><linearGradient id="paint3_linear_2353_132718" x1="20" y1="3" x2="11" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#1B44B1"/><stop offset="1" stop-color="#2052CB"/></linearGradient><linearGradient id="paint4_linear_2353_132718" x1="3.50003" y1="6" x2="9.50003" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#0094F0"/><stop offset="1" stop-color="#6CE0FF"/></linearGradient><linearGradient id="paint5_linear_2353_132718" x1="10" y1="4.5" x2="10" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#2052CB"/><stop offset="1" stop-color="#0FAFFF"/></linearGradient><linearGradient id="paint6_linear_2353_132718" x1="0.375024" y1="-11.125" x2="13.368" y2="19.126" gradientUnits="userSpaceOnUse"><stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0"/><stop offset="1" stop-color="#FF6CE8"/></linearGradient></defs></svg>
         </div>
     </div>
-    <div style="margin-bottom: 4px; margin-top: 0px;"><div class="shape-tabs"><div class="shape-tabs-triggers"><div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div><div class="shape-tab-trigger" data-target="emoji">Emoji</div></div></div><div id="presetShapesContainer" style="display: block;"><div class="selector-grid id-shape-selector"><div class="selector-item" data-state="selected" data-value="rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="wave"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="vertical-divider"></div><div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg><span>Custom</span><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div></div></div><div id="emojiShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="emojiGrid"></div></div></div></div>
+    <div style="margin-bottom: 4px; margin-top: 0px;"><div class="shape-tabs"><div class="shape-tabs-triggers"><div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div><div class="shape-tab-trigger" data-target="emoji">Emoji</div><div class="shape-tab-trigger" data-target="flag">Flag</div></div></div><div id="presetShapesContainer" style="display: block;"><div class="selector-grid id-shape-selector"><div class="selector-item" data-state="selected" data-value="rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="wave"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="vertical-divider"></div><div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg><span>Custom</span><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div></div></div><div id="emojiShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="emojiGrid"></div></div></div><div id="flagShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="flagGrid"></div></div></div></div>
     <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 0 0 12px 0;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Randomize Particles</div><div class="slider-container"><div class="slider-fill" id="randomFill" style="width: 80%;"></div><input type="text" class="slider-value-input" id="randomValueInput" value="80%"><input type="range" id="randomInput" class="slider-input" min="0" max="100" value="80"></div><div class="slider-labels-row"><span>Uniform</span><span>Chaotic</span></div></div><div><div class="label">Particle Amount</div><div class="slider-container"><div class="slider-fill" id="amountFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="amountValueInput" value="20%"><input type="range" id="amountInput" class="slider-input" min="0" max="100" value="20"></div><div class="slider-labels-row"><span>Less</span><span>More</span></div></div></div>
     
@@ -277,11 +273,11 @@
       
       <div class="cp-tabs">
           <div class="cp-tab active" data-tab="solid" onclick="switchColorTab('solid')">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2349_132713)"><path d="M12.7774 0H5.23161C1.95397 0 0 1.953 0 5.229V12.762C0 16.047 1.95397 18 5.23161 18H12.7684C16.046 18 18 16.047 18 12.771V5.229C18.009 1.953 16.055 0 12.7774 0ZM7.40169 17.1H5.32165C2.88144 17.1 0.900449 15.12 0.900449 12.681V10.602C0.900449 10.233 1.2066 9.927 1.57579 9.927C1.94497 9.927 2.25112 10.233 2.25112 10.602V12.681C2.25112 14.373 3.62881 15.75 5.32165 15.75H7.40169C7.77087 15.75 8.07702 16.056 8.07702 16.425C8.07702 16.794 7.77988 17.1 7.40169 17.1ZM7.40169 2.25H5.32165C3.62881 2.25 2.25112 3.627 2.25112 5.319V7.398C2.25112 7.767 1.94497 8.073 1.57579 8.073C1.2066 8.073 0.900449 7.776 0.900449 7.398V5.319C0.900449 2.88 2.88144 0.9 5.32165 0.9H7.40169C7.77087 0.9 8.07702 1.206 8.07702 1.575C8.07702 1.944 7.77988 2.25 7.40169 2.25ZM17.1085 12.681C17.1085 15.12 15.1275 17.1 12.6873 17.1H11.4357C11.0665 17.1 10.7604 16.794 10.7604 16.425C10.7604 16.056 11.0665 15.75 11.4357 15.75H12.6873C14.3802 15.75 15.7579 14.373 15.7579 12.681V11.43C15.7579 11.061 16.064 10.755 16.4332 10.755C16.8024 10.755 17.1085 11.061 17.1085 11.43V12.681ZM17.1085 7.398C17.1085 7.767 16.8024 8.073 16.4332 8.073C16.064 8.073 15.7579 7.767 15.7579 7.398V5.319C15.7579 3.627 14.3802 2.25 12.6873 2.25H10.6073C10.2381 2.25 9.93195 1.944 9.93195 1.575C9.93195 1.206 10.2291 0.9 10.6073 0.9H12.6873C15.1275 0.9 17.1085 2.88 17.1085 5.319V7.398Z" fill="#292D32"/></g><defs><clipPath id="clip0_2349_132713"><rect width="18" height="18" rx="5" fill="white"/></clipPath></defs></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2349_132713)"><path d="M12.7774 0H5.23161C1.95397 0 0 1.953 0 5.229V12.762C0 16.047 1.95397 18 5.23161 18H12.7684C16.046 18 18 16.047 18 12.771V5.229C18.009 1.953 16.055 0 12.7774 0ZM7.40169 17.1H5.32165C2.88144 17.1 0.900449 15.12 0.900449 12.681V10.602C0.900449 10.233 1.2066 9.927 1.57579 9.927C1.94497 9.927 2.25112 10.233 2.25112 10.602V12.681C2.25112 14.373 3.62881 15.75 5.32165 15.75H7.40169C7.77087 15.75 8.07702 16.056 8.07702 16.425C8.07702 16.794 7.77988 17.1 7.40169 17.1ZM7.40169 2.25H5.32165C3.62881 2.25 2.25112 3.627 2.25112 5.319V7.398C2.25112 7.767 1.94497 8.073 1.57579 8.073C1.2066 8.073 0.900449 7.776 0.900449 7.398V5.319C0.900449 2.88 2.88144 0.9 5.32165 0.9H7.40169C7.77087 0.9 8.07702 1.206 8.07702 1.575C8.07702 1.944 7.77988 2.25 7.40169 2.25ZM17.1085 12.681C17.1085 15.12 15.1275 17.1 12.6873 17.1H11.4357C11.0665 17.1 10.7604 16.425C10.7604 16.425C10.7604 16.056 11.0665 15.75 11.4357 15.75H12.6873C14.3802 15.75 15.7579 14.373 15.7579 12.681V11.43C15.7579 11.061 16.064 10.755 16.4332 10.755C16.8024 10.755 17.1085 11.061 17.1085 11.43V12.681ZM17.1085 7.398C17.1085 7.767 16.8024 8.073 16.4332 8.073C16.064 8.073 15.7579 7.767 15.7579 7.398V5.319C15.7579 3.627 14.3802 2.25 12.6873 2.25H10.6073C10.2381 2.25 9.93195 1.944 9.93195 1.575C9.93195 1.206 10.2291 0.9 10.6073 0.9H12.6873C15.1275 0.9 17.1085 2.88 17.1085 5.319V7.398Z" fill="#292D32"/></g><defs><clipPath id="clip0_2349_132713"><rect width="18" height="18" rx="5" fill="white"/></clipPath></defs></svg>
               <span>Solid</span>
           </div>
           <div class="cp-tab" data-tab="linear" onclick="switchColorTab('linear')">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2349_132709)"><path d="M4 14.5C4.43333 14.5 4.79167 14.3583 5.075 14.075C5.35833 13.7917 5.5 13.4333 5.5 13C5.5 12.5667 5.35833 12.2083 5.075 11.925C4.79167 11.6417 4.43333 11.5 4 11.5C3.56667 11.5 3.20833 11.6417 2.925 11.925C2.64167 12.2083 2.5 12.5667 2.5 13C2.5 13.4333 2.64167 13.7917 2.925 14.075C3.20833 14.3583 3.56667 14.5 4 14.5ZM8 10C8.28333 10 8.521 9.904 8.713 9.712C8.905 9.52 9.00067 9.28267 9 9C8.99933 8.71733 8.90333 8.48 8.712 8.288C8.52067 8.096 8.28333 8 8 8C7.71667 8 7.47933 8.096 7.288 8.288C7.09667 8.48 7.00067 8.71733 7 9C6.99933 9.28267 7.09533 9.52033 7.288 9.713C7.48067 9.90567 7.718 10.0013 8 10ZM8 6C8.28333 6 8.521 5.904 8.713 5.712C8.905 5.52 9.00067 5.28267 9 5C8.99933 4.71733 8.90333 4.48 8.712 4.288C8.52067 4.096 8.28333 4 8 4C7.71667 4 7.47933 4.096 7.288 4.288C7.09667 4.48 7.00067 4.71733 7 5C6.99933 5.28267 7.09533 5.52033 7.288 5.713C7.48067 5.90567 7.718 6.00133 8 6ZM4 6.5C4.43333 6.5 4.79167 6.35833 5.075 6.075C5.35833 5.79167 5.5 5.43333 5.5 5C5.5 4.56667 5.35833 4.20833 5.075 3.925C4.79167 3.64167 4.43333 3.5 4 3.5C3.56667 3.5 3.20833 3.64167 2.925 3.925C2.64167 4.20833 2.5 4.56667 2.5 5C2.5 5.43333 2.64167 5.79167 2.925 6.075C3.20833 6.35833 3.56667 6.5 4 6.5ZM4 10.5C4.43333 10.5 4.79167 10.3583 5.075 10.075C5.35833 9.79167 5.5 9.43333 5.5 9C5.5 8.56667 5.35833 8.20833 5.075 7.925C4.79167 7.64167 4.43333 7.5 4 7.5C3.56667 7.5 3.20833 7.64167 2.925 7.925C2.64167 8.20833 2.5 8.56667 2.5 9C2.5 9.43333 2.64167 9.79167 2.925 10.075C3.20833 10.3583 3.56667 10.5 4 10.5ZM8 14C8.28333 14 8.521 13.904 8.713 13.712C8.905 13.52 9.00067 13.2827 9 13C8.99933 12.7173 8.90333 12.48 8.712 12.288C8.52067 12.096 8.28333 12 8 12C7.71667 12 7.47933 12.096 7.288 12.288C7.09667 12.48 7.00067 12.7173 7 13C6.99933 13.2827 7.09533 13.5203 7.288 13.713C7.48067 13.9057 7.718 14.0013 8 14ZM15 13.5C15.15 13.5 15.271 13.4543 15.363 13.363C15.455 13.2717 15.5007 13.1507 15.5 13C15.4993 12.8493 15.4537 12.7283 15.363 12.637C15.2723 12.5457 15.1513 12.5 15 12.5C14.8487 12.5 14.7277 12.546 14.637 12.638C14.5463 12.73 14.5007 12.8507 14.5 13C14.4993 13.1493 14.5453 13.2703 14.638 13.363C14.7307 13.4557 14.8513 13.5013 15 13.5ZM15 5.5C15.15 5.5 15.271 5.45433 15.363 5.363C15.455 5.27167 15.5007 5.15067 15.5 5C15.4993 4.84933 15.4537 4.72833 15.363 4.637C15.2723 4.54567 15.1513 4.5 15 4.5C14.8487 4.5 14.7277 4.546 14.637 4.638C14.5463 4.73 14.5007 4.85067 14.5 5C14.4993 5.14933 14.5453 5.27033 14.638 5.363C14.7307 5.45567 14.8513 5.50133 15 5.5ZM15 9.5C15.15 9.5 15.271 9.45433 15.363 9.363C15.455 9.27167 15.5007 9.15067 15.5 9C15.4993 8.84933 15.4537 8.72833 15.363 8.637C15.2723 8.54567 15.1513 8.5 15 8.5C14.8487 8.5 14.7277 8.546 14.637 8.638C14.5463 8.73 14.5007 8.85067 14.5 9C14.4993 9.14933 14.5453 9.27033 14.638 9.363C14.7307 9.45567 14.8513 9.50133 15 9.5ZM12 6C12.2833 6 12.521 5.904 12.713 5.712C12.905 5.52 13.0007 5.28267 13 5C12.9993 4.71733 12.9033 4.48 12.712 4.288C12.5207 4.096 12.2833 4 12 4C11.7167 4 11.4793 4.096 11.288 4.288C11.0967 4.48 11.0007 4.71733 11 5C10.9993 5.28267 11.0953 5.52033 11.288 5.713C11.4807 5.90567 11.718 6.00133 12 6ZM12 10C12.2833 10 12.521 9.904 12.713 9.712C12.905 9.52 13.0007 9.28267 13 9C12.9993 8.71733 12.9033 8.48 12.712 8.288C12.5207 8.096 12.2833 8 12 8C11.7167 8 11.4793 8.096 11.288 8.288C11.0967 8.48 11.0007 8.71733 11 9C10.9993 9.28267 11.0953 9.52033 11.288 9.713C11.4807 9.90567 11.718 10.0013 12 10ZM12 14C12.2833 14 12.521 13.904 12.713 13.712C12.905 13.52 13.0007 13.2827 13 13C12.9993 12.7173 12.9033 12.48 12.712 12.288C12.5207 12.096 12.2833 12 12 12C11.7167 12 11.4793 12.096 11.288 12.288C11.0967 12.48 11.0007 12.7173 11 13C10.9993 13.2827 11.0953 13.5203 11.288 13.713C11.4807 13.9057 11.718 14.0013 12 14ZM18 1V17C18 17.2833 17.904 17.521 17.712 17.713C17.52 17.905 17.2827 18.0007 17 18H1C0.716667 18 0.479333 17.904 0.288 17.712C0.0966668 17.52 0.000666667 17.2827 0 17V1C0 0.716667 0.0960001 0.479333 0.288 0.288C0.48 0.0966668 0.717333 0.000666667 1 0H17C17.2833 0 17.521 0.0960001 17.713 0.288C17.905 0.48 18.0007 0.717333 18 1Z" fill="#292D32"/></g><defs><clipPath id="clip0_2349_132709"><rect width="18" height="18" rx="5" fill="white"/></clipPath></defs></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2349_132709)"><path d="M4 14.5C4.43333 14.5 4.79167 14.3583 5.075 14.075C5.35833 13.7917 5.5 13.4333 5.5 13C5.5 12.5667 5.35833 12.2083 5.075 11.925C4.79167 11.6417 4.43333 11.5 4 11.5C3.56667 11.5 3.20833 11.6417 2.925 11.925C2.64167 12.2083 2.5 12.5667 2.5 13C2.5 13.4333 2.64167 13.7917 2.925 14.075C3.20833 14.3583 3.56667 14.5 4 14.5ZM8 10C8.28333 10 8.521 9.904 8.713 9.712C8.905 9.52 9.00067 9.28267 9 5C8.99933 8.71733 8.90333 8.48 8.712 8.288C8.52067 8.096 8.28333 8 8 8C7.71667 8 7.47933 8.096 7.288 8.288C7.09667 8.48 7.00067 8.71733 7 9C6.99933 9.28267 7.09533 9.52033 7.288 9.713C7.48067 9.90567 7.718 10.0013 8 10ZM8 6C8.28333 6 8.521 5.904 8.713 5.712C8.905 5.52 9.00067 5.28267 9 5C8.99933 4.71733 8.90333 4.48 8.712 4.288C8.52067 4.096 8.28333 4 8 4C7.71667 4 7.47933 4.096 7.288 4.288C7.09667 4.48 7.00067 4.71733 7 5C6.99933 5.28267 7.09533 5.52033 7.288 5.713C7.48067 5.90567 7.718 6.00133 8 6ZM4 6.5C4.43333 6.5 4.79167 6.35833 5.075 6.075C5.35833 5.79167 5.5 5.43333 5.5 5C5.5 4.56667 5.35833 4.20833 5.075 3.925C4.79167 3.64167 4.43333 3.5 4 3.5C3.56667 3.5 3.20833 3.64167 2.925 3.925C2.64167 4.20833 2.5 4.56667 2.5 5C2.5 5.43333 2.64167 5.79167 2.925 6.075C3.20833 6.35833 3.56667 6.5 4 6.5ZM4 10.5C4.43333 10.5 4.79167 10.3583 5.075 10.075C5.35833 9.79167 5.5 9.43333 5.5 9C5.5 8.56667 5.35833 8.20833 5.075 7.925C4.79167 7.64167 4.43333 7.5 4 7.5C3.56667 7.5 3.20833 7.64167 2.925 7.925C2.64167 8.20833 2.5 8.56667 2.5 9C2.5 9.43333 2.64167 9.79167 2.925 10.075C3.20833 10.3583 3.56667 10.5 4 10.5ZM8 14C8.28333 14 8.521 13.904 8.713 13.712C8.905 13.52 9.00067 13.2827 9 13C8.99933 12.7173 8.90333 12.48 8.712 12.288C8.52067 12.096 8.28333 12 8 12C7.71667 12 7.47933 12.096 7.288 12.288C7.09667 12.48 7.00067 12.7173 7 13C6.99933 13.2827 7.09533 13.5203 7.288 13.713C7.48067 13.9057 7.718 14.0013 8 14ZM15 13.5C15.15 13.5 15.271 13.4543 15.363 13.363C15.455 13.2717 15.5007 13.1507 15.5 13C15.4993 12.8493 15.4537 12.7283 15.363 12.637C15.2723 12.5457 15.1513 12.5 15 12.5C14.8487 12.5 14.7277 12.546 14.637 12.638C14.5463 12.73 14.5007 12.8507 14.5 13C14.4993 13.1493 14.5453 13.2703 14.638 13.363C14.7307 13.4557 14.8513 13.5013 15 13.5ZM15 5.5C15.15 5.5 15.271 5.45433 15.363 5.363C15.455 5.27167 15.5007 5.15067 15.5 5C15.4993 4.84933 15.4537 4.72833 15.363 4.637C15.2723 4.54567 15.1513 4.5 15 4.5C14.8487 4.5 14.7277 4.546 14.637 4.638C14.5463 4.73 14.5007 4.85067 14.5 5C14.4993 5.14933 14.5453 5.27033 14.638 5.363C14.7307 5.45567 14.8513 5.50133 15 5.5ZM15 9.5C15.15 9.5 15.271 9.45433 15.363 9.363C15.455 9.27167 15.5007 9.15067 15.5 9C15.4993 8.84933 15.4537 8.72833 15.363 8.637C15.2723 8.54567 15.1513 8.5 15 8.5C14.8487 8.5 14.7277 8.546 14.637 8.638C14.5463 8.73 14.5007 8.85067 14.5 9C14.4993 9.14933 14.5453 9.27033 14.638 9.363C14.7307 9.45567 14.8513 9.50133 15 9.5ZM12 6C12.2833 6 12.521 5.904 12.713 5.712C12.905 5.52 13.0007 5.28267 13 5C12.9993 4.71733 12.9033 4.48 12.712 4.288C12.5207 4.096 12.2833 4 12 4C11.7167 4 11.4793 4.096 11.288 4.288C11.0967 4.48 11.0007 4.71733 11 5C10.9993 5.28267 11.0953 5.52033 11.288 5.713C11.4807 5.90567 11.718 6.00133 12 6ZM12 10C12.2833 10 12.521 9.904 12.713 9.712C12.905 9.52 13.0007 9.28267 13 9C12.9993 8.71733 12.9033 8.48 12.712 8.288C12.5207 8.096 12.2833 8 12 8C11.7167 8 11.4793 8.096 11.288 8.288C11.0967 8.48 11.0007 8.71733 11 9C10.9993 9.28267 11.0953 9.52033 11.288 9.713C11.4807 9.90567 11.718 10.0013 12 10ZM12 14C12.2833 14 12.521 13.904 12.713 13.712C12.905 13.52 13.0007 13.2827 13 13C12.9993 12.7173 12.9033 12.48 12.712 12.288C12.5207 12.096 12.2833 12 12 12C11.7167 12 11.4793 12.096 11.288 12.288C11.0967 12.48 11.0007 12.7173 11 13C10.9993 13.2827 11.0953 13.5203 11.288 13.713C11.4807 13.9057 11.718 14.0013 12 14ZM18 1V17C18 17.2833 17.904 17.521 17.712 17.713C17.52 17.905 17.2827 18.0007 17 18H1C0.716667 18 0.479333 17.904 0.288 17.712C0.0966668 17.52 0.000666667 17.2827 0 17V1C0 0.716667 0.0960001 0.479333 0.288 0.288C0.48 0.0966668 0.717333 0.000666667 1 0H17C17.2833 0 17.521 0.0960001 17.713 0.288C17.905 0.48 18.0007 0.717333 18 1Z" fill="#292D32"/></g><defs><clipPath id="clip0_2349_132709"><rect width="18" height="18" rx="5" fill="white"/></clipPath></defs></svg>
               <span>Linear</span>
           </div>
       </div>
@@ -342,7 +338,26 @@
   </div>
 
   <div id="customShapePopover" class="custom-shape-popover">
-      <div class="cp-header"><span>Custom Shape Editor</span><button id="csCloseBtn" class="icon-btn-flat"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div style="font-size: 12px; color: var(--muted-foreground); margin-bottom: 8px;">Drag points to customize shape.</div><div class="cs-canvas-container"><svg id="csEditorSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"></svg><div id="csResetIcon" class="cs-reset-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div></div><button id="csSaveBtn" class="btn btn-primary">Save Shape</button>
+      <div class="cp-header">
+          <span>Custom Shape Editor</span>
+          <div style="display: flex; gap: 8px;">
+              <button id="csImportBtn" class="icon-btn-flat" title="Import SVG">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </button>
+              <input type="file" id="csFileInput" accept=".svg" style="display: none;">
+              <button id="csCloseBtn" class="icon-btn-flat">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+          </div>
+      </div>
+      <div style="font-size: 12px; color: var(--muted-foreground); margin-bottom: 8px;">Drag points or import an SVG file.</div>
+      <div class="cs-canvas-container">
+          <svg id="csEditorSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div id="csResetIcon" class="cs-reset-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </div>
+      </div>
+      <button id="csSaveBtn" class="btn btn-primary">Save Shape</button>
   </div>
   <script>
     // --- GLOBALS ---
@@ -354,18 +369,25 @@
     const csSaveBtn = document.getElementById('csSaveBtn');
     const csEditorSvg = document.getElementById('csEditorSvg');
     const csResetIcon = document.getElementById('csResetIcon');
+    const csImportBtn = document.getElementById('csImportBtn');
+    const csFileInput = document.getElementById('csFileInput');
     const presetShapesContainer = document.getElementById('presetShapesContainer');
     const emojiShapesContainer = document.getElementById('emojiShapesContainer');
+    const flagShapesContainer = document.getElementById('flagShapesContainer');
     const particleColorSection = document.getElementById('particleColorSection');
     const emojiGrid = document.getElementById('emojiGrid');
+    const flagGrid = document.getElementById('flagGrid');
 
     let previewParticles = []; 
     let panzoomInstance; 
     let selectedEmoji = null; 
     let activeShapeTab = 'preset'; 
     let finalCustomShapePathStr = ""; 
+    let finalCustomViewBox = "0 0 320 320"; // Tracks the imported SVG's viewBox
     let csHistory = []; 
     let selectedEmojis = [];
+    let selectedFlags = [];
+    let flagDataCache = {};
 
     // --- HELPER UTILS ---
     function createSvgElement(type, attributes) { const el = document.createElementNS("http://www.w3.org/2000/svg", type); for (const key in attributes) el.setAttribute(key, attributes[key]); return el; }
@@ -465,41 +487,26 @@
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
             document.getElementById('hiddenPickerStorage').appendChild(sharedPicker);
-            
-            // INHERIT COLOR LOGIC: If switching from Solid to Linear, inherit the color
             if (previousTab === 'solid') {
-                // Get current solid color
                 const startHex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
-                
-                // Create a darker shade for the end stop (reduce Lightness by 30%)
                 const darkL = Math.max(0, pickerHSLA.l - 30);
                 const endHex = hslToHex(pickerHSLA.h, pickerHSLA.s, darkL);
-
-                // Overwrite gradient stops with the new solid-based gradient
                 gradientStops = [
                     { percent: 0, color: startHex, alpha: pickerHSLA.a },
                     { percent: 100, color: endHex, alpha: pickerHSLA.a }
                 ];
-                
-                // Set active stop to 0 so the picker shows the primary color
                 activeStopIndex = 0;
             }
-
             updateGradientVisuals(); 
         }
     }
     function toggleLinearDropdown() { document.getElementById('linearDropdownContent').classList.toggle('show'); }
     window.toggleLinearDropdown = toggleLinearDropdown;
-    
-    // NEW: Handle outside clicks for Linear Dropdown
     window.addEventListener('click', (e) => {
         const dropdown = document.getElementById('linearDropdownContent');
         const trigger = document.getElementById('linearTypeDropdown');
-        if (dropdown && dropdown.classList.contains('show') && !trigger.contains(e.target)) {
-            dropdown.classList.remove('show');
-        }
+        if (dropdown && dropdown.classList.contains('show') && !trigger.contains(e.target)) { dropdown.classList.remove('show'); }
     });
-
     function selectLinearType(type) { document.getElementById('linearTypeLabel').textContent = type; document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected')); document.getElementById('linearDropdownContent').classList.remove('show'); }
     window.selectLinearType = selectLinearType;
 
@@ -546,40 +553,26 @@
         activeStopIndex = gradientStops.indexOf(activeObj); updateGradientVisuals();
     }
 
-    // --- FIX: Positioning Logic for Mini Popover ---
     function openMiniColorPopover(e, idx) {
         setActiveStop(idx);
         const popover = document.getElementById('miniColorPopover');
         const sharedPicker = document.getElementById('sharedPicker');
         popover.insertBefore(sharedPicker, document.getElementById('miniSaveBtn'));
         popover.style.display = 'block';
-        
         const mainPopover = document.getElementById('colorPickerPopover'); 
         const mainRect = mainPopover.getBoundingClientRect();
-        
-        // Get dimensions
         const popRect = popover.getBoundingClientRect();
         const miniWidth = popRect.width || 286;
         const miniHeight = popRect.height || 300;
-        const gap = 12;
-        const padding = 10;
-
-        // Horizontal Position
+        const gap = 12; const padding = 10;
         let left = mainRect.left - miniWidth - gap;
         if (left < padding) left = mainRect.right + gap;
         if (left + miniWidth > window.innerWidth - padding) { left = window.innerWidth - miniWidth - padding; }
         if (left < padding) left = padding;
-
-        // Vertical Position (Check bottom overflow)
         let top = mainRect.bottom - miniHeight;
-        if (top + miniHeight > window.innerHeight - padding) {
-            top = window.innerHeight - miniHeight - padding;
-        }
+        if (top + miniHeight > window.innerHeight - padding) { top = window.innerHeight - miniHeight - padding; }
         if (top < padding) top = padding;
-
-        popover.style.top = `${top}px`; 
-        popover.style.left = `${left}px`;
-        
+        popover.style.top = `${top}px`; popover.style.left = `${left}px`;
         document.removeEventListener('click', closePopoverOnClickOutside);
         setTimeout(() => document.addEventListener('click', closeMiniPopoverOnClickOutside), 0);
     }
@@ -679,7 +672,7 @@
 
     function openPopoverToEdit(index, triggerElement) { 
         editingColorIndex = index; const colorToEdit = colorState.colors[index]; 
-        if (colorToEdit.type === 'linear') { gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops)); isVerticalFlip = colorToEdit.isVertical; activeStopIndex = 0; document.getElementById('flipVerticalBtn').style.backgroundColor = 'transparent'; switchColorTab('linear'); setActiveStop(0); } else { pickerHSLA = { h: colorToEdit.h, s: colorToEdit.s, l: colorToEdit.l, a: colorToEdit.a }; updatePickerVisuals(); switchColorTab('solid'); }
+        if (colorToEdit.type === 'linear') { gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops)); isVerticalFlip = colorToEdit.isVertical; activeStopIndex = 0; switchColorTab('linear'); setActiveStop(0); } else { pickerHSLA = { h: colorToEdit.h, s: colorToEdit.s, l: colorToEdit.l, a: colorToEdit.a }; updatePickerVisuals(); switchColorTab('solid'); }
         cpHeaderTitle.textContent = "Edit Color"; cpAddConfirmBtn.textContent = "Save Color"; openPopover(triggerElement); 
     }
     function openPopover(triggerElement = addColorBtn) { if (colorState.isMultiColor) return; popover.style.visibility = 'hidden'; popover.style.display = 'flex'; if(editingColorIndex === -1) switchColorTab('solid'); const btnRect = triggerElement.getBoundingClientRect(); const popoverRect = popover.getBoundingClientRect(); const leftPos = btnRect.right + 12; const btnCenterY = btnRect.top + (btnRect.height / 2); let topPos = btnCenterY - (popoverRect.height / 2); const padding = 10; topPos = Math.max(padding, topPos); const maxTop = window.innerHeight - popoverRect.height - padding; topPos = Math.min(topPos, maxTop); popover.style.left = `${leftPos}px`; popover.style.top = `${topPos}px`; popover.style.visibility = 'visible'; currentTriggerElement = triggerElement; document.addEventListener('click', closePopoverOnClickOutside); }
@@ -698,7 +691,13 @@
     document.querySelectorAll('.shape-tab-trigger').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.shape-tab-trigger').forEach(t => t.removeAttribute('data-state')); tab.setAttribute('data-state', 'active'); activeShapeTab = tab.getAttribute('data-target');
-            if (activeShapeTab === 'preset') { presetShapesContainer.style.display = 'block'; emojiShapesContainer.style.display = 'none'; particleColorSection.classList.remove('section-disabled'); } else { presetShapesContainer.style.display = 'none'; emojiShapesContainer.style.display = 'block'; particleColorSection.classList.add('section-disabled'); }
+            if (activeShapeTab === 'preset') { 
+                presetShapesContainer.style.display = 'block'; emojiShapesContainer.style.display = 'none'; flagShapesContainer.style.display = 'none'; particleColorSection.classList.remove('section-disabled'); 
+            } else if (activeShapeTab === 'emoji') { 
+                presetShapesContainer.style.display = 'none'; emojiShapesContainer.style.display = 'block'; flagShapesContainer.style.display = 'none'; particleColorSection.classList.add('section-disabled'); 
+            } else {
+                presetShapesContainer.style.display = 'none'; emojiShapesContainer.style.display = 'none'; flagShapesContainer.style.display = 'block'; particleColorSection.classList.add('section-disabled');
+            }
             updatePreview(false); 
         });
     });
@@ -710,7 +709,7 @@
        });
     });
 
-    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😛', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
     modernEmojis.forEach(emojiChar => {
         const emojiItem = document.createElement('div'); emojiItem.className = 'emoji-item'; emojiItem.textContent = emojiChar;
         emojiItem.addEventListener('click', () => {
@@ -720,17 +719,54 @@
         emojiGrid.appendChild(emojiItem);
     });
 
+    // --- FLAGS POPULATION ---
+    const flagCodes = ['us', 'gb', 'fr', 'de', 'jp', 'ca', 'br', 'au', 'cn', 'in', 'mx', 'it', 'es', 'kr', 'se', 'no', 'nl', 'be', 'ch', 'at'];
+    flagCodes.forEach(code => {
+        const flagItem = document.createElement('div'); flagItem.className = 'flag-item'; flagItem.innerHTML = `<img src="https://flagcdn.com/${code}.svg" draggable="false">`;
+        flagItem.addEventListener('click', async () => {
+            const index = selectedFlags.indexOf(code);
+            if (index > -1) { 
+                selectedFlags.splice(index, 1); flagItem.removeAttribute('data-state'); 
+            } else { 
+                selectedFlags.push(code); flagItem.setAttribute('data-state', 'selected');
+                if (!flagDataCache[code]) {
+                    try {
+                        const response = await fetch(`https://flagcdn.com/${code}.svg`);
+                        const svgText = await response.text();
+                        flagDataCache[code] = svgText;
+                    } catch (e) { console.error("Failed to fetch flag SVG", e); }
+                }
+            }
+            updatePreview(false);
+        });
+        flagGrid.appendChild(flagItem);
+    });
+
     // --- CUSTOM SHAPE EDITOR ---
     const initialCsState = { anchors: [{x: 60, y: 60}, {x: 260, y: 60}, {x: 260, y: 260}, {x: 60, y: 260}], controls: [{dx: 0, dy: -30}, {dx: -30, dy: 0}, {dx: 30, dy: 0}, {dx: 0, dy: -30}, {dx: 0, dy: 30}, {dx: 30, dy: 0}, {dx: -30, dy: 0}, {dx: 0, dy: 30}] };
     let csState = JSON.parse(JSON.stringify(initialCsState)); let draggingElement = null; let dragStartIndex = -1; 
+    
     function renderEditorCanvas() {
-        csEditorSvg.innerHTML = ''; const a = csState.anchors; const c = csState.controls;
-        let d = `M ${a[0].x},${a[0].y} `; d += `C ${a[0].x + c[0].dx},${a[0].y + c[0].dy} ${a[1].x + c[3].dx},${a[1].y + c[3].dy} ${a[1].x},${a[1].y} `; d += `C ${a[1].x + c[2].dx},${a[1].y + c[2].dy} ${a[2].x + c[5].dx},${a[2].y + c[5].dy} ${a[2].x},${a[2].y} `; d += `C ${a[2].x + c[4].dx},${a[2].y + c[4].dy} ${a[3].x + c[7].dx},${a[3].y + c[7].dy} ${a[3].x},${a[3].y} `; d += `C ${a[3].x + c[6].dx},${a[3].y + c[6].dy} ${a[0].x + c[1].dx},${a[0].y + c[1].dy} ${a[0].x},${a[0].y} Z`;
+        csEditorSvg.innerHTML = ''; 
+        // Update Editor's viewBox to match imported SVG or default
+        csEditorSvg.setAttribute('viewBox', finalCustomViewBox);
+        
+        const a = csState.anchors; const c = csState.controls;
+        let d;
+        if (finalCustomShapePathStr && csResetIcon.style.display === 'block') {
+            d = finalCustomShapePathStr;
+        } else {
+            d = `M ${a[0].x},${a[0].y} `; d += `C ${a[0].x + c[0].dx},${a[0].y + c[0].dy} ${a[1].x + c[3].dx},${a[1].y + c[3].dy} ${a[1].x},${a[1].y} `; d += `C ${a[1].x + c[2].dx},${a[1].y + c[2].dy} ${a[2].x + c[5].dx},${a[2].y + c[5].dy} ${a[2].x},${a[2].y} `; d += `C ${a[2].x + c[4].dx},${a[2].y + c[4].dy} ${a[3].x + c[7].dx},${a[3].y + c[7].dy} ${a[3].x},${a[3].y} `; d += `C ${a[3].x + c[6].dx},${a[3].y + c[6].dy} ${a[0].x + c[1].dx},${a[0].y + c[1].dy} ${a[0].x},${a[0].y} Z`;
+        }
+        
         const pathPreview = createSvgElement('path', { d: d, class: 'cs-path-preview' }); csEditorSvg.appendChild(pathPreview);
-        const drawCircle = (x, y, cls, idx, type) => { const circle = createSvgElement('circle', { cx: x, cy: y, r: 6, class: cls }); circle.addEventListener('mousedown', (e) => startDrag(e, idx, type)); return circle; };
-        const drawLine = (x1, y1, x2, y2) => createSvgElement('line', { x1, y1, x2, y2, class: 'cs-connector' });
-        csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy)); csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
-        c.forEach((ctrl, i) => { const anchorIdx = Math.floor(i / 2); const absX = a[anchorIdx].x + ctrl.dx; const absY = a[anchorIdx].y + ctrl.dy; csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control')); }); a.forEach((p, i) => { csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor')); });
+        
+        if (!(finalCustomShapePathStr && csResetIcon.style.display === 'block')) {
+            const drawCircle = (x, y, cls, idx, type) => { const circle = createSvgElement('circle', { cx: x, cy: y, r: 6, class: cls }); circle.addEventListener('mousedown', (e) => startDrag(e, idx, type)); return circle; };
+            const drawLine = (x1, y1, x2, y2) => createSvgElement('line', { x1, y1, x2, y2, class: 'cs-connector' });
+            csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy)); csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
+            c.forEach((ctrl, i) => { const anchorIdx = Math.floor(i / 2); const absX = a[anchorIdx].x + ctrl.dx; const absY = a[anchorIdx].y + ctrl.dy; csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control')); }); a.forEach((p, i) => { csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor')); });
+        }
     }
     function startDrag(e, index, type) { csHistory.push(JSON.parse(JSON.stringify(csState))); draggingElement = type; dragStartIndex = index; document.addEventListener('mousemove', onDrag); document.addEventListener('mouseup', stopDrag); }
     function onDrag(e) { if (!draggingElement) return; const rect = csEditorSvg.getBoundingClientRect(); const x = Math.max(0, Math.min(320, e.clientX - rect.left)); const y = Math.max(0, Math.min(320, e.clientY - rect.top)); if (draggingElement === 'anchor') { csState.anchors[dragStartIndex] = {x, y}; } else if (draggingElement === 'control') { const anchorIdx = Math.floor(dragStartIndex / 2); const anchor = csState.anchors[anchorIdx]; csState.controls[dragStartIndex] = { dx: x - anchor.x, dy: y - anchor.y }; } renderEditorCanvas(); }
@@ -739,14 +775,81 @@
     document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { if (customShapePopover.style.display === 'flex') { e.preventDefault(); undoShape(); } } });
     customShapeBtn.addEventListener('click', () => { customShapePopover.style.display = 'flex'; renderEditorCanvas(); });
     csCloseBtn.addEventListener('click', () => { customShapePopover.style.display = 'none'; });
-    csSaveBtn.addEventListener('click', () => { const previewPath = csEditorSvg.querySelector('.cs-path-preview'); if (previewPath) { finalCustomShapePathStr = previewPath.getAttribute('d'); customShapeBtn.setAttribute('data-state', 'selected'); document.querySelectorAll('.id-shape-selector .selector-item:not(#customShapeBtn)').forEach(item => { item.removeAttribute('data-state'); }); csResetIcon.style.display = 'block'; } customShapePopover.style.display = 'none'; updatePreview(false); });
-    csResetIcon.addEventListener('click', () => { csState = JSON.parse(JSON.stringify(initialCsState)); csHistory = []; renderEditorCanvas(); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; customShapePopover.style.display = 'none'; updatePreview(false); });
+    csSaveBtn.addEventListener('click', () => { 
+        if (!(finalCustomShapePathStr && csResetIcon.style.display === 'block')) {
+            const previewPath = csEditorSvg.querySelector('.cs-path-preview'); 
+            if (previewPath) { finalCustomShapePathStr = previewPath.getAttribute('d'); }
+        }
+        customShapeBtn.setAttribute('data-state', 'selected'); 
+        document.querySelectorAll('.id-shape-selector .selector-item:not(#customShapeBtn)').forEach(item => { item.removeAttribute('data-state'); }); 
+        csResetIcon.style.display = 'block'; 
+        customShapePopover.style.display = 'none'; 
+        updatePreview(false); 
+    });
+    csResetIcon.addEventListener('click', () => { 
+        csState = JSON.parse(JSON.stringify(initialCsState)); 
+        csHistory = []; 
+        finalCustomShapePathStr = ""; 
+        finalCustomViewBox = "0 0 320 320"; // Reset containment
+        csResetIcon.style.display = 'none'; 
+        renderEditorCanvas(); 
+        customShapeBtn.removeAttribute('data-state'); 
+        updatePreview(false); 
+    });
+
+    // --- SVG IMPORT LOGIC ---
+    csImportBtn.addEventListener('click', () => {
+        csFileInput.value = ""; // Fix: Bug where re-importing same file fails
+        csFileInput.click();
+    });
+    
+    csFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, "image/svg+xml");
+            const svgEl = doc.querySelector('svg');
+            const paths = doc.querySelectorAll('path');
+            
+            // Fix: Containment Logic
+            // If the SVG has a viewBox, we use it to contain the shape correctly
+            const viewBox = svgEl.getAttribute('viewBox');
+            if (viewBox) {
+                finalCustomViewBox = viewBox;
+            } else {
+                const w = svgEl.getAttribute('width') || 320;
+                const h = svgEl.getAttribute('height') || 320;
+                finalCustomViewBox = `0 0 ${w} ${h}`;
+            }
+
+            let pathData = "";
+            paths.forEach(p => { pathData += p.getAttribute('d') + " "; });
+            if (pathData) {
+                finalCustomShapePathStr = pathData.trim();
+                csResetIcon.style.display = 'block';
+                renderEditorCanvas();
+            } else {
+                alert("No path data found in the imported SVG.");
+            }
+        };
+        reader.readAsText(file);
+    });
 
     function getSettings() {
-        let selectedShapes = []; let currentSelectedEmoji = null; let customPath = null;
-        if (activeShapeTab === 'preset') { selectedShapes = Array.from(document.querySelectorAll('.id-shape-selector .selector-item[data-state="selected"]:not(#customShapeBtn)')).map(el => el.getAttribute('data-value')); if (customShapeBtn.getAttribute('data-state') === 'selected') { selectedShapes.push('custom'); customPath = finalCustomShapePathStr; } } else { currentSelectedEmoji = selectedEmoji; }
+        let selectedShapes = []; let customPath = null;
+        if (activeShapeTab === 'preset') { 
+            selectedShapes = Array.from(document.querySelectorAll('.id-shape-selector .selector-item[data-state="selected"]:not(#customShapeBtn)')).map(el => el.getAttribute('data-value')); if (customShapeBtn.getAttribute('data-state') === 'selected') { selectedShapes.push('custom'); customPath = finalCustomShapePathStr; } 
+        }
+        
+        const currentSelectedFlagsData = selectedFlags.map(code => ({ code, svg: flagDataCache[code] }));
+
         return {
-            shapeTab: activeShapeTab, selectedShapes: selectedShapes, selectedEmojis: selectedEmojis, customShapePath: customPath, 
+            shapeTab: activeShapeTab, selectedShapes, selectedEmojis, selectedFlags: currentSelectedFlagsData, 
+            customShapePath: customPath, 
+            customViewBox: finalCustomViewBox, // Send viewBox for generation fix
             randomness: parseInt(document.getElementById('randomInput').value), amount: parseInt(document.getElementById('amountInput').value), zoom: parseInt(document.getElementById('zoomInput').value),
             flutter: parseInt(document.getElementById('flutterInput').value),
             randomizeSize: document.getElementById('checkSize').checked, randomizeRotation: document.getElementById('checkRotation').checked,
@@ -758,50 +861,103 @@
     document.getElementById('generateBtn').addEventListener('click', () => { const settings = getSettings(); if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } });
     
     function resetPluginState() { 
-        // NEW DEFAULTS: 80% Random, 100% Flutter
-        document.getElementById('randomInput').value = 80; 
-        document.getElementById('amountInput').value = 20; 
-        document.getElementById('zoomInput').value = 10;
-        document.getElementById('flutterInput').value = 100;
-        
-        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; csResetIcon.style.display = 'none'; selectedEmojis = []; document.querySelectorAll('.emoji-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; 
-        
-        document.getElementById('randomInput').dispatchEvent(new Event('input')); 
-        document.getElementById('amountInput').dispatchEvent(new Event('input')); 
-        document.getElementById('zoomInput').dispatchEvent(new Event('input')); 
-        document.getElementById('flutterInput').dispatchEvent(new Event('input'));
-        
+        document.getElementById('randomInput').value = 80; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('flutterInput').value = 100;
+        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; 
+        document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); document.getElementById('flutterInput').dispatchEvent(new Event('input'));
         updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
     }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
-    // --- RENDER PREVIEW ---
+    // ui.html (renderPreview function block)
+
     function renderPreview() {
         const settings = getSettings(); 
         previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); 
         const globalZoom = settings.zoom / 10; 
         
+        // Generate a unique session ID to force browser to redraw gradients (caching fix)
+        const sessionSalt = Math.random().toString(36).substring(2, 7);
+
         previewParticles.forEach((p, index) => { 
-            let el; 
-            const baseSize = 24; 
-            const finalScale = p.scale * globalZoom;
+            let el; const baseSize = 24; 
+            const globalScale = p.scale * globalZoom;
             const flipScale = Math.max(0.01, Math.abs(p.flipFactor !== undefined ? p.flipFactor : 1));
-            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${finalScale}, ${finalScale * flipScale})`; 
+            const transformStr = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${globalScale}, ${globalScale * flipScale})`; 
 
             if (p.isEmoji) { 
-                el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': transformStr }); 
-                el.textContent = p.shapeType; 
+                el = createSvgElement('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': baseSize + 'px', 'font-family': '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", sans-serif', 'transform': transformStr }); el.textContent = p.shapeType; 
+            } else if (p.shapeType === 'flag' && p.flagSvg) {
+                const parser = new DOMParser(); 
+                const svgDoc = parser.parseFromString(p.flagSvg, "image/svg+xml"); 
+                const innerSvg = svgDoc.querySelector('svg');
+                if (innerSvg) {
+                    const viewBoxStr = innerSvg.getAttribute('viewBox') || `0 0 ${innerSvg.getAttribute('width') || 24} ${innerSvg.getAttribute('height') || 24}`;
+                    const vb = viewBoxStr.split(' ').map(Number);
+                    const w = vb[2], h = vb[3];
+                    const aspectRatio = w / h;
+
+                    // --- RE-IMPLEMENTED AREA NORMALIZATION FOR PREVIEW ---
+                    const targetArea = 960;
+                    const normH = Math.sqrt(targetArea / aspectRatio);
+                    
+                    const normalizedScale = globalScale * (normH / 24);
+                    const finalTransform = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${normalizedScale}, ${normalizedScale * flipScale})`;
+                    
+                    const g = createSvgElement('g', { transform: finalTransform });
+                    const internalScale = 24 / Math.max(w, h); 
+                    const innerG = createSvgElement('g', { transform: `scale(${internalScale * aspectRatio}) translate(${-w/2}, ${-h/2})` });
+                    
+                    Array.from(innerSvg.childNodes).forEach(node => { 
+                        if (node.nodeType === 1) innerG.appendChild(node.cloneNode(true)); 
+                    });
+                    g.appendChild(innerG); el = g;
+                }
             } else { 
                 let fill; let opacity = 1; 
-                if (!p.color) { fill = '#CBD5E1'; } else if (p.color.type === 'linear') { const gradId = `p_grad_${index}`; const gradient = createSvgElement('linearGradient', { id: gradId, x1: '0%', y1: '0%', x2: p.color.isVertical ? '0%' : '100%', y2: p.color.isVertical ? '100%' : '0%' }); p.color.gradientStops.forEach(stop => { const r = Math.round(stop.color.r * 255); const g = Math.round(stop.color.g * 255); const b = Math.round(stop.color.b * 255); const stopEl = createSvgElement('stop', { offset: `${stop.position * 100}%`, 'stop-color': `rgb(${r},${g},${b})`, 'stop-opacity': stop.color.a }); gradient.appendChild(stopEl); }); defs.appendChild(gradient); fill = `url(#${gradId})`; } else { const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); fill = `rgb(${r}, ${g}, ${b})`; opacity = p.color.a !== undefined ? p.color.a : 1; } 
+                if (!p.color) { fill = '#CBD5E1'; } 
+                else if (p.color.type === 'linear') { 
+                    const gradId = `p_grad_${sessionSalt}_${index}`; 
+                    const gradient = createSvgElement('linearGradient', { 
+                        id: gradId, 
+                        gradientUnits: "objectBoundingBox",
+                        x1: '0%', y1: '0%', 
+                        x2: p.color.isVertical ? '0%' : '100%', 
+                        y2: p.color.isVertical ? '100%' : '0%' 
+                    }); 
+                    p.color.gradientStops.forEach(stop => { 
+                        const r = Math.round(stop.color.r * 255); const g = Math.round(stop.color.g * 255); const b = Math.round(stop.color.b * 255); 
+                        const stopEl = createSvgElement('stop', { offset: `${stop.position * 100}%`, 'stop-color': `rgb(${r},${g},${b})`, 'stop-opacity': stop.color.a }); 
+                        gradient.appendChild(stopEl); 
+                    }); 
+                    defs.appendChild(gradient); fill = `url(#${gradId})`; 
+                } else { 
+                    const r = Math.round(p.color.r * 255); const g = Math.round(p.color.g * 255); const b = Math.round(p.color.b * 255); 
+                    fill = `rgb(${r}, ${g}, ${b})`; opacity = p.color.a !== undefined ? p.color.a : 1; 
+                } 
+                
                 const commonAttrs = { fill: fill, 'fill-opacity': opacity, 'transform': transformStr }; 
-                if (p.shapeType === 'custom' && p.customPathData) { const pathScale = baseSize / 320; el = createSvgElement('path', { d: p.customPathData, transform: `${transformStr} scale(${pathScale}) translate(-160, -160)`, fill: fill, 'fill-opacity': opacity }); } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } 
+                
+                if (p.shapeType === 'custom' && p.customPathData) {
+                    const vbParts = p.customViewBox.split(' ').map(Number);
+                    const vbW = vbParts[2] || 320; const vbH = vbParts[3] || 320;
+                    const vbX = vbParts[0] || 0; const vbY = vbParts[1] || 0;
+                    const pathScale = baseSize / Math.max(vbW, vbH); 
+                    el = createSvgElement('path', { 
+                        d: p.customPathData, 
+                        transform: `${transformStr} scale(${pathScale}) translate(${-vbX - vbW/2}, ${-vbY - vbH/2})`, 
+                        fill: fill, 'fill-opacity': opacity 
+                    }); 
+                } else if (p.shapeType === 'rectangle') { el = createSvgElement('rect', { x: -(baseSize * 1.33) / 2, y: -baseSize / 2, width: baseSize * 1.33, height: baseSize, rx: 2, ...commonAttrs }); } 
+                else if (p.shapeType === 'square') { el = createSvgElement('rect', { x: -baseSize / 2, y: -baseSize / 2, width: baseSize, height: baseSize, rx: 2, ...commonAttrs }); } 
+                else if (p.shapeType === 'circle') { el = createSvgElement('circle', { cx: 0, cy: 0, r: baseSize / 2, ...commonAttrs }); } 
+                else if (p.shapeType === 'star') { const points = "0,-12 3.5,-3.5 12,-3.5 5,2.5 8,11 0,6 -8,11 -5,2.5 -12,-3.5 -3.5,-3.5"; el = createSvgElement('polygon', { points: points, ...commonAttrs }); } 
+                else if (p.shapeType === 'wave') { el = createSvgElement('path', { d: "M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6", stroke: fill, 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'fill-opacity': 0, 'stroke-opacity': opacity, transform: `${transformStr} translate(-12, -12)` }); } 
             } 
             if(el) previewSvg.appendChild(el); 
         }); 
     }
 
-    function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions: keepPositions, changeType: changeType } }, '*'); }
+    function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions, changeType } }, '*'); }
     window.onmessage = (event) => { const msg = event.data.pluginMessage; if (msg && msg.type === 'preview-data') { previewParticles = msg.particles; renderPreview(); } };
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
     panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
