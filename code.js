@@ -1,5 +1,3 @@
-// code.js
-
 figma.showUI(__html__, { width: 960, height: 800, themeColors: false });
 
 let cachedParticles = [];
@@ -60,14 +58,14 @@ function getColorPalette(settings) {
                 });
                 return { 
                     type: 'linear', 
-                    subtype: c.gradientSubtype || 'Linear', // Fixed: Pass through the gradient type
+                    subtype: c.gradientSubtype || 'Linear',
                     gradientStops: figmaStops, 
                     isVertical: c.isVertical 
                 };
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
-                return rgba;
+                rgba.return; rgba;
             }
         });
     }
@@ -227,6 +225,7 @@ async function populateFrameWithConfetti(frame, pList) {
     node.rotation = p.rotation;
     const flipScale = Math.max(0.01, Math.abs(p.flipFactor));
 
+    // --- FLAG SIZING LOGIC (COPIED FROM CODE 1) ---
     if (p.shapeType === 'flag') {
         const aspectRatio = parseFloat(node.getPluginData('aspectRatio') || "1.5");
         const targetArea = 960; 
@@ -241,13 +240,11 @@ async function populateFrameWithConfetti(frame, pList) {
     if (!p.isEmoji && p.shapeType !== 'flag' && p.color) {
         let fill;
         if (p.color.type === 'linear') {
-            // FIX: Correct mapping for all gradient subtypes
             let figmaType = 'GRADIENT_LINEAR';
             if (p.color.subtype === 'Radial') figmaType = 'GRADIENT_RADIAL';
             if (p.color.subtype === 'Angular') figmaType = 'GRADIENT_ANGULAR';
             if (p.color.subtype === 'Diamond') figmaType = 'GRADIENT_DIAMOND';
 
-            // Center the gradient transform for radial/diamond styles
             const transform = (figmaType === 'GRADIENT_LINEAR') 
                 ? (p.color.isVertical ? [[0, 1, 0], [-1, 0, 1]] : [[1, 0, 0], [0, 1, 0]])
                 : [[0.5, 0, 0.5], [0, 0.5, 0.5]];
