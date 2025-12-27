@@ -65,7 +65,7 @@ function getColorPalette(settings) {
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
-                rgba.return; rgba;
+                return rgba; // FIXED: Changed from rgba.return; rgba;
             }
         });
     }
@@ -225,7 +225,6 @@ async function populateFrameWithConfetti(frame, pList) {
     node.rotation = p.rotation;
     const flipScale = Math.max(0.01, Math.abs(p.flipFactor));
 
-    // --- FLAG SIZING LOGIC (COPIED FROM CODE 1) ---
     if (p.shapeType === 'flag') {
         const aspectRatio = parseFloat(node.getPluginData('aspectRatio') || "1.5");
         const targetArea = 960; 

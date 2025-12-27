@@ -27,7 +27,8 @@
     /* LAYOUT */
     .header { height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-    .close-btn { cursor: pointer; color: var(--muted-foreground); padding: 4px; }
+    .credit-link { font-size: 13px; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
+    .credit-link:hover { color: var(--primary); }
     .main-layout { flex: 1; display: flex; overflow: hidden; position: relative; }
     .settings-panel { width: 440px; padding: 24px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
     .preview-panel { flex: 1; padding: 24px; background-color: #fafafa; display: flex; flex-direction: column; }
@@ -233,9 +234,7 @@
 
   <div class="header">
     <div class="title"><span>🎉</span> Confetti Animator</div>
-    <div class="close-btn" id="closeBtn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </div>
+    <a href="https://reexlabs.com" target="_blank" class="credit-link">Made with ♥️ by ReexLabs</a>
   </div>
 
   <div class="main-layout">
@@ -569,7 +568,7 @@
         updatePickerVisuals(); updateGradientVisuals();
     }
     function applyPickerToActive() {
-        if (currentTab === 'linear') {
+        if (currentTab === 'solid') {
             const hex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
             gradientStops[activeStopIndex].color = hex; gradientStops[activeStopIndex].alpha = pickerHSLA.a;
             updateGradientVisuals();
@@ -750,11 +749,43 @@
        });
     });
 
-    const modernEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '🥲', '☺️', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '💤', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
-    modernEmojis.forEach(emojiChar => {
-        const emojiItem = document.createElement('div'); emojiItem.className = 'emoji-item'; emojiItem.textContent = emojiChar;
+    const modernEmojis = [
+        { char: '😀', name: 'Grinning Face' }, { char: '😃', name: 'Beaming Face with Smiling Eyes' }, { char: '😄', name: 'Grinning Face with Smiling Eyes' }, { char: '😁', name: 'Beaming Face with Smiling Eyes' },
+        { char: '😆', name: 'Grinning Squinting Face' }, { char: '😅', name: 'Grinning Face with Sweat' }, { char: '😂', name: 'Face with Tears of Joy' }, { char: '🤣', name: 'Rolling on the Floor Laughing' },
+        { char: '🥲', name: 'Smiling Face with Tear' }, { char: '☺️', name: 'Smiling Face' }, { char: '😊', name: 'Smiling Face with Smiling Eyes' }, { char: '😇', name: 'Smiling Face with Halo' },
+        { char: '🙂', name: 'Slightly Smiling Face' }, { char: '🙃', name: 'Upside-Down Face' }, { char: '😉', name: 'Winking Face' }, { char: '😌', name: 'Relieved Face' },
+        { char: '😍', name: 'Smiling Face with Heart-Eyes' }, { char: '🥰', name: 'Smiling Face with Hearts' }, { char: '😘', name: 'Face Blowing a Kiss' }, { char: '😗', name: 'Kissing Face' },
+        { char: '😙', name: 'Kissing Face with Smiling Eyes' }, { char: '😚', name: 'Kissing Face with Closed Eyes' }, { char: '😋', name: 'Face Savoring Food' }, { char: '😛', name: 'Face with Tongue' },
+        { char: '😝', name: 'Squinting Face with Tongue' }, { char: '😜', name: 'Winking Face with Tongue' }, { char: '🤪', name: 'Zany Face' }, { char: '🤨', name: 'Face with Raised Eyebrow' },
+        { char: '🧐', name: 'Face with Monocle' }, { char: '🤓', name: 'Nerd Face' }, { char: '😎', name: 'Smiling Face with Sunglasses' }, { char: '🥸', name: 'Disguised Face' },
+        { char: '🤩', name: 'Star-Struck' }, { char: '🥳', name: 'Partying Face' }, { char: '😏', name: 'Smirking Face' }, { char: '😒', name: 'Unamused Face' },
+        { char: '😞', name: 'Disconnected Face' }, { char: '😔', name: 'Pensive Face' }, { char: '😟', name: 'Worried Face' }, { char: '😕', name: 'Confused Face' },
+        { char: '🙁', name: 'Slightly Frowning Face' }, { char: '☹️', name: 'Frowning Face' }, { char: '😣', name: 'Persevering Face' }, { char: '😖', name: 'Confounded Face' },
+        { char: '😫', name: 'Tired Face' }, { char: '😩', name: 'Weary Face' }, { char: '🥺', name: 'Pleading Face' }, { char: '😢', name: 'Crying Face' },
+        { char: '😭', name: 'Loudly Crying Face' }, { char: '😤', name: 'Face with Steam From Nose' }, { char: '😠', name: 'Angry Face' }, { char: '😡', name: 'Pouting Face' },
+        { char: '🤬', name: 'Face with Symbols on Mouth' }, { char: '🤯', name: 'Exploding Head' }, { char: '😳', name: 'Flushed Face' }, { char: '🥵', name: 'Hot Face' },
+        { char: '🥶', name: 'Cold Face' }, { char: '😱', name: 'Face Screaming in Fear' }, { char: '😨', name: 'Fearful Face' }, { char: '😰', name: 'Anxious Face with Sweat' },
+        { char: '😥', name: 'Sad but Relieved Face' }, { char: '😓', name: 'Downcast Face with Sweat' }, { char: '🤗', name: 'Hugging Face' }, { char: '🤔', name: 'Thinking Face' },
+        { char: '🤭', name: 'Face with Hand Over Mouth' }, { char: '🤫', name: 'Shushing Face' }, { char: '🤥', name: 'Lying Face' }, { char: '😶', name: 'Face Without Mouth' },
+        { char: '😐', name: 'Neutral Face' }, { char: '😑', name: 'Expressionless Face' }, { char: '😬', name: 'Grimacing Face' }, { char: '🙄', name: 'Face with Rolling Eyes' },
+        { char: '😯', name: 'Hushed Face' }, { char: '😦', name: 'Frowning Face with Open Mouth' }, { char: '😧', name: 'Anguished Face' }, { char: '😮', name: 'Face with Open Mouth' },
+        { char: '😲', name: 'Astonished Face' }, { char: '🥱', name: 'Yawning Face' }, { char: '😴', name: 'Sleeping Face' }, { char: '🤤', name: 'Drooling Face' },
+        { char: '😪', name: 'Sleepy Face' }, { char: '😵', name: 'Dizzy Face' }, { char: '🤐', name: 'Zipper-Mouth Face' }, { char: '🥴', name: 'Woozy Face' },
+        { char: '🤢', name: 'Nauseated Face' }, { char: '🤮', name: 'Face Vomiting' }, { char: '🤧', name: 'Sneezing Face' }, { char: '😷', name: 'Face with Medical Mask' },
+        { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Face with Thermometer' }, { char: '🤕', name: 'Face with Head-Bandage' }, { char: '🤑', name: 'Money-Mouth Face' },
+        { char: '🤠', name: 'Cowboy Hat Face' }, { char: '😈', name: 'Smiling Face with Horns' }, { char: '👿', name: 'Angry Face with Horns' }, { char: '👹', name: 'Ogre' },
+        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown Face' }, { char: '💩', name: 'Pile of Poo' }, { char: '👻', name: 'Ghost' },
+        { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull and Crossbones' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Alien Monster' },
+        { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Jack-O-Lantern' }, { char: '😺', name: 'Grinning Cat' }, { char: '😸', name: 'Grinning Cat with Smiling Eyes' },
+        { char: '😹', name: 'Cat with Tears of Joy' }, { char: '😻', name: 'Smiling Cat with Heart-Eyes' }, { char: '😼', name: 'Cat with Wry Smile' }, { char: '😽', name: 'Kissing Cat' },
+        { char: '🙀', name: 'Weary Cat' }, { char: '😿', name: 'Crying Cat' }, { char: '😾', name: 'Pouting Cat' }
+    ];
+
+    modernEmojis.forEach(emojiData => {
+        const emojiItem = document.createElement('div'); emojiItem.className = 'emoji-item'; emojiItem.textContent = emojiData.char;
+        emojiItem.setAttribute('data-tooltip', emojiData.name);
         emojiItem.addEventListener('click', () => {
-            const index = selectedEmojis.indexOf(emojiChar); if (index > -1) { selectedEmojis.splice(index, 1); emojiItem.removeAttribute('data-state'); } else { selectedEmojis.push(emojiChar); emojiItem.setAttribute('data-state', 'selected'); }
+            const index = selectedEmojis.indexOf(emojiData.char); if (index > -1) { selectedEmojis.splice(index, 1); emojiItem.removeAttribute('data-state'); } else { selectedEmojis.push(emojiData.char); emojiItem.setAttribute('data-state', 'selected'); }
             updatePreview(false);
         });
         emojiGrid.appendChild(emojiItem);
@@ -869,12 +900,11 @@
             frameCount: parseInt(document.getElementById('frameCountInput').value) || 1, frameDelay: parseInt(document.getElementById('frameDelayInput').value) || 50
         };
     }
-    document.getElementById('closeBtn').addEventListener('click', () => parent.postMessage({ pluginMessage: { type: 'close-plugin' } }, '*'));
     document.getElementById('generateBtn').addEventListener('click', () => { const settings = getSettings(); if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } });
     
     function resetPluginState() { 
         document.getElementById('randomInput').value = 80; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('flutterInput').value = 100;
-        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0]); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; 
+        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0].char); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } document.getElementById('frameCountInput').value = 10; document.getElementById('frameDelayInput').value = 75; 
         document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); document.getElementById('flutterInput').dispatchEvent(new Event('input'));
         updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
     }
