@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 960, height: 800, themeColors: false });
+figma.showUI(__html__, { width: 960, height: 800, themeColors: true });
 
 let cachedParticles = [];
 
@@ -65,7 +65,7 @@ function getColorPalette(settings) {
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
-                return rgba; // FIXED: Corrected return statement
+                return rgba;
             }
         });
     }

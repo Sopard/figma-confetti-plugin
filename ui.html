@@ -6,7 +6,7 @@
   <title>Confetti Animator</title>
   <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
   <style>
-    /* VARIABLES */
+    /* VARIABLES - DEFAULT (LIGHT) */
     :root {
       --primary: #1890FF; --primary-hover: #40a9ff;
       --background: #FFFFFF; --foreground: #0f172a;
@@ -16,7 +16,46 @@
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --slider-track: #E5E7EB; --switch-bg: #E5E7EB;
       --handle-color: #1890FF; --control-color: #FF4D4F;
+      --preview-panel-bg: #fafafa;
+      --canvas-bg: #FFFFFF;
+      --canvas-dot: #e2e8f0;
+      --cs-canvas-bg: #E9EAEB;
+      --cs-stripe: #ccc;
+      --tab-inactive-svg: #E5E5EA;
+      --tab-active-bg: #FFFFFF; /* WHITE FOR LIGHT MODE */
+      --tab-active-text: #0f172a; /* DARK TEXT FOR LIGHT MODE */
+      --stop-swatch-border: rgba(0,0,0,0.1);
+      --stop-remove-hover: #d00;
+      --dropdown-bg: white;
+      --dropdown-hover: #E9EAEB;
+      --dropdown-selected: #f0f9ff;
     }
+
+    /* VARIABLES - AUTOMATIC DARK THEME */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #1e1e1e; --foreground: #FFFFFF;
+        --muted: #2b2b2b; --muted-darker: #3b3b3b; --muted-foreground: #a1a1a1;
+        --border: #333333;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.7), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+        --slider-track: #333333; --switch-bg: #333333;
+        --preview-panel-bg: #121212;
+        --canvas-bg: #1a1a1a;
+        --canvas-dot: #333;
+        --cs-canvas-bg: #000;
+        --cs-stripe: #111;
+        --tab-inactive-svg: #444;
+        --tab-active-bg: #454545; /* THEME-REFLECTIVE GRAY FOR DARK MODE */
+        --tab-active-text: #FFFFFF; /* LIGHT TEXT FOR DARK MODE */
+        --stop-swatch-border: rgba(255,255,255,0.1);
+        --stop-remove-hover: #f44;
+        --dropdown-bg: #2b2b2b;
+        --dropdown-hover: #3b3b3b;
+        --dropdown-selected: #1e3a5f;
+      }
+    }
+
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: var(--background); color: var(--foreground); height: 100vh; display: flex; flex-direction: column; }
 
     /* GLOBAL INPUT TWEAKS */
@@ -30,12 +69,12 @@
     .credit-link:hover { color: var(--primary); }
     .main-layout { flex: 1; display: flex; overflow: hidden; position: relative; }
     .settings-panel { width: 440px; padding: 24px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
-    .preview-panel { flex: 1; padding: 24px; background-color: #fafafa; display: flex; flex-direction: column; }
+    .preview-panel { flex: 1; padding: 24px; background-color: var(--preview-panel-bg); display: flex; flex-direction: column; }
 
     /* COMMON COMPONENTS */
     .tabs-list { display: flex; background-color: var(--muted); padding: 4px; border-radius: var(--radius); position: relative; }
     .tab-trigger { flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; position: relative; }
-    .tab-trigger[data-state="active"] { background-color: var(--background); color: var(--foreground); box-shadow: var(--shadow-sm); }
+    .tab-trigger[data-state="active"] { background-color: var(--tab-active-bg); color: var(--tab-active-text); box-shadow: var(--shadow-sm); }
     .tab-trigger.disabled { opacity: 0.8; cursor: not-allowed; color: var(--muted-foreground); background-color: var(--muted); }
     
     .premium-icon { position: absolute; top: 0px; right: 0px; pointer-events: none; }
@@ -46,13 +85,13 @@
     [data-tooltip]:hover::after {
         content: attr(data-tooltip);
         position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
-        background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px;
+        background: #000000; color: white; padding: 4px 8px; border-radius: 4px;
         font-size: 11px; white-space: nowrap; pointer-events: none; z-index: 100;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* TOP ROW TOOLTIP FLIP */
-    .emoji-grid > div:nth-child(-n+8):hover::after,
+    /* TOP ROW TOOLTIP FLIP - Fix for Cutoff */
+    .emoji-grid > div:nth-child(-n+18):hover::after,
     .id-shape-selector > div:nth-child(-n+3):hover::after {
         bottom: auto;
         top: 110%;
@@ -87,7 +126,7 @@
     .color-list-container { display: flex; flex-direction: column; gap: 12px; }
     .color-toggle-row { display: flex; align-items: center; justify-content: space-between; }
     .color-toggle-label { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
-    .rainbow-icon { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #FFD700, #FF8C00, #FF6B6B, #1890FF); }
+    .rainbow-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
     .scrollable-grid-container { max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); background-color: transparent; padding: 8px; margin-top: 8px; position: relative; }
     .color-item-row { display: flex; align-items: center; gap: 12px; transition: opacity 0.3s; padding: 4px 0; }
     .color-preview-sq { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; cursor: pointer; }
@@ -101,20 +140,20 @@
     .shape-tab-trigger[data-state="active"] { color: var(--primary); }
     .shape-tab-trigger[data-state="active"]::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background-color: var(--primary); }
     .selector-grid { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; width: 100%; }
-    .selector-item { flex: 1; height: 40px; min-width: 0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); border-radius: var(--radius); color: var(--muted-foreground); cursor: pointer; position: relative; background: var(--background); transition: all 0.2s; flex-shrink: 0; }
-    .selector-item[data-state="selected"] { border-color: var(--primary); color: var(--primary); background-color: #f0f9ff; }
+    .selector-item { flex: 1; height: 40px; min-width: 0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); border-radius: var(--radius); color: var(--muted-foreground); cursor: pointer; position: relative; background: var(--muted); transition: all 0.2s; flex-shrink: 0; }
+    .selector-item[data-state="selected"] { border-color: var(--primary); color: var(--primary); background-color: var(--muted-darker); }
     .selector-check { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--primary); border-radius: 50%; border: 2px solid var(--background); display: none; align-items: center; justify-content: center; color: white; }
     .selector-item[data-state="selected"] .selector-check { display: flex; }
     .vertical-divider { width: 1px; height: 40px; background-color: var(--border); flex-shrink: 0; flex-grow: 0; }
     .custom-shape-btn { flex: 2; padding: 0 4px; gap: 6px; font-size: 13px; font-weight: 500; white-space: nowrap; }
     .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
     .emoji-item, .flag-item { width: 40px; height: 40px; font-size: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; position: relative; }
-    .emoji-item[data-state="selected"], .flag-item[data-state="selected"] { background-color: #f0f9ff; border-color: var(--primary); }
+    .emoji-item[data-state="selected"], .flag-item[data-state="selected"] { background-color: var(--muted-darker); border-color: var(--primary); }
     .flag-item img { width: 80%; height: 80%; object-fit: contain; }
 
     /* CUSTOM SHAPE EDITOR POPOVER */
     .custom-shape-popover { position: fixed; top: 50%; left: 65%; transform: translate(-50%, -50%); width: 380px; min-height: 500px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 20; display: none; flex-direction: column; border: 1px solid var(--border); box-sizing: border-box; justify-content: space-between; }
-    .cs-canvas-container { width: 320px; height: 320px; background-color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); margin: 16px auto; position: relative; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; flex-shrink: 0; }
+    .cs-canvas-container { width: 320px; height: 320px; background-color: var(--cs-canvas-bg); border: 1px solid var(--border); border-radius: var(--radius); margin: 16px auto; position: relative; background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; flex-shrink: 0; }
     #csEditorSvg { width: 100%; height: 100%; overflow: visible; }
     .cs-anchor { fill: var(--handle-color); stroke: white; stroke-width: 2px; cursor: grab; }
     .cs-control { fill: var(--control-color); stroke: white; stroke-width: 2px; cursor: grab; }
@@ -131,7 +170,7 @@
     .btn-outline { flex: 1; background-color: transparent; border: 1px solid var(--border); color: var(--foreground); }
     .btn-outline:hover { background-color: var(--muted); }
     .preview-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-    .preview-canvas { flex: 1; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; color: var(--muted-foreground); position: relative; }
+    .preview-canvas { flex: 1; background: var(--canvas-bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; color: var(--muted-foreground); position: relative; }
     #panzoomContainer { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: grab; }
     #previewSvg { max-width: 100%; max-height: 100%; pointer-events: none; }
     .preview-footer { display: flex; }
@@ -167,7 +206,7 @@
     .cp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     
     .cp-tab svg path { fill: currentColor; }
-    .cp-tab:not(.active) svg path { fill: #E5E5EA !important; }
+    .cp-tab:not(.active) svg path { fill: var(--tab-inactive-svg) !important; }
 
     .cp-content-scrollable { flex: 1; overflow-y: auto; margin-bottom: 16px; padding-right: 4px; -ms-overflow-style: none; scrollbar-width: none; }
     .cp-content-scrollable::-webkit-scrollbar { display: none; }
@@ -176,7 +215,7 @@
     .cp-sliders { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
     .cp-slider-track { width: 100%; height: 16px; border-radius: 8px; position: relative; cursor: pointer; }
     .cp-hue-slider { background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red); }
-    .cp-alpha-slider { background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
+    .cp-alpha-slider { background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
     .cp-alpha-slider-bar { position: absolute; top:0; left:0; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(to right, transparent, red); pointer-events: none;}
     .cp-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: var(--shadow-sm); transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border); }
     .cp-inputs-row { display: flex; gap: 8px; margin-bottom: 16px; flex-shrink: 0; }
@@ -192,17 +231,18 @@
     #cpLinearContent { display: none; flex-direction: column; gap: 16px; }
     .linear-controls-row { display: flex; justify-content: space-between; align-items: center; }
     .custom-dropdown { position: relative; }
-    .dropdown-trigger { border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; background: white; cursor: pointer; }
-    .dropdown-content { position: absolute; top: 100%; left: 0; width: 140px; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-md); display: none; flex-direction: column; z-index: 20; margin-top: 4px; overflow: hidden; }
+    .dropdown-trigger { border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; background: var(--dropdown-bg); cursor: pointer; }
+    .dropdown-content { position: absolute; top: 100%; left: 0; width: 140px; background: var(--dropdown-bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-md); display: none; flex-direction: column; z-index: 20; margin-top: 4px; overflow: hidden; }
     .dropdown-content.show { display: flex; }
     .dropdown-item { padding: 8px 12px; font-size: 14px; cursor: pointer; transition: background 0.2s; }
-    .dropdown-item.selected { background: #f0f9ff; color: var(--primary); }
+    .dropdown-item:hover { background: var(--dropdown-hover); }
+    .dropdown-item.selected { background: var(--dropdown-selected); color: var(--primary); }
     .linear-actions { display: flex; gap: 4px; }
 
     .gradient-slider-container { position: relative; height: 120px; display: flex; align-items: center; overflow: visible; margin: 0 18px 40px 18px; cursor: crosshair; }
     .gradient-bar { width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #D966FF 0%, #823D99 100%); position: relative; }
     .gradient-handle { position: absolute; top: 100%; margin-top: 2px; width: 28px; height: 31px; cursor: grab; transform: translateX(-50%) rotate(180deg); z-index: 10; overflow: visible; }
-    .gradient-handle svg { width: 100%; height: 100%; drop-shadow: 0 -2px 2px rgba(0,0,0,0.2); }
+    .gradient-handle svg { width: 100%; height: 100%; drop-shadow: 0 -2px 2px rgba(0,0,0,0.5); }
     .gradient-handle.active svg path { stroke: var(--primary) !important; stroke-width: 3px !important; z-index: 20; }
     .gradient-handle:active { cursor: grabbing; }
 
@@ -214,12 +254,12 @@
     .stop-pos-group { background: var(--muted); border: 1px solid var(--border); border-radius: 6px; width: 52px; padding: 0 4px 0 0; display: flex; align-items: center; justify-content: center; height: 32px; gap: 2px; }
     .stop-pos-input { width: 100%; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-align: right; color: var(--foreground); padding-right: 0; }
     .stop-data-group { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; height: 32px; transition: border-color 0.2s; }
-    .stop-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
-    .stop-hex { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-transform: uppercase; width: 50px; }
-    .stop-opacity-group { display: flex; align-items: center; gap: 2px; border-left: 1px solid #ddd; padding-left: 8px; padding-right: 8px; }
-    .stop-opacity { width: 28px; background: transparent; border: none; outline: none; font-size: 13px; }
+    .stop-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--stop-swatch-border); cursor: pointer; }
+    .stop-hex { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 500; text-transform: uppercase; width: 50px; color: var(--foreground); }
+    .stop-opacity-group { display: flex; align-items: center; gap: 2px; border-left: 1px solid var(--border); padding-left: 8px; padding-right: 8px; }
+    .stop-opacity { width: 28px; background: transparent; border: none; outline: none; font-size: 13px; color: var(--foreground); }
     .stop-remove-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; color: #888; margin-left: 4px; }
-    .stop-remove-btn:hover { color: #d00; }
+    .stop-remove-btn:hover { color: var(--stop-remove-hover); }
     #cpAddConfirmBtn { flex-shrink: 0; height: 46px; min-height: 46px; font-size: 14px; font-weight: 600; flex-grow: 0; margin-top: auto; }
   </style>
 </head>
@@ -245,15 +285,15 @@
         </div>
     </div>
     <div style="margin-bottom: 4px; margin-top: 0px;"><div class="shape-tabs"><div class="shape-tabs-triggers"><div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div><div class="shape-tab-trigger" data-target="emoji">Emoji</div><div class="shape-tab-trigger" data-target="flag">Flag</div></div></div><div id="presetShapesContainer" style="display: block;"><div class="selector-grid id-shape-selector"><div class="selector-item" data-state="selected" data-value="rectangle" data-tooltip="Rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="square" data-tooltip="Square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="circle" data-tooltip="Circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="star" data-tooltip="Star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="wave" data-tooltip="Wave"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="vertical-divider"></div><div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg><span>Custom</span><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div></div></div><div id="emojiShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="emojiGrid"></div></div></div><div id="flagShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="flagGrid"></div></div></div></div>
-    <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 0 0 12px 0;">
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 0 0 12px 0;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Randomize Particles</div><div class="slider-container"><div class="slider-fill" id="randomFill" style="width: 80%;"></div><input type="text" class="slider-value-input" id="randomValueInput" value="80%"><input type="range" id="randomInput" class="slider-input" min="0" max="100" value="80"></div><div class="slider-labels-row"><span>Uniform</span><span>Chaotic</span></div></div><div><div class="label">Particle Amount</div><div class="slider-container"><div class="slider-fill" id="amountFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="amountValueInput" value="20%"><input type="range" id="amountInput" class="slider-input" min="0" max="100" value="20"></div><div class="slider-labels-row"><span>Less</span><span>More</span></div></div></div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="label">Particle Size</div><div class="slider-container"><div class="slider-fill" id="zoomFill" style="width: 20%;"></div><input type="text" class="slider-value-input" id="zoomValueInput" value="x1.0"><input type="range" id="zoomInput" class="slider-input" min="0" max="50" value="10"></div><div class="slider-labels-row"><span>x0.0</span><span>x5.0</span></div></div><div><div class="label">Flutter</div><div class="slider-container"><div class="slider-fill" id="flutterFill" style="width: 100%;"></div><input type="text" class="slider-value-input" id="flutterValueInput" value="100%"><input type="range" id="flutterInput" class="slider-input" min="0" max="100" value="100"></div><div class="slider-labels-row"><span>Static</span><span>Spinny</span></div></div></div>
     
     <div class="toggle-row-container"><div class="toggle-row"><span class="toggle-label">Randomize Size</span><label class="switch"><input type="checkbox" id="checkSize" checked><span class="switch-slider"></span></label></div><div class="toggle-row"><span class="toggle-label">Randomize Rotation</span><label class="switch"><input type="checkbox" id="checkRotation" checked><span class="switch-slider"></span></label></div></div>
-    <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 8px 0 0 0;">
-    <div id="particleColorSection"><div class="label" style="margin-top: 4px; margin-bottom: 24px;">Confetti Color</div><div class="color-toggle-row" style="margin-bottom: 12px;"><div class="color-toggle-label"><div class="rainbow-icon"></div><span>Multi-color</span></div><label class="switch"><input type="checkbox" id="multiColorSwitch"><span class="switch-slider"></span></label></div><div class="color-header-box"><span class="color-count-text" id="colorCounter">0 Colors</span><button class="icon-btn-flat" id="addColorBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div><div class="color-list-container"><div class="scrollable-grid-container"><div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
-    <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 8px 0 0 0;">
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
+    <div id="particleColorSection"><div class="label" style="margin-top: 4px; margin-bottom: 24px;">Confetti Color</div><div class="color-toggle-row" style="margin-bottom: 12px;"><div class="color-toggle-label"><div class="rainbow-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#paint0_angular_2580_64390_clip_path)" data-figma-skip-parse="true"><g transform="matrix(0 0.011 -0.011 0 11 11)"><foreignObject x="-1100" y="-1100" width="2200" height="2200"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(209, 90, 168, 1) 0deg,rgba(84, 125, 253, 1) 24.3555deg,rgba(103, 225, 78, 1) 102.115deg,rgba(254, 255, 136, 1) 176.538deg,rgba(252, 206, 68, 1) 244.038deg,rgba(246, 75, 85, 1) 314.915deg,rgba(209, 90, 168, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><rect width="22" height="22" rx="6" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;transform&#34;:{&#34;m00&#34;:1.3471115643134642e-15,&#34;m01&#34;:-22.0,&#34;m02&#34;:22.0,&#34;m10&#34;:22.0,&#34;m11&#34;:2.5772017576671316e-14,&#34;m12&#34;:-1.3559564305794594e-14},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}"/><g filter="url(#filter0_f_2580_64390)"><circle cx="11.5" cy="11.5" r="3.5" fill="white"/></g><defs><clipPath id="paint0_angular_2580_64390_clip_path"><rect width="22" height="22" rx="6"/></clipPath><filter id="filter0_f_2580_64390" x="4" y="4" width="15" height="15" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="2" result="effect1_foregroundBlur_2580_64390"/></filter></defs></svg></div><span>Multi-color</span></div><label class="switch"><input type="checkbox" id="multiColorSwitch"><span class="switch-slider"></span></label></div><div class="color-header-box"><span class="color-count-text" id="colorCounter">0 Colors</span><button class="icon-btn-flat" id="addColorBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div><div class="color-list-container"><div class="scrollable-grid-container"><div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
     <div style="margin-top: 8px;"><div class="label" style="margin-bottom: 24px;">Animation Settings</div><div class="grouped-settings-box" style="padding: 10px; gap: 8px;"><div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="75" min="1"></div><div class="number-input-row"><span class="toggle-label">Frame Count (Min 1)</span><input type="number" id="frameCountInput" class="number-input-field" value="10" min="1"></div></div></div>
     <hr class="section-divider"><div class="footer"><button id="resetBtn" class="btn btn-outline">Reset</button></div>
 </div>
@@ -279,7 +319,9 @@
       
       <div class="cp-tabs">
           <div class="cp-tab active" data-tab="solid" onclick="switchColorTab('solid')">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2349_132713)"><path d="M12.7774 0H5.23161C1.95397 0 0 1.953 0 5.229V12.762C0 16.047 1.95397 18 5.23161 18H12.7684C16.046 18 18 16.047 18 12.771V5.229C18.009 1.953 16.055 0 12.7774 0ZM7.40169 17.1H5.32165C2.88144 17.1 0.900449 15.12 0.900449 12.681V10.602C0.900449 10.233 1.2066 9.927 1.57579 9.927C1.94497 9.927 2.25112 10.233 2.25112 10.602V12.681C2.25112 14.373 3.62881 15.75 5.32165 15.75H7.40169C7.77087 15.75 8.07702 16.056 8.07702 16.425C8.07702 16.794 7.77988 17.1 7.40169 17.1ZM7.40169 2.25H5.32165C3.62881 2.25 2.25112 3.627 2.25112 5.319V7.398C2.25112 7.767 1.94497 8.073 1.57579 8.073C1.2066 8.073 0.900449 7.776 0.900449 7.398V5.319C0.900449 2.88 2.88144 0.9 5.32165 0.9H7.40169C7.77087 0.9 8.07702 1.206 8.07702 1.575C8.07702 1.944 7.77988 2.25 7.40169 2.25ZM17.1085 12.681C17.1085 15.12 15.1275 17.1 12.6873 17.1H11.4357C11.0665 17.1 10.7604 16.425C10.7604 16.425C10.7604 16.056 11.0665 15.75 11.4357 15.75H12.6873C14.3802 15.75 15.7579 14.373 15.7579 12.681V11.43C15.7579 11.061 16.064 10.755 16.4332 10.755C16.8024 10.755 17.1085 11.061 17.1085 11.43V12.681ZM17.1085 7.398C17.1085 7.767 16.8024 8.073 16.4332 8.073C16.064 8.073 15.7579 7.767 15.7579 7.398V5.319C15.7579 3.627 14.3802 2.25 12.6873 2.25H10.6073C10.2381 2.25 9.93195 1.944 9.93195 1.575C9.93195 1.206 10.2291 0.9 10.6073 0.9H12.6873C15.1275 0.9 17.1085 2.88 17.1085 5.319V7.398Z" fill="#292D32"/></g><defs><clipPath id="clip0_2349_132713"><rect width="18" height="18" rx="5" fill="white"/></clipPath></defs></svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16.2256 0C19.1111 0.000212547 21.4502 2.34101 21.4502 5.22656V16.2266C21.4497 19.1117 19.1108 21.451 16.2256 21.4512H5.22559C2.34037 21.451 0.000475279 19.1117 0 16.2266V5.22656C0 2.34101 2.34008 0.000214432 5.22559 0H16.2256ZM5.22559 1.65137C3.25135 1.65158 1.65039 3.25228 1.65039 5.22656V16.2266C1.65087 18.2004 3.25164 19.8006 5.22559 19.8008H16.2256C18.1995 19.8006 19.7993 18.2004 19.7998 16.2266V5.22656C19.7998 3.25228 18.1998 1.65158 16.2256 1.65137H5.22559ZM16.2256 3.02539C17.4406 3.0254 18.4258 4.01056 18.4258 5.22559V16.2266C18.4258 17.4406 17.4406 18.4258 16.2256 18.4258H5.22559C4.01056 18.4258 3.0254 17.4406 3.02539 16.2256V5.22559C3.02539 4.01056 4.01056 3.02539 5.22559 3.02539H16.2256Z" fill="#007AFF"/>
+              </svg>
               <span>Solid</span>
           </div>
           <div class="cp-tab" data-tab="linear" onclick="switchColorTab('linear')">
@@ -541,7 +583,6 @@
         });
     }
 
-    // FIXED: Splitting Angular and Diamond logic for accurate CSS preview
     function updateGradientVisuals() {
         renderHandles();
         const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
@@ -556,7 +597,7 @@
         } else if (subtype === 'Angular') {
             gradientBar.style.background = `conic-gradient(from 0deg, ${stopsStr})`;
         } else if (subtype === 'Diamond') {
-            gradientBar.style.background = `radial-gradient(circle, ${stopsStr})`; // Nearest CSS approximation
+            gradientBar.style.background = `radial-gradient(circle, ${stopsStr})`;
         } else {
             gradientBar.style.background = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stopsStr})`;
         }
@@ -666,7 +707,7 @@
             const subtype = document.getElementById('linearTypeLabel').textContent;
             const newColorData = { 
                 type: 'linear', 
-                gradientSubtype: subtype,
+                subtype: subtype,
                 isVertical: isVerticalFlip, 
                 stops: JSON.parse(JSON.stringify(gradientStops)) 
             };
@@ -697,7 +738,7 @@
     function updateHueFromEvent(e) { const rect = cpHueSlider.getBoundingClientRect(); let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width)); pickerHSLA.h = (x / rect.width) * 360; onPickerChange(); }
     cpAlphaSlider.addEventListener('mousedown', (e) => { isDraggingAlpha = true; updateAlphaFromEvent(e); });
     function updateAlphaFromEvent(e) { const rect = cpAlphaSlider.getBoundingClientRect(); let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width)); pickerHSLA.a = x / rect.width; onPickerChange(); }
-    cpHexInput.addEventListener('input', (e) => { let hex = e.target.value; if (hex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(hex)) { const hsl = hexToHsl("#" + hex); pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l; onPickerChange(); } });
+    cpHexInput.addEventListener('input', (e) => { hex = e.target.value; if (hex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(hex)) { const hsl = hexToHsl("#" + hex); pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l; onPickerChange(); } });
     cpAlphaInput.addEventListener('input', (e) => { let val = parseInt(e.target.value); if (!isNaN(val)) { val = Math.max(0, Math.min(100, val)); pickerHSLA.a = val / 100; onPickerChange(); } });
 
     const presetColors = ['#FF3B30', '#FF9500', '#FFCC00', '#4CD964', '#5AC8FA', '#007AFF', '#5856D6', '#FF2D55', '#8E8E93', '#C7C7CC', '#D1D1D6', '#E5E5EA', '#F2F2F7', '#FFFFFF', '#000000'];
@@ -753,7 +794,6 @@
        });
     });
 
-    // FIXED: Restored emoji tooltips
     const modernEmojis = [
         { char: '😀', name: 'Happy' }, { char: '😃', name: 'Grinning' }, { char: '😄', name: 'Smiling' }, { char: '😁', name: 'Beaming' },
         { char: '😆', name: 'Squinting' }, { char: '😅', name: 'Sweat Smile' }, { char: '😂', name: 'Tears of Joy' }, { char: '🤣', name: 'ROFL' },
@@ -796,7 +836,6 @@
         emojiGrid.appendChild(emojiItem);
     });
 
-    // --- FLAGS POPULATION ---
     const flagNames = { 
         'us': 'United States', 'gb': 'United Kingdom', 'fr': 'France', 'de': 'Germany', 
         'jp': 'Japan', 'ca': 'Canada', 'br': 'Brazil', 'au': 'Australia', 
@@ -829,7 +868,6 @@
         flagGrid.appendChild(flagItem);
     });
 
-    // --- CUSTOM SHAPE EDITOR ---
     const initialCsState = { anchors: [{x: 60, y: 60}, {x: 260, y: 60}, {x: 260, y: 260}, {x: 60, y: 260}], controls: [{dx: 0, dy: -30}, {dx: -30, dy: 0}, {dx: 30, dy: 0}, {dx: 0, dy: -30}, {dx: 0, dy: 30}, {dx: 30, dy: 0}, {dx: -30, dy: 0}, {dx: 0, dy: 30}] };
     let csState = JSON.parse(JSON.stringify(initialCsState)); let draggingElement = null; let dragStartIndex = -1; 
     
@@ -915,7 +953,6 @@
     }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
-    // FIXED: Property check aligned to logic data
     function renderPreview() {
         const settings = getSettings(); 
         previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); 
@@ -954,7 +991,7 @@
                 if (!p.color) { fill = '#CBD5E1'; } 
                 else if (p.color.type === 'linear') { 
                     const gradId = `p_grad_${sessionSalt}_${index}`; 
-                    let gradient; const subtype = p.color.subtype; // FIXED: property name usage
+                    let gradient; const subtype = p.color.subtype; 
                     if (subtype === 'Radial' || subtype === 'Diamond' || subtype === 'Angular') {
                         gradient = createSvgElement('radialGradient', { id: gradId, cx: '50%', cy: '50%', r: '50%' });
                     } else {
