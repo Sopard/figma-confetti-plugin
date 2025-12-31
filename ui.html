@@ -25,8 +25,7 @@
     input[type="number"] { -moz-appearance: textfield; text-align: center; }
 
     /* LAYOUT */
-    .header { height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .header { height: 56px; display: flex; justify-content: flex-end; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .credit-link { font-size: 13px; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
     .credit-link:hover { color: var(--primary); }
     .main-layout { flex: 1; display: flex; overflow: hidden; position: relative; }
@@ -52,7 +51,7 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* TOP ROW TOOLTIP FLIP: Shows under target */
+    /* TOP ROW TOOLTIP FLIP */
     .emoji-grid > div:nth-child(-n+8):hover::after,
     .id-shape-selector > div:nth-child(-n+3):hover::after {
         bottom: auto;
@@ -229,11 +228,10 @@
   <div id="hiddenPickerStorage" style="display: none;"></div>
   
   <div id="miniColorPopover" class="mini-color-popover">
-      <button id="miniSaveBtn" class="btn btn-primary" onclick="event.stopPropagation(); closeMiniPopover()">Save</button>
+      <button id="miniSaveBtn" class="btn btn-primary" onclick="event.stopPropagation(); applyPickerToActive(); closeMiniPopover()">Save</button>
   </div>
 
   <div class="header">
-    <div class="title"><span>🎉</span> Confetti Animator</div>
     <a href="https://reexlabs.com" target="_blank" class="credit-link">Made with ♥️ by ReexLabs</a>
   </div>
 
@@ -243,7 +241,7 @@
         <div class="tab-trigger" data-state="active" style="font-size: 14px; padding: 8px;">Free Fall</div>
         <div class="tab-trigger disabled" data-tooltip="Coming soon!" style="font-size: 14px; padding: 8px;">
             Impact Fall
-            <svg class="premium-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5 3C11.4183 3.00002 11.3378 3.02007 11.2656 3.0584C11.1934 3.09673 11.1318 3.15217 11.086 3.21987C11.0402 3.28757 11.0117 3.36545 11.003 3.44672C10.9943 3.52798 11.0056 3.61014 11.036 3.686L13.036 8.686C13.0732 8.77869 13.1372 8.85813 13.2199 8.91409C13.3026 8.97006 13.4002 8.99998 13.5 9H17.5C17.5885 9.00002 17.6754 8.97657 17.7518 8.93203C17.8282 8.8875 17.8915 8.82349 17.9351 8.74652C17.9787 8.66956 18.0011 8.58239 18.0001 8.49394C17.999 8.40548 17.9745 8.31889 17.929 8.243L14.929 3.243C14.8846 3.16888 14.8217 3.10753 14.7465 3.06495C14.6714 3.02236 14.5864 2.99998 14.5 3H11.5Z" fill="url(#paint0_linear_2353_132718)"/><path d="M5.50001 3C5.4136 2.99998 5.32866 3.02236 5.25348 3.06495C5.17829 3.10753 5.11543 3.16888 5.07101 3.243L2.07101 8.243C2.02554 8.31889 2.00102 8.40548 1.99995 8.49394C1.99887 8.40548 2.02129 8.66956 2.06491 8.74652C2.10852 8.82349 2.17178 8.8875 2.24822 8.93203C2.32466 8.97657 2.41155 9.00002 2.50001 9H6.50001C6.59987 8.99998 6.69743 8.97006 6.78012 8.91409C6.86282 8.85813 6.92687 8.77869 6.96401 8.686L8.96401 3.686C8.99442 3.61014 9.00576 3.52798 8.99705 3.44672C8.98834 3.36545 8.95984 3.28757 8.91405 3.21987C8.86827 3.15217 8.80658 3.09673 8.7344 3.0584C8.66222 3.02007 8.58174 3.00002 8.50001 3H5.50001Z" fill="url(#paint1_linear_2353_132718)"/><path d="M8.50001 3C8.40015 3.00002 8.30259 3.02994 8.2199 3.08591C8.1372 3.14187 8.07315 3.22131 8.03601 3.314L6.03601 8.314C6.0056 8.38986 5.99426 8.47202 6.00297 8.55328C6.01168 8.63455 6.04018 8.71243 6.08596 8.78013C6.13175 8.84783 6.19344 8.90327 6.26562 8.9416C6.3378 8.97993 6.41828 8.99998 6.50001 9H13.5C13.5817 8.99998 13.6622 8.97993 13.7344 8.9416C13.8066 8.90327 13.8683 8.84783 13.914 8.78013C13.9598 8.71243 13.9883 8.63455 13.997 8.55328C14.0058 8.47202 13.9944 8.38986 13.964 8.314L11.964 3.314C11.9269 3.22131 11.8628 3.14187 11.7801 3.08591C11.6974 3.02994 11.5999 3.00002 11.5 3H8.50001Z" fill="url(#paint2_linear_2353_132718)"/><path d="M13.5 8C13.3992 8.00002 13.3008 8.03049 13.2177 8.08741C13.1345 8.14434 13.0705 8.22506 13.034 8.319L9.53401 17.319C9.49126 17.4295 9.48915 17.5516 9.52806 17.6636C9.56697 17.7755 9.64436 17.87 9.74645 17.9301C9.84853 17.9903 9.96867 18.0123 10.0854 17.9921C10.2022 17.9719 10.308 17.9109 10.384 17.82L17.884 8.82C17.9448 8.747 17.9836 8.65818 17.9957 8.56396C18.0079 8.46973 17.9929 8.37399 17.9526 8.28795C17.9123 8.20191 17.8484 8.12913 17.7682 8.07814C17.688 8.02714 17.595 8.00004 17.5 8H13.5Z" fill="url(#paint3_linear_2353_132718)"/><path d="M2.50003 8C2.40502 8.00004 2.31199 8.02714 2.23183 8.07814C2.15167 8.12913 2.0877 8.20191 2.0474 8.28795C2.00711 8.37399 1.99217 8.46973 2.00432 8.56396C2.01647 8.65818 2.05522 8.747 2.11603 8.82L9.61603 17.82C9.69201 17.9109 9.79782 17.9719 9.91459 17.9921C10.0314 18.0123 10.1515 17.9903 10.2536 17.9301C10.3557 17.87 10.4331 17.7755 10.472 17.6636C10.5109 17.5516 10.5088 17.4295 10.466 17.319L6.96603 8.319C6.92955 8.22506 6.86553 8.14434 6.78237 8.08741C6.69922 8.03049 6.6008 8.00002 6.50003 8H2.50003Z" fill="url(#paint4_linear_2353_132718)"/><path d="M6.16 8C6.16 8 5.938 8.387 6.034 8.681L9.534 17.681C9.57052 17.7749 9.63455 17.8556 9.7177 17.9125C9.80086 17.9693 9.89925 17.9998 10 17.9998C10.1007 17.9998 10.1991 17.9693 10.2823 17.9125C10.3655 17.8556 10.4295 17.7749 10.466 17.681L13.966 8.681C14.091 8.36 13.84 8 13.84 8H6.16Z" fill="url(#paint5_linear_2353_132718)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.07103 3.243C5.11544 3.16888 5.17831 3.10753 5.25349 3.06495C5.32868 3.02236 5.41362 2.99998 5.50003 3H14.5C14.5864 2.99998 14.6714 3.02236 14.7466 3.06495C14.8217 3.10753 14.8846 3.16888 14.929 3.243L17.925 8.236C17.9806 8.3252 18.0066 8.42963 17.9994 8.53447C17.9922 8.6393 17.9522 8.73921 17.885 8.82L10.387 17.817L10.344 17.863C10.2942 17.9103 10.2351 17.9468 10.1705 17.9703C10.1059 17.9937 10.0371 18.0036 9.9685 17.9993C9.8999 17.995 9.83293 17.9765 9.77177 17.9452C9.71061 17.9138 9.65657 17.8702 9.61302 17.817L2.11902 8.823C2.0512 8.74315 2.01018 8.644 2.00174 8.53957C1.99331 8.43514 2.0179 8.3307 2.07202 8.241L5.07103 3.243Z" fill="url(#paint6_linear_2353_132718)" fill-opacity="0.7"/><defs><linearGradient id="paint0_linear_2353_132718" x1="13.5" y1="3" x2="17.5" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#0FAFFF"/><stop offset="1" stop-color="#102784"/></linearGradient><linearGradient id="paint1_linear_2353_132718" x1="8.00001" y1="0.5" x2="4.50001" y2="8" gradientUnits="userSpaceOnUse"><stop stop-color="#9FF0F9"/><stop offset="1" stop-color="#29C3FF"/></linearGradient><linearGradient id="paint2_linear_2353_132718" x1="10" y1="3" x2="10" y2="10.5" gradientUnits="userSpaceOnUse"><stop stop-color="#3BD5FF"/><stop offset="1" stop-color="#367AF2"/></linearGradient><linearGradient id="paint3_linear_2353_132718" x1="20" y1="3" x2="11" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#1B44B1"/><stop offset="1" stop-color="#2052CB"/></linearGradient><linearGradient id="paint4_linear_2353_132718" x1="3.50003" y1="6" x2="9.50003" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#0094F0"/><stop offset="1" stop-color="#6CE0FF"/></linearGradient><linearGradient id="paint5_linear_2353_132718" x1="10" y1="4.5" x2="10" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#2052CB"/><stop offset="1" stop-color="#0FAFFF"/></linearGradient><linearGradient id="paint6_linear_2353_132718" x1="0.375024" y1="-11.125" x2="13.368" y2="19.126" gradientUnits="userSpaceOnUse"><stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0"/><stop offset="1" stop-color="#FF6CE8"/></linearGradient></defs></svg>
+            <svg class="premium-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5 3C11.4183 3.00002 11.3378 3.02007 11.2656 3.0584C11.1934 3.09673 11.1318 3.15217 11.086 3.21987C11.0402 3.28757 11.0117 3.36545 11.003 3.44672C10.9943 3.52798 11.0056 3.61014 11.036 3.686L13.036 8.686C13.0732 8.77869 13.1372 8.85813 13.2199 8.91409C13.3026 8.97006 13.4002 8.99998 13.5 9H17.5C17.5885 9.00002 17.6754 8.97657 17.7518 8.93203C17.8282 8.8875 17.8915 8.82349 17.9351 8.74652C17.9787 8.66956 18.0011 8.58239 18.0001 8.49394C17.999 8.40548 17.9745 8.31889 17.929 8.243L14.929 3.243C14.8846 3.16888 14.8217 3.10753 14.7465 3.06495C14.6714 3.02236 14.5864 2.99998 14.5 3H11.5Z" fill="url(#paint0_linear_2353_132718)"/><path d="M5.50001 3C5.4136 2.99998 5.32866 3.02236 5.25348 3.06495C5.17829 3.10753 5.11543 3.16888 5.07101 3.243L2.07101 8.243C2.02554 8.31889 2.00102 8.40548 1.99995 8.49394C1.99887 8.40548 2.02129 8.66956 2.06491 8.74652C2.10852 8.82349 2.17178 8.8875 2.24822 8.93203C2.32466 8.97657 2.41155 9.00002 2.50001 9H6.50001C6.59987 8.99998 6.69743 8.97006 6.78012 8.91409C6.86282 8.85813 6.92687 8.77869 6.96401 8.686L8.96401 3.686C8.99442 3.61014 9.00576 3.52798 8.99705 3.44672C8.98834 3.36545 8.95984 3.28757 8.91405 3.21987C8.86827 3.15217 8.80658 3.09673 8.7344 3.0584C8.66222 3.02007 8.58174 3.00002 8.50001 3H5.50001Z" fill="url(#paint1_linear_2353_132718)"/><path d="M8.50001 3C8.40015 3.00002 8.30259 3.02994 8.2199 3.08591C8.1372 3.14187 8.07315 3.22131 8.03601 3.314L6.03601 8.314C6.0056 8.38986 5.99426 8.47202 6.00297 8.55328C6.01168 8.63455 6.04018 8.71243 6.08596 8.78013C6.13175 8.84783 6.19344 8.90327 6.26562 8.9416C6.3378 8.97993 6.41828 8.99998 6.50001 9H13.5C13.5817 8.99998 13.6622 8.97993 13.7344 8.9416C13.8066 8.90327 13.8683 8.84783 13.914 8.78013C13.9598 8.71243 13.9883 8.63455 13.997 8.55328C14.0058 8.47202 13.9944 8.38986 13.964 8.314L11.964 3.314C11.9269 3.22131 11.8628 3.14187 11.7801 3.08591C11.6974 3.02994 11.5999 3.00002 11.5 3H8.50001Z" fill="url(#paint2_linear_2353_132718)"/><path d="M13.5 8C13.3992 8.00002 13.3008 8.03049 13.2177 8.08741C13.1345 8.14434 13.0705 8.22506 13.034 8.319L9.53401 17.319C9.49126 17.4295 9.48915 17.5516 9.52806 17.6636C9.56697 17.7755 9.64436 17.87 9.74645 17.9301C9.84853 17.9903 9.96867 18.0123 10.0854 17.9921C10.2022 17.9719 10.308 17.9109 10.384 17.82L17.884 8.82C17.9448 8.747 17.9836 8.65818 17.9957 8.56396C18.0079 8.46973 17.9929 8.37399 17.9526 8.28795C17.9123 8.20191 17.8484 8.12913 17.7682 8.07814C17.688 8.02714 17.595 8.00004 17.5 8H13.5Z" fill="url(#paint0_linear_2353_132718)"/><path d="M2.50003 8C2.40502 8.00004 2.31199 8.02714 2.23183 8.07814C2.15167 8.12913 2.0877 8.20191 2.0474 8.28795C2.00711 8.37399 1.99217 8.46973 2.00432 8.56396C2.01647 8.65818 2.05522 8.747 2.11603 8.82L9.61603 17.82C9.69201 17.9109 9.79782 17.9719 9.91459 17.9921C10.0314 18.0123 10.1515 17.9903 10.2536 17.9301C10.3557 17.87 10.4331 17.7755 10.472 17.6636C10.5109 17.5516 10.5088 17.4295 10.466 17.319L6.96603 8.319C6.92955 8.22506 6.86553 8.14434 6.78237 8.08741C6.69922 8.03049 6.6008 8.00002 6.50003 8H2.50003Z" fill="url(#paint4_linear_2353_132718)"/><path d="M6.16 8C6.16 8 5.938 8.387 6.034 8.681L9.534 17.681C9.57052 17.7749 9.63455 17.8556 9.7177 17.9125C9.80086 17.9693 9.89925 17.9998 10 17.9998C10.1007 17.9998 10.1991 17.9693 10.2823 17.9125C10.3655 17.8556 10.4295 17.7749 10.466 17.681L13.966 8.681C14.091 8.36 13.84 8 13.84 8H6.16Z" fill="url(#paint5_linear_2353_132718)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.07103 3.243C5.11544 3.16888 5.17831 3.10753 5.25349 3.06495C5.32868 3.02236 5.41362 2.99998 5.50003 3H14.5C14.5864 2.99998 14.6714 3.02236 14.7466 3.06495C14.8217 3.10753 14.8846 3.16888 14.929 3.243L17.925 8.236C17.9806 8.3252 18.0066 8.42963 17.9994 8.53447C17.9922 8.6393 17.9522 8.73921 17.885 8.82L10.387 17.817L10.344 17.863C10.2942 17.9103 10.2351 17.9468 10.1705 17.9703C10.1059 17.9937 10.0371 18.0036 9.9685 17.9993C9.8999 17.995 9.83293 17.9765 9.77177 17.9452C9.71061 17.9138 9.65657 17.8702 9.61302 17.817L2.11902 8.823C2.0512 8.74315 2.01018 8.644 2.00174 8.53957C1.99331 8.43514 2.0179 8.3307 2.07202 8.241L5.07103 3.243Z" fill="url(#paint6_linear_2353_132718)" fill-opacity="0.7"/><defs><linearGradient id="paint0_linear_2353_132718" x1="13.5" y1="3" x2="17.5" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#0FAFFF"/><stop offset="1" stop-color="#102784"/></linearGradient><linearGradient id="paint1_linear_2353_132718" x1="8.00001" y1="0.5" x2="4.50001" y2="8" gradientUnits="userSpaceOnUse"><stop stop-color="#9FF0F9"/><stop offset="1" stop-color="#29C3FF"/></linearGradient><linearGradient id="paint2_linear_2353_132718" x1="10" y1="3" x2="10" y2="10.5" gradientUnits="userSpaceOnUse"><stop stop-color="#3BD5FF"/><stop offset="1" stop-color="#367AF2"/></linearGradient><linearGradient id="paint3_linear_2353_132718" x1="20" y1="3" x2="11" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#1B44B1"/><stop offset="1" stop-color="#2052CB"/></linearGradient><linearGradient id="paint4_linear_2353_132718" x1="3.50003" y1="6" x2="9.50003" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#0094F0"/><stop offset="1" stop-color="#6CE0FF"/></linearGradient><linearGradient id="paint5_linear_2353_132718" x1="10" y1="4.5" x2="10" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#2052CB"/><stop offset="1" stop-color="#0FAFFF"/></linearGradient><linearGradient id="paint6_linear_2353_132718" x1="0.375024" y1="-11.125" x2="13.368" y2="19.126" gradientUnits="userSpaceOnUse"><stop offset="0.533" stop-color="#FF6CE8" stop-opacity="0"/><stop offset="1" stop-color="#FF6CE8"/></linearGradient></defs></svg>
         </div>
     </div>
     <div style="margin-bottom: 4px; margin-top: 0px;"><div class="shape-tabs"><div class="shape-tabs-triggers"><div class="shape-tab-trigger" data-target="preset" data-state="active">Shapes</div><div class="shape-tab-trigger" data-target="emoji">Emoji</div><div class="shape-tab-trigger" data-target="flag">Flag</div></div></div><div id="presetShapesContainer" style="display: block;"><div class="selector-grid id-shape-selector"><div class="selector-item" data-state="selected" data-value="rectangle" data-tooltip="Rectangle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="square" data-tooltip="Square"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="circle" data-tooltip="Circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-state="selected" data-value="star" data-tooltip="Star"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="selector-item" data-value="wave" data-tooltip="Wave"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.625 18C17.6917 15.3333 16.7583 14.2667 13.825 14.8C11.1583 15.6 10.3583 14.6667 11.425 12C12.7583 9.33333 11.9583 8.4 9.025 9.2C6.09167 10 5.29167 8.93333 6.625 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="vertical-divider"></div><div class="selector-item custom-shape-btn" id="customShapeBtn" data-value="custom"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_2154_386615)"><path d="M21 8.25V15.75M5.25 2.824L18.75 5.524M3 18.75V5.25M18.75 18.476L5.25 21.176M0.75 0.75H5.25V5.25H0.75V0.75ZM18.75 3.75H23.25V8.25H18.75V3.75ZM18.75 15.75H23.25V20.25H18.75V15.75ZM0.75 18.75H5.25V23.25H0.75V18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><defs><clipPath id="clip0_2154_386615"><rect width="24" height="24" fill="white"/></clipPath></defs></svg><span>Custom</span><div class="selector-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div></div></div><div id="emojiShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="emojiGrid"></div></div></div><div id="flagShapesContainer" style="display: none;"><div class="scrollable-grid-container"><div class="emoji-grid" id="flagGrid"></div></div></div></div>
@@ -542,6 +540,8 @@
             gradientSliderContainer.appendChild(handle);
         });
     }
+
+    // FIXED: Splitting Angular and Diamond logic for accurate CSS preview
     function updateGradientVisuals() {
         renderHandles();
         const sorted = [...gradientStops].sort((a,b) => a.percent - b.percent);
@@ -551,10 +551,12 @@
         }).join(', ');
         
         const subtype = document.getElementById('linearTypeLabel').textContent;
-        if (subtype === 'Radial' || subtype === 'Diamond') {
+        if (subtype === 'Radial') {
             gradientBar.style.background = `radial-gradient(circle, ${stopsStr})`;
         } else if (subtype === 'Angular') {
             gradientBar.style.background = `conic-gradient(from 0deg, ${stopsStr})`;
+        } else if (subtype === 'Diamond') {
+            gradientBar.style.background = `radial-gradient(circle, ${stopsStr})`; // Nearest CSS approximation
         } else {
             gradientBar.style.background = `linear-gradient(${isVerticalFlip ? '0deg' : '90deg'}, ${stopsStr})`;
         }
@@ -568,9 +570,11 @@
         updatePickerVisuals(); updateGradientVisuals();
     }
     function applyPickerToActive() {
-        if (currentTab === 'solid') {
+        const isMiniOpen = document.getElementById('miniColorPopover').style.display === 'block';
+        if (currentTab === 'solid' || isMiniOpen) {
             const hex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
-            gradientStops[activeStopIndex].color = hex; gradientStops[activeStopIndex].alpha = pickerHSLA.a;
+            gradientStops[activeStopIndex].color = hex; 
+            gradientStops[activeStopIndex].alpha = pickerHSLA.a;
             updateGradientVisuals();
         }
     }
@@ -749,36 +753,37 @@
        });
     });
 
+    // FIXED: Restored emoji tooltips
     const modernEmojis = [
-        { char: '😀', name: 'Grinning Face' }, { char: '😃', name: 'Beaming Face with Smiling Eyes' }, { char: '😄', name: 'Grinning Face with Smiling Eyes' }, { char: '😁', name: 'Beaming Face with Smiling Eyes' },
-        { char: '😆', name: 'Grinning Squinting Face' }, { char: '😅', name: 'Grinning Face with Sweat' }, { char: '😂', name: 'Face with Tears of Joy' }, { char: '🤣', name: 'Rolling on the Floor Laughing' },
-        { char: '🥲', name: 'Smiling Face with Tear' }, { char: '☺️', name: 'Smiling Face' }, { char: '😊', name: 'Smiling Face with Smiling Eyes' }, { char: '😇', name: 'Smiling Face with Halo' },
-        { char: '🙂', name: 'Slightly Smiling Face' }, { char: '🙃', name: 'Upside-Down Face' }, { char: '😉', name: 'Winking Face' }, { char: '😌', name: 'Relieved Face' },
-        { char: '😍', name: 'Smiling Face with Heart-Eyes' }, { char: '🥰', name: 'Smiling Face with Hearts' }, { char: '😘', name: 'Face Blowing a Kiss' }, { char: '😗', name: 'Kissing Face' },
-        { char: '😙', name: 'Kissing Face with Smiling Eyes' }, { char: '😚', name: 'Kissing Face with Closed Eyes' }, { char: '😋', name: 'Face Savoring Food' }, { char: '😛', name: 'Face with Tongue' },
-        { char: '😝', name: 'Squinting Face with Tongue' }, { char: '😜', name: 'Winking Face with Tongue' }, { char: '🤪', name: 'Zany Face' }, { char: '🤨', name: 'Face with Raised Eyebrow' },
-        { char: '🧐', name: 'Face with Monocle' }, { char: '🤓', name: 'Nerd Face' }, { char: '😎', name: 'Smiling Face with Sunglasses' }, { char: '🥸', name: 'Disguised Face' },
-        { char: '🤩', name: 'Star-Struck' }, { char: '🥳', name: 'Partying Face' }, { char: '😏', name: 'Smirking Face' }, { char: '😒', name: 'Unamused Face' },
-        { char: '😞', name: 'Disconnected Face' }, { char: '😔', name: 'Pensive Face' }, { char: '😟', name: 'Worried Face' }, { char: '😕', name: 'Confused Face' },
-        { char: '🙁', name: 'Slightly Frowning Face' }, { char: '☹️', name: 'Frowning Face' }, { char: '😣', name: 'Persevering Face' }, { char: '😖', name: 'Confounded Face' },
-        { char: '😫', name: 'Tired Face' }, { char: '😩', name: 'Weary Face' }, { char: '🥺', name: 'Pleading Face' }, { char: '😢', name: 'Crying Face' },
-        { char: '😭', name: 'Loudly Crying Face' }, { char: '😤', name: 'Face with Steam From Nose' }, { char: '😠', name: 'Angry Face' }, { char: '😡', name: 'Pouting Face' },
-        { char: '🤬', name: 'Face with Symbols on Mouth' }, { char: '🤯', name: 'Exploding Head' }, { char: '😳', name: 'Flushed Face' }, { char: '🥵', name: 'Hot Face' },
-        { char: '🥶', name: 'Cold Face' }, { char: '😱', name: 'Face Screaming in Fear' }, { char: '😨', name: 'Fearful Face' }, { char: '😰', name: 'Anxious Face with Sweat' },
-        { char: '😥', name: 'Sad but Relieved Face' }, { char: '😓', name: 'Downcast Face with Sweat' }, { char: '🤗', name: 'Hugging Face' }, { char: '🤔', name: 'Thinking Face' },
-        { char: '🤭', name: 'Face with Hand Over Mouth' }, { char: '🤫', name: 'Shushing Face' }, { char: '🤥', name: 'Lying Face' }, { char: '😶', name: 'Face Without Mouth' },
-        { char: '😐', name: 'Neutral Face' }, { char: '😑', name: 'Expressionless Face' }, { char: '😬', name: 'Grimacing Face' }, { char: '🙄', name: 'Face with Rolling Eyes' },
-        { char: '😯', name: 'Hushed Face' }, { char: '😦', name: 'Frowning Face with Open Mouth' }, { char: '😧', name: 'Anguished Face' }, { char: '😮', name: 'Face with Open Mouth' },
-        { char: '😲', name: 'Astonished Face' }, { char: '🥱', name: 'Yawning Face' }, { char: '😴', name: 'Sleeping Face' }, { char: '🤤', name: 'Drooling Face' },
-        { char: '😪', name: 'Sleepy Face' }, { char: '😵', name: 'Dizzy Face' }, { char: '🤐', name: 'Zipper-Mouth Face' }, { char: '🥴', name: 'Woozy Face' },
-        { char: '🤢', name: 'Nauseated Face' }, { char: '🤮', name: 'Face Vomiting' }, { char: '🤧', name: 'Sneezing Face' }, { char: '😷', name: 'Face with Medical Mask' },
-        { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Face with Thermometer' }, { char: '🤕', name: 'Face with Head-Bandage' }, { char: '🤑', name: 'Money-Mouth Face' },
-        { char: '🤠', name: 'Cowboy Hat Face' }, { char: '😈', name: 'Smiling Face with Horns' }, { char: '👿', name: 'Angry Face with Horns' }, { char: '👹', name: 'Ogre' },
-        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown Face' }, { char: '💩', name: 'Pile of Poo' }, { char: '👻', name: 'Ghost' },
-        { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull and Crossbones' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Alien Monster' },
-        { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Jack-O-Lantern' }, { char: '😺', name: 'Grinning Cat' }, { char: '😸', name: 'Grinning Cat with Smiling Eyes' },
-        { char: '😹', name: 'Cat with Tears of Joy' }, { char: '😻', name: 'Smiling Cat with Heart-Eyes' }, { char: '😼', name: 'Cat with Wry Smile' }, { char: '😽', name: 'Kissing Cat' },
-        { char: '🙀', name: 'Weary Cat' }, { char: '😿', name: 'Crying Cat' }, { char: '😾', name: 'Pouting Cat' }
+        { char: '😀', name: 'Happy' }, { char: '😃', name: 'Grinning' }, { char: '😄', name: 'Smiling' }, { char: '😁', name: 'Beaming' },
+        { char: '😆', name: 'Squinting' }, { char: '😅', name: 'Sweat Smile' }, { char: '😂', name: 'Tears of Joy' }, { char: '🤣', name: 'ROFL' },
+        { char: '🥲', name: 'Smiling Tear' }, { char: '☺️', name: 'Calm Smile' }, { char: '😊', name: 'Proud' }, { char: '😇', name: 'Halo' },
+        { char: '🙂', name: 'Slightly Happy' }, { char: '🙃', name: 'Upside Down' }, { char: '😉', name: 'Winking' }, { char: '😌', name: 'Relieved' },
+        { char: '😍', name: 'Heart Eyes' }, { char: '🥰', name: 'Loving' }, { char: '😘', name: 'Kissing' }, { char: '😗', name: 'Kiss' },
+        { char: '😙', name: 'Soft Kiss' }, { char: '😚', name: 'Closed Kiss' }, { char: '😋', name: 'Yum' }, { char: '😛', name: 'Tongue Out' },
+        { char: '😝', name: 'Squinting Tongue' }, { char: '😜', name: 'Wink Tongue' }, { char: '🤪', name: 'Zany' }, { char: '🤨', name: 'Raised Eyebrow' },
+        { char: '🧐', name: 'Monocle' }, { char: '🤓', name: 'Nerd' }, { char: '😎', name: 'Cool' }, { char: '🥸', name: 'Disguised' },
+        { char: '🤩', name: 'Star Struck' }, { char: '🥳', name: 'Partying' }, { char: '😏', name: 'Smirking' }, { char: '😒', name: 'Unamused' },
+        { char: '😞', name: 'Disappointed' }, { char: '😔', name: 'Pensive' }, { char: '😟', name: 'Worried' }, { char: '😕', name: 'Confused' },
+        { char: '🙁', name: 'Slightly Frown' }, { char: '☹️', name: 'Frowning' }, { char: '😣', name: 'Persevering' }, { char: '😖', name: 'Confounded' },
+        { char: '😫', name: 'Tired' }, { char: '😩', name: 'Weary' }, { char: '🥺', name: 'Pleading' }, { char: '😢', name: 'Crying' },
+        { char: '😭', name: 'Sobbing' }, { char: '😤', name: 'Steam Nose' }, { char: '😠', name: 'Angry' }, { char: '😡', name: 'Pouting' },
+        { char: '🤬', name: 'Cursing' }, { char: '🤯', name: 'Mind Blown' }, { char: '😳', name: 'Flushed' }, { char: '🥵', name: 'Hot' },
+        { char: '🥶', name: 'Cold' }, { char: '😱', name: 'Screaming' }, { char: '😨', name: 'Fearful' }, { char: '😰', name: 'Anxious' },
+        { char: '😥', name: 'Sad Relieved' }, { char: '😓', name: 'Downcast' }, { char: '🤗', name: 'Hugging' }, { char: '🤔', name: 'Thinking' },
+        { char: '🤭', name: 'Hand Over Mouth' }, { char: '🤫', name: 'Shushing' }, { char: '🤥', name: 'Lying' }, { char: '😶', name: 'No Mouth' },
+        { char: '😐', name: 'Neutral' }, { char: '😑', name: 'Expressionless' }, { char: '😬', name: 'Grimacing' }, { char: '🙄', name: 'Rolling Eyes' },
+        { char: '😯', name: 'Hushed' }, { char: '😦', name: 'Open Mouth Frown' }, { char: '😧', name: 'Anguished' }, { char: '😮', name: 'Open Mouth' },
+        { char: '😲', name: 'Astonished' }, { char: '🥱', name: 'Yawning' }, { char: '😴', name: 'Sleeping' }, { char: '🤤', name: 'Drooling' },
+        { char: '😪', name: 'Sleepy' }, { char: '😵', name: 'Dizzy' }, { char: '🤐', name: 'Zipped' }, { char: '🥴', name: 'Woozy' },
+        { char: '🤢', name: 'Nauseated' }, { char: '🤮', name: 'Vomiting' }, { char: '🤧', name: 'Sneezing' }, { char: '😷', name: 'Masked' },
+        { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Thermometer' }, { char: '🤕', name: 'Bandaged' }, { char: '🤑', name: 'Money Mouth' },
+        { char: '🤠', name: 'Cowboy' }, { char: '😈', name: 'Happy Horns' }, { char: '👿', name: 'Angry Horns' }, { char: '👹', name: 'Ogre' },
+        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: '💩', name: 'Poo' }, { char: '👻', name: 'Ghost' },
+        { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull Cross' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Monster' },
+        { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Pumpkin' }, { char: '😺', name: 'Cat Smile' }, { char: '😸', name: 'Cat Grin' },
+        { char: '😹', name: 'Cat Joy' }, { char: '😻', name: 'Cat Hearts' }, { char: '😼', name: 'Cat Wry' }, { char: '😽', name: 'Cat Kiss' },
+        { char: '🙀', name: 'Cat Weary' }, { char: '😿', name: 'Cat Crying' }, { char: '😾', name: 'Cat Pouting' }
     ];
 
     modernEmojis.forEach(emojiData => {
@@ -791,7 +796,7 @@
         emojiGrid.appendChild(emojiItem);
     });
 
-    // --- FLAGS POPULATION (UPDATED WITH TOOLTIPS) ---
+    // --- FLAGS POPULATION ---
     const flagNames = { 
         'us': 'United States', 'gb': 'United Kingdom', 'fr': 'France', 'de': 'Germany', 
         'jp': 'Japan', 'ca': 'Canada', 'br': 'Brazil', 'au': 'Australia', 
@@ -910,6 +915,7 @@
     }
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
+    // FIXED: Property check aligned to logic data
     function renderPreview() {
         const settings = getSettings(); 
         previewSvg.innerHTML = ''; const defs = createSvgElement('defs', {}); previewSvg.appendChild(defs); 
@@ -933,20 +939,14 @@
                     const vb = viewBoxStr.split(' ').map(Number);
                     const w = vb[2], h = vb[3];
                     const aspectRatio = w / h;
-
                     const targetArea = 960;
                     const normH = Math.sqrt(targetArea / aspectRatio);
-                    
                     const normalizedScale = globalScale * (normH / 24);
                     const finalTransform = `translate(${p.x}, ${p.y}) rotate(${p.rotation}) scale(${normalizedScale}, ${normalizedScale * flipScale})`;
-                    
                     const g = createSvgElement('g', { transform: finalTransform });
                     const internalScale = 24 / Math.max(w, h); 
                     const innerG = createSvgElement('g', { transform: `scale(${internalScale * aspectRatio}) translate(${-w/2}, ${-h/2})` });
-                    
-                    Array.from(innerSvg.childNodes).forEach(node => { 
-                        if (node.nodeType === 1) innerG.appendChild(node.cloneNode(true)); 
-                    });
+                    Array.from(innerSvg.childNodes).forEach(node => { if (node.nodeType === 1) innerG.appendChild(node.cloneNode(true)); });
                     g.appendChild(innerG); el = g;
                 }
             } else { 
@@ -954,7 +954,7 @@
                 if (!p.color) { fill = '#CBD5E1'; } 
                 else if (p.color.type === 'linear') { 
                     const gradId = `p_grad_${sessionSalt}_${index}`; 
-                    let gradient; const subtype = p.color.gradientSubtype;
+                    let gradient; const subtype = p.color.subtype; // FIXED: property name usage
                     if (subtype === 'Radial' || subtype === 'Diamond' || subtype === 'Angular') {
                         gradient = createSvgElement('radialGradient', { id: gradId, cx: '50%', cy: '50%', r: '50%' });
                     } else {

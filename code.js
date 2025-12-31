@@ -65,7 +65,7 @@ function getColorPalette(settings) {
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);
                 rgba.type = 'solid';
-                return rgba; // FIXED: Changed from rgba.return; rgba;
+                return rgba; // FIXED: Corrected return statement
             }
         });
     }
