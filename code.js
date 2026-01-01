@@ -54,12 +54,11 @@ function getColorPalette(settings) {
             if (c.type === 'linear') {
                 const figmaStops = c.stops.map(stop => {
                     const rgb = hexToRgb(stop.color);
-                    // Combine individual stop alpha with the global gradient alpha
                     return { position: stop.percent / 100, color: { r: rgb.r, g: rgb.g, b: rgb.b, a: stop.alpha * (c.a || 1.0) } };
                 });
                 return { 
                     type: 'linear', 
-                    subtype: c.subtype || 'Linear',
+                    subtype: c.gradientSubtype || 'Linear',
                     gradientStops: figmaStops, 
                     isVertical: c.isVertical,
                     globalAlpha: c.a || 1.0
@@ -82,7 +81,7 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   const flutter = validateNum(settings.flutter, 0, 100, 50) / 50; 
   const randomizeSize = settings.randomizeSize === true;
   const randomizeRotation = settings.randomizeRotation === true;
-  const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 10));
+  const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 20));
 
   let shapesToUse = [];
   const isEmojiMode = settings.shapeTab === 'emoji';
@@ -264,7 +263,7 @@ async function populateFrameWithConfetti(frame, pList) {
 }
 
 async function createFinalConfettiOnCanvas(settings) {
-  const fCount = validateNum(settings.frameCount, 1, 100, 10);
+  const fCount = validateNum(settings.frameCount, 1, 100, 20);
   const delay = validateNum(settings.frameDelay, 1, 5000, 75);
   const createdFrames = [];
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
@@ -289,5 +288,6 @@ figma.ui.onmessage = async (msg) => {
     figma.ui.postMessage({ type: 'preview-data', particles: cachedParticles.map(p => getParticleStateForFrame(p, 0)) });
   } else if (msg.type === 'generate-confetti') {
     await createFinalConfettiOnCanvas(msg.settings);
+    figma.ui.postMessage({ type: 'generation-complete' });
   } else if (msg.type === 'close-plugin') figma.closePlugin();
 };
