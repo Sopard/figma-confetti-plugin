@@ -54,13 +54,15 @@ function getColorPalette(settings) {
             if (c.type === 'linear') {
                 const figmaStops = c.stops.map(stop => {
                     const rgb = hexToRgb(stop.color);
-                    return { position: stop.percent / 100, color: { r: rgb.r, g: rgb.g, b: rgb.b, a: stop.alpha } };
+                    // Combine individual stop alpha with the global gradient alpha
+                    return { position: stop.percent / 100, color: { r: rgb.r, g: rgb.g, b: rgb.b, a: stop.alpha * (c.a || 1.0) } };
                 });
                 return { 
                     type: 'linear', 
-                    subtype: c.gradientSubtype || 'Linear',
+                    subtype: c.subtype || 'Linear',
                     gradientStops: figmaStops, 
-                    isVertical: c.isVertical 
+                    isVertical: c.isVertical,
+                    globalAlpha: c.a || 1.0
                 };
             } else {
                 const rgba = hslToRgba(c.h, c.s, c.l, c.a);

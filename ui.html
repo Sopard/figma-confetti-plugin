@@ -198,7 +198,9 @@
     .cp-sb-selector { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); transform: translate(-8px, -8px); top: 0%; left: 100%; pointer-events: none; }
     .cp-sliders { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
     .cp-slider-track { width: 100%; height: 16px; border-radius: 8px; position: relative; cursor: pointer; }
+    
     .cp-hue-slider { background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red); }
+    
     .cp-alpha-slider { background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
     .cp-alpha-slider-bar { position: absolute; top:0; left:0; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(to right, transparent, red); pointer-events: none;}
     .cp-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: var(--shadow-sm); transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border); }
@@ -484,8 +486,9 @@
             const row = document.createElement('div'); row.className = `color-item-row ${colorState.isMultiColor ? 'disabled' : ''}`;
             let hexDisplay = ""; let opacityDisplay = ""; let bgStyle = "";
             if (colorData.type === 'linear') {
-                hexDisplay = colorData.gradientSubtype || "Linear Gradient";
-                opacityDisplay = colorData.stops.length > 0 ? Math.round(colorData.stops[0].alpha * 100) : "100";
+                hexDisplay = colorData.subtype || "Linear Gradient";
+                // FIXED: Now uses the dedicated gradient alpha property 'a'
+                opacityDisplay = Math.round((colorData.a || 1.0) * 100);
                 const stops = colorData.stops; const sorted = [...stops].sort((a,b)=>a.percent-b.percent);
                 const angle = colorData.isVertical ? '0deg' : '90deg';
                 const css = `linear-gradient(${angle}, ${sorted.map(s => `${s.color} ${s.percent}%`).join(', ')})`;
@@ -500,7 +503,16 @@
             const previewSq = row.querySelector('.color-preview-sq'); 
             previewSq.addEventListener('click', () => { if (colorState.isMultiColor) return; openPopoverToEdit(index, previewSq); });
             const percentInput = row.querySelector('.color-percent-input'); 
-            percentInput.addEventListener('change', (e) => { let newVal = parseInt(e.target.value); if (isNaN(newVal)) newVal = 100; newVal = Math.max(0, Math.min(100, newVal)); e.target.value = newVal; if (colorData.type === 'linear') { colorState.colors[index].stops.forEach(s => s.alpha = newVal / 100); } else { colorState.colors[index].a = newVal / 100; } renderColorList(); updatePreview(true, 'color'); });
+            percentInput.addEventListener('change', (e) => { 
+                let newVal = parseInt(e.target.value); 
+                if (isNaN(newVal)) newVal = 100; 
+                newVal = Math.max(0, Math.min(100, newVal)); 
+                e.target.value = newVal; 
+                // FIXED: Update global alpha 'a' instead of individual stops
+                colorState.colors[index].a = newVal / 100; 
+                renderColorList(); 
+                updatePreview(true, 'color'); 
+            });
             const deleteBtn = row.querySelector('.delete-color-btn'); 
             deleteBtn.addEventListener('click', () => { if (colorState.isMultiColor) return; if (editingColorIndex === index) { editingColorIndex = -1; closePopover(); } colorState.colors.splice(index, 1); renderColorList(); updatePreview(true, 'color'); });
             colorRowsContainer.prepend(row);
@@ -704,11 +716,13 @@
             if (editingColorIndex > -1) { colorState.colors[editingColorIndex] = newColorData; } else { colorState.colors.push(newColorData); }
         } else {
             const subtype = document.getElementById('linearTypeLabel').textContent;
+            // FIXED: Linear objects now carry their own 'a' property
             const newColorData = { 
                 type: 'linear', 
-                gradientSubtype: subtype,
+                subtype: subtype,
                 isVertical: isVerticalFlip, 
-                stops: JSON.parse(JSON.stringify(gradientStops)) 
+                stops: JSON.parse(JSON.stringify(gradientStops)),
+                a: editingColorIndex > -1 ? colorState.colors[editingColorIndex].a : 1.0 
             };
             if (editingColorIndex > -1) { colorState.colors[editingColorIndex] = newColorData; } else { colorState.colors.push(newColorData); }
         }
@@ -751,7 +765,8 @@
             gradientStops = JSON.parse(JSON.stringify(colorToEdit.stops)); 
             isVerticalFlip = colorToEdit.isVertical; 
             activeStopIndex = 0; 
-            selectLinearType(colorToEdit.gradientSubtype || 'Linear');
+            selectLinearType(colorToEdit.subtype || 'Linear');
+            // skipAutoGradient=true prevents overwriting loaded data
             switchColorTab('linear', true); 
             setActiveStop(0); 
         } else { 
