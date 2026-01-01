@@ -22,13 +22,16 @@
       --cs-canvas-bg: #E9EAEB;
       --cs-stripe: #ccc;
       --tab-inactive-svg: #E5E5EA;
-      --tab-active-bg: #FFFFFF; /* WHITE FOR LIGHT MODE */
-      --tab-active-text: #0f172a; /* DARK TEXT FOR LIGHT MODE */
+      --tab-active-bg: #FFFFFF;
+      --tab-active-text: #0f172a;
       --stop-swatch-border: rgba(0,0,0,0.1);
       --stop-remove-hover: #d00;
       --dropdown-bg: white;
       --dropdown-hover: #E9EAEB;
       --dropdown-selected: #f0f9ff;
+      --tag-bg: #E6F7FF; 
+      --tag-text: #1890FF;
+      --tag-border: #91D5FF;
     }
 
     /* VARIABLES - AUTOMATIC DARK THEME */
@@ -46,24 +49,27 @@
         --cs-canvas-bg: #000;
         --cs-stripe: #111;
         --tab-inactive-svg: #444;
-        --tab-active-bg: #454545; /* THEME-REFLECTIVE GRAY FOR DARK MODE */
-        --tab-active-text: #FFFFFF; /* LIGHT TEXT FOR DARK MODE */
+        --tab-active-bg: #454545;
+        --tab-active-text: #FFFFFF;
         --stop-swatch-border: rgba(255,255,255,0.1);
         --stop-remove-hover: #f44;
         --dropdown-bg: #2b2b2b;
         --dropdown-hover: #3b3b3b;
         --dropdown-selected: #1e3a5f;
+        --tag-bg: #111d2c; 
+        --tag-text: #1890FF;
+        --tag-border: #153450;
       }
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: var(--background); color: var(--foreground); height: 100vh; display: flex; flex-direction: column; }
 
-    /* GLOBAL INPUT TWEAKS */
+    .recommended-tag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background-color: var(--tag-bg); color: var(--tag-text); border: 1px solid var(--tag-border); text-transform: uppercase; margin-left: 8px; display: inline-block; vertical-align: middle; line-height: 1; }
+
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; text-align: center; }
 
-    /* LAYOUT */
     .header { height: 56px; display: flex; justify-content: flex-end; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .credit-link { font-size: 13px; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
     .credit-link:hover { color: var(--primary); }
@@ -71,7 +77,6 @@
     .settings-panel { width: 440px; padding: 24px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
     .preview-panel { flex: 1; padding: 24px; background-color: var(--preview-panel-bg); display: flex; flex-direction: column; }
 
-    /* COMMON COMPONENTS */
     .tabs-list { display: flex; background-color: var(--muted); padding: 4px; border-radius: var(--radius); position: relative; }
     .tab-trigger { flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; position: relative; }
     .tab-trigger[data-state="active"] { background-color: var(--tab-active-bg); color: var(--tab-active-text); box-shadow: var(--shadow-sm); }
@@ -80,7 +85,6 @@
     .premium-icon { position: absolute; top: 0px; right: 0px; pointer-events: none; }
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
 
-    /* TOOLTIP BASE LOGIC */
     [data-tooltip] { position: relative; }
     [data-tooltip]:hover::after {
         content: attr(data-tooltip);
@@ -90,7 +94,6 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* TOP ROW TOOLTIP FLIP - Fix for Cutoff */
     .emoji-grid > div:nth-child(-n+18):hover::after,
     .id-shape-selector > div:nth-child(-n+3):hover::after {
         bottom: auto;
@@ -133,7 +136,6 @@
     .color-hex-text { flex: 1; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
     .color-percent-input { width: 48px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--foreground); border: 1px solid transparent; background: transparent; border-radius: 4px; padding: 2px 4px; }
     
-    /* SHAPES */
     .shape-tabs { display: flex; gap: 16px; border-bottom: 1px solid var(--border); margin-bottom: 24px; align-items: center; justify-content: space-between; }
     .shape-tabs-triggers { display: flex; gap: 16px; }
     .shape-tab-trigger { padding: 8px 0; font-size: 14px; font-weight: 500; color: var(--muted-foreground); cursor: pointer; position: relative; transition: color 0.2s; }
@@ -151,7 +153,6 @@
     .emoji-item[data-state="selected"], .flag-item[data-state="selected"] { background-color: var(--muted-darker); border-color: var(--primary); }
     .flag-item img { width: 80%; height: 80%; object-fit: contain; }
 
-    /* CUSTOM SHAPE EDITOR POPOVER */
     .custom-shape-popover { position: fixed; top: 50%; left: 65%; transform: translate(-50%, -50%); width: 380px; min-height: 500px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 20; display: none; flex-direction: column; border: 1px solid var(--border); box-sizing: border-box; justify-content: space-between; }
     .cs-canvas-container { width: 320px; height: 320px; background-color: var(--cs-canvas-bg); border: 1px solid var(--border); border-radius: var(--radius); margin: 16px auto; position: relative; background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; flex-shrink: 0; }
     #csEditorSvg { width: 100%; height: 100%; overflow: visible; }
@@ -162,7 +163,6 @@
     .cs-reset-icon { position: absolute; top: 8px; right: 8px; background-color: var(--background); border: 1px solid var(--border); border-radius: 4px; padding: 4px; cursor: pointer; color: var(--muted-foreground); display: none; }
     #csSaveBtn { flex-shrink: 0; width: 100%; }
 
-    /* FOOTER & PREVIEW */
     .footer { display: flex; margin-top: -8px; padding-top: 0; }
     .btn { height: 44px; border-radius: var(--radius); font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
     .btn-primary { flex: 3; background-color: var(--primary); color: white; }
@@ -179,23 +179,8 @@
     .grouped-settings-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .grouped-settings-box .number-input-row { margin-bottom: 0; }
 
-    /* --- COLOR PICKER STYLES --- */
-    .color-picker-popover {
-        position: absolute; top: 0; left: 0; width: 320px;
-        background: var(--background); border-radius: 12px;
-        box-shadow: var(--shadow-md); padding: 20px; z-index: 10;
-        display: none; border: 1px solid var(--border); box-sizing: border-box;
-        flex-direction: column; 
-        min-height: auto;
-        max-height: 90vh;
-    }
-    
-    .mini-color-popover {
-        position: fixed; z-index: 100;
-        background: var(--background); border: 1px solid var(--border);
-        box-shadow: var(--shadow-md); border-radius: 12px;
-        padding: 12px; width: 260px; display: none;
-    }
+    .color-picker-popover { position: absolute; top: 0; left: 0; width: 320px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 10; display: none; border: 1px solid var(--border); box-sizing: border-box; flex-direction: column; min-height: auto; max-height: 90vh; }
+    .mini-color-popover { position: fixed; z-index: 100; background: var(--background); border: 1px solid var(--border); box-shadow: var(--shadow-md); border-radius: 12px; padding: 12px; width: 260px; display: none; }
     .mini-color-popover .cp-inputs-row { margin-bottom: 0; }
     .mini-color-popover .cp-sat-bright-area { height: 160px; }
     #miniSaveBtn { margin-top: 12px; width: 100%; height: 32px; font-size: 13px; }
@@ -204,7 +189,6 @@
     .cp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; justify-content: flex-start; gap: 8px; }
     .cp-tab { text-align: center; padding: 10px 16px; cursor: pointer; color: var(--muted-foreground); font-weight: 500; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .cp-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    
     .cp-tab svg path { fill: currentColor; }
     .cp-tab:not(.active) svg path { fill: var(--tab-inactive-svg) !important; }
 
@@ -214,7 +198,10 @@
     .cp-sb-selector { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); transform: translate(-8px, -8px); top: 0%; left: 100%; pointer-events: none; }
     .cp-sliders { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
     .cp-slider-track { width: 100%; height: 16px; border-radius: 8px; position: relative; cursor: pointer; }
+    
+    /* FIXED: Corrected class reference for visibility */
     .cp-hue-slider { background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red); }
+    
     .cp-alpha-slider { background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
     .cp-alpha-slider-bar { position: absolute; top:0; left:0; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(to right, transparent, red); pointer-events: none;}
     .cp-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: var(--shadow-sm); transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border); }
@@ -227,7 +214,6 @@
     .cp-swatch-grid { display: flex; flex-wrap: wrap; gap: 10px; }
     .cp-swatch { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); box-sizing: border-box; }
     
-    /* LINEAR UI */
     #cpLinearContent { display: none; flex-direction: column; gap: 16px; }
     .linear-controls-row { display: flex; justify-content: space-between; align-items: center; }
     .custom-dropdown { position: relative; }
@@ -294,7 +280,10 @@
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
     <div id="particleColorSection"><div class="label" style="margin-top: 4px; margin-bottom: 24px;">Confetti Color</div><div class="color-toggle-row" style="margin-bottom: 12px;"><div class="color-toggle-label"><div class="rainbow-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#paint0_angular_2580_64390_clip_path)" data-figma-skip-parse="true"><g transform="matrix(0 0.011 -0.011 0 11 11)"><foreignObject x="-1100" y="-1100" width="2200" height="2200"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(209, 90, 168, 1) 0deg,rgba(84, 125, 253, 1) 24.3555deg,rgba(103, 225, 78, 1) 102.115deg,rgba(254, 255, 136, 1) 176.538deg,rgba(252, 206, 68, 1) 244.038deg,rgba(246, 75, 85, 1) 314.915deg,rgba(209, 90, 168, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><rect width="22" height="22" rx="6" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;transform&#34;:{&#34;m00&#34;:1.3471115643134642e-15,&#34;m01&#34;:-22.0,&#34;m02&#34;:22.0,&#34;m10&#34;:22.0,&#34;m11&#34;:2.5772017576671316e-14,&#34;m12&#34;:-1.3559564305794594e-14},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}"/><g filter="url(#filter0_f_2580_64390)"><circle cx="11.5" cy="11.5" r="3.5" fill="white"/></g><defs><clipPath id="paint0_angular_2580_64390_clip_path"><rect width="22" height="22" rx="6"/></clipPath><filter id="filter0_f_2580_64390" x="4" y="4" width="15" height="15" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="2" result="effect1_foregroundBlur_2580_64390"/></filter></defs></svg></div><span>Multi-color</span></div><label class="switch"><input type="checkbox" id="multiColorSwitch"><span class="switch-slider"></span></label></div><div class="color-header-box"><span class="color-count-text" id="colorCounter">0 Colors</span><button class="icon-btn-flat" id="addColorBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div><div class="color-list-container"><div class="scrollable-grid-container"><div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
-    <div style="margin-top: 8px;"><div class="label" style="margin-bottom: 24px;">Animation Settings</div><div class="grouped-settings-box" style="padding: 10px; gap: 8px;"><div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="75" min="1"></div><div class="number-input-row"><span class="toggle-label">Frame Count (Min 1)</span><input type="number" id="frameCountInput" class="number-input-field" value="10" min="1"></div></div></div>
+    <div style="margin-top: 8px;">
+        <div class="label" style="margin-bottom: 24px;">Animation Settings <span class="recommended-tag">Recommended</span></div>
+        <div class="grouped-settings-box" style="padding: 10px; gap: 8px;"><div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="75" min="1"></div><div class="number-input-row"><span class="toggle-label">Frame Count (Min 1)</span><input type="number" id="frameCountInput" class="number-input-field" value="10" min="1"></div></div>
+    </div>
     <hr class="section-divider"><div class="footer"><button id="resetBtn" class="btn btn-outline">Reset</button></div>
 </div>
     
@@ -335,7 +324,10 @@
           <div id="cpSolidContent">
               <div id="sharedPicker">
                   <div class="cp-sat-bright-area" id="cpSatBrightArea"><div class="cp-sb-selector" id="cpSbSelector"></div></div>
-                  <div class="cp-sliders"><div class="cp-slider-track cp-hue-slider" id="cpHueSlider"><div class="cp-slider-thumb" id="cpHueThumb"></div></div><div class="cp-slider-track cp-alpha-slider" id="cpAlphaSlider"><div class="cp-alpha-slider-bar" id="cpAlphaBar"></div><div class="cp-slider-thumb" id="cpAlphaThumb"></div></div></div>
+                  <div class="cp-sliders">
+                      <div class="cp-slider-track cp-hue-slider" id="cpHueSlider"><div class="cp-slider-thumb" id="cpHueThumb"></div></div>
+                      <div class="cp-slider-track cp-alpha-slider" id="cpAlphaSlider"><div class="cp-alpha-slider-bar" id="cpAlphaBar"></div><div class="cp-slider-thumb" id="cpAlphaThumb"></div></div>
+                  </div>
                   <div class="cp-inputs-row"><div class="cp-input-wrapper cp-hex-wrapper"><span>Hex</span><input type="text" id="cpHexInput" class="cp-input-field" value="FF0000" maxlength="6"></div><div class="cp-input-wrapper cp-alpha-wrapper"><input type="number" id="cpAlphaInput" class="cp-input-field" value="100" min="0" max="100"><span>%</span></div></div>
               </div>
               <div class="cp-swatches-section"><div class="label" style="margin-bottom: 8px;">Preset Colors</div><div class="cp-swatch-grid" id="cpSwatchGrid"></div></div>
@@ -514,7 +506,7 @@
         });
     }
     multiColorSwitch.addEventListener('change', (e) => { colorState.isMultiColor = e.target.checked; if (colorState.isMultiColor) { closePopover(); editingColorIndex = -1; } renderColorList(); updatePreview(true, 'color'); });
-    // --- POPOVER LOGIC ---
+    
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
     let currentTab = 'solid';
 
@@ -707,7 +699,7 @@
             const subtype = document.getElementById('linearTypeLabel').textContent;
             const newColorData = { 
                 type: 'linear', 
-                subtype: subtype,
+                gradientSubtype: subtype,
                 isVertical: isVerticalFlip, 
                 stops: JSON.parse(JSON.stringify(gradientStops)) 
             };
