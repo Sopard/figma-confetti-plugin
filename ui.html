@@ -198,10 +198,7 @@
     .cp-sb-selector { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); transform: translate(-8px, -8px); top: 0%; left: 100%; pointer-events: none; }
     .cp-sliders { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
     .cp-slider-track { width: 100%; height: 16px; border-radius: 8px; position: relative; cursor: pointer; }
-    
-    /* FIXED: Corrected class reference for visibility */
     .cp-hue-slider { background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red); }
-    
     .cp-alpha-slider { background-image: linear-gradient(45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(-45deg, var(--cs-stripe) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--cs-stripe) 75%), linear-gradient(-45deg, transparent 75%, var(--cs-stripe) 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px; }
     .cp-alpha-slider-bar { position: absolute; top:0; left:0; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(to right, transparent, red); pointer-events: none;}
     .cp-slider-thumb { position: absolute; top: 50%; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: var(--shadow-sm); transform: translate(-10px, -50%); pointer-events: none; border: 1px solid var(--border); }
@@ -382,7 +379,11 @@
           <span>Custom Shape Editor</span>
           <div style="display: flex; gap: 8px;">
               <button id="csImportBtn" class="icon-btn-flat" title="Import SVG">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16.4405 8.8999C20.0405 9.2099 21.5105 11.0599 21.5105 15.1099V15.2399C21.5105 19.7099 19.7205 21.4999 15.2505 21.4999H8.74047C4.27047 21.4999 2.48047 19.7099 2.48047 15.2399V15.1099C2.48047 11.0899 3.93047 9.2399 7.47047 8.9099" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 2V14.88" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M15.3504 12.6499L12.0004 15.9999L8.65039 12.6499" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
               </button>
               <input type="file" id="csFileInput" accept=".svg" style="display: none;">
               <button id="csCloseBtn" class="icon-btn-flat">
@@ -510,7 +511,7 @@
     const popover = document.getElementById('colorPickerPopover'); const cpCloseBtn = document.getElementById('cpCloseBtn'); const cpAddConfirmBtn = document.getElementById('cpAddConfirmBtn'); const cpHeaderTitle = document.getElementById('cpHeaderTitle');
     let currentTab = 'solid';
 
-    window.switchColorTab = function(tabName) {
+    window.switchColorTab = function(tabName, skipAutoGradient = false) {
         const previousTab = currentTab;
         currentTab = tabName;
         document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
@@ -527,7 +528,8 @@
             document.getElementById('cpSolidContent').style.display = 'none';
             document.getElementById('cpLinearContent').style.display = 'flex';
             document.getElementById('hiddenPickerStorage').appendChild(sharedPicker);
-            if (previousTab === 'solid') {
+            
+            if (previousTab === 'solid' && !skipAutoGradient) {
                 const startHex = hslToHex(pickerHSLA.h, pickerHSLA.s, pickerHSLA.l);
                 const darkL = Math.max(0, pickerHSLA.l - 30);
                 const endHex = hslToHex(pickerHSLA.h, pickerHSLA.s, darkL);
@@ -655,7 +657,12 @@
         gradientStops.forEach((stop, idx) => {
             const div = document.createElement('div'); div.className = 'stop-row'; if (idx === activeStopIndex) div.classList.add('active');
             div.innerHTML = `<div class="stop-pos-group"><input class="stop-pos-input" type="number" min="0" max="100" value="${Math.round(stop.percent)}">%</div><div class="stop-data-group" onclick="setActiveStop(${idx})"><div class="stop-swatch" style="background-color: ${stop.color};"></div><input class="stop-hex" value="${stop.color.replace('#','')}" maxlength="6"><div class="stop-opacity-group"><input class="stop-opacity" type="number" min="0" max="100" value="${Math.round(stop.alpha * 100)}" data-idx="${idx}">%</div><button class="stop-remove-btn" onclick="event.stopPropagation(); removeGradientStop(${idx})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
-            const swatch = div.querySelector('.stop-swatch'); swatch.addEventListener('click', (e) => { e.stopPropagation(); openMiniColorPopover(e, idx); });
+            const swatch = div.querySelector('.stop-swatch'); 
+            swatch.addEventListener('click', (e) => { 
+                const hueSlider = document.getElementById('cpHueSlider');
+                if (hueSlider) hueSlider.classList.add('cp-hue-slider'); 
+                e.stopPropagation(); openMiniColorPopover(e, idx); 
+            });
             const posInput = div.querySelector('.stop-pos-input'); posInput.addEventListener('change', (e) => updateStopPosition(e, idx)); posInput.addEventListener('click', (e) => e.stopPropagation()); 
             const hexInput = div.querySelector('.stop-hex'); hexInput.addEventListener('change', (e) => { let val = e.target.value.trim(); if (/^[0-9A-Fa-f]{6}$/.test(val)) { gradientStops[idx].color = '#' + val.toUpperCase(); updateGradientVisuals(); if(idx === activeStopIndex) { const hsl = hexToHsl('#' + val); pickerHSLA.h = hsl.h; pickerHSLA.s = hsl.s; pickerHSLA.l = hsl.l; updatePickerVisuals(); } } else { e.target.value = gradientStops[idx].color.replace('#',''); } }); hexInput.addEventListener('click', (e) => e.stopPropagation());
             const opInput = div.querySelector('.stop-opacity'); opInput.addEventListener('change', (e) => { let val = parseInt(e.target.value); if(isNaN(val)) val = 100; val = Math.max(0, Math.min(100, val)); gradientStops[idx].alpha = val / 100; updateGradientVisuals(); if(idx === activeStopIndex) { pickerHSLA.a = val / 100; updatePickerVisuals(); } }); opInput.addEventListener('click', (e) => e.stopPropagation());
@@ -745,7 +752,7 @@
             isVerticalFlip = colorToEdit.isVertical; 
             activeStopIndex = 0; 
             selectLinearType(colorToEdit.gradientSubtype || 'Linear');
-            switchColorTab('linear'); 
+            switchColorTab('linear', true); 
             setActiveStop(0); 
         } else { 
             pickerHSLA = { h: colorToEdit.h, s: colorToEdit.s, l: colorToEdit.l, a: colorToEdit.a }; updatePickerVisuals(); switchColorTab('solid'); 
@@ -811,7 +818,7 @@
         { char: '🤢', name: 'Nauseated' }, { char: '🤮', name: 'Vomiting' }, { char: '🤧', name: 'Sneezing' }, { char: '😷', name: 'Masked' },
         { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Thermometer' }, { char: '🤕', name: 'Bandaged' }, { char: '🤑', name: 'Money Mouth' },
         { char: '🤠', name: 'Cowboy' }, { char: '😈', name: 'Happy Horns' }, { char: '👿', name: 'Angry Horns' }, { char: '👹', name: 'Ogre' },
-        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: '💩', name: 'Poo' }, { char: '👻', name: 'Ghost' },
+        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: 'poo', name: 'Poo' }, { char: '👻', name: 'Ghost' },
         { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull Cross' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Monster' },
         { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Pumpkin' }, { char: '😺', name: 'Cat Smile' }, { char: '😸', name: 'Cat Grin' },
         { char: '😹', name: 'Cat Joy' }, { char: '😻', name: 'Cat Hearts' }, { char: '😼', name: 'Cat Wry' }, { char: '😽', name: 'Cat Kiss' },
