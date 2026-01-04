@@ -32,7 +32,7 @@
       --tag-bg: #E6F7FF; 
       --tag-text: #1890FF;
       --tag-border: #91D5FF;
-      --scrollbar-thumb: #C1C1C1; /* LIGHT THEME SCROLLBAR */
+      --scrollbar-thumb: #C1C1C1;
     }
 
     /* VARIABLES - AUTOMATIC DARK THEME */
@@ -60,7 +60,7 @@
         --tag-bg: #111d2c; 
         --tag-text: #1890FF;
         --tag-border: #153450;
-        --scrollbar-thumb: #484848; /* DARK THEME SCROLLBAR */
+        --scrollbar-thumb: #484848;
       }
     }
 
@@ -82,10 +82,12 @@
     .btn-loading .loader { display: block; }
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
+    /* GLOBAL INPUT TWEAKS */
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; text-align: center; }
 
+    /* LAYOUT */
     .header { height: 56px; display: flex; justify-content: flex-end; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .credit-link { font-size: 13px; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
     .credit-link:hover { color: var(--primary); }
@@ -93,6 +95,7 @@
     .settings-panel { width: 440px; padding: 24px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
     .preview-panel { flex: 1; padding: 24px; background-color: var(--preview-panel-bg); display: flex; flex-direction: column; }
 
+    /* COMMON COMPONENTS */
     .tabs-list { display: flex; background-color: var(--muted); padding: 4px; border-radius: var(--radius); position: relative; }
     .tab-trigger { flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; position: relative; }
     .tab-trigger[data-state="active"] { background-color: var(--tab-active-bg); color: var(--tab-active-text); box-shadow: var(--shadow-sm); }
@@ -271,7 +274,7 @@
   </div>
 
   <div class="header">
-    <a href="https://reexlabs.com" target="_blank" class="credit-link">Made with ♥️ by ReexLabs</a>
+    <a href="https://toolshq.com" target="_blank" class="credit-link">Made with ♥️ by ToolsHQ</a>
   </div>
 
   <div class="main-layout">
@@ -312,7 +315,7 @@
         </div>
         <div class="preview-footer">
             <button id="generateBtn" class="btn btn-primary">
-                <span class="btn-text">Generate Confetti</span>
+                <span id="generateBtnText">Generate Confetti</span>
                 <div class="loader" id="generateLoader"></div>
             </button>
         </div>
@@ -974,16 +977,25 @@
     
     document.getElementById('generateBtn').addEventListener('click', (e) => { 
         const btn = e.currentTarget;
+        const btnText = document.getElementById('generateBtnText');
         const settings = getSettings(); 
-        btn.disabled = true; btn.classList.add('btn-loading');
-        if (settings.amount === 0) { parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); } 
-        else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } 
+        
+        btn.disabled = true; 
+        btn.classList.add('btn-loading');
+        btnText.textContent = "Generating..."; // UPDATE TEXT ON CLICK
+
+        if (settings.amount === 0) { 
+            parent.postMessage({ pluginMessage: { type: 'generate-empty-frame' } }, '*'); 
+        } else { 
+            parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); 
+        } 
     });
     
     function resetPluginState() { 
         document.getElementById('randomInput').value = 80; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('flutterInput').value = 100;
         document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0].char); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } 
-        document.getElementById('frameCountInput').value = 20; document.getElementById('frameDelayInput').value = 75; 
+        document.getElementById('frameCountInput').value = 20; 
+        document.getElementById('frameDelayInput').value = 75; 
         document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); document.getElementById('flutterInput').dispatchEvent(new Event('input'));
         updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
     }
@@ -1059,11 +1071,20 @@
     }
 
     function updatePreview(keepPositions, changeType) { const settings = getSettings(); if (settings.amount === 0) { previewParticles = []; renderPreview(); return; } parent.postMessage({ pluginMessage: { type: 'preview-confetti', settings: settings, keepPositions, changeType } }, '*'); }
+    
     window.onmessage = (event) => { 
         const msg = event.data.pluginMessage; 
-        if (msg && msg.type === 'preview-data') { previewParticles = msg.particles; renderPreview(); } 
-        else if (msg && msg.type === 'generation-complete') { const btn = document.getElementById('generateBtn'); btn.disabled = false; btn.classList.remove('btn-loading'); }
+        if (msg && msg.type === 'preview-data') { 
+            previewParticles = msg.particles; renderPreview(); 
+        } else if (msg && msg.type === 'generation-complete') {
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('generateBtnText');
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+            btnText.textContent = "Generate Confetti"; // REVERT TEXT ON FINISH
+        }
     };
+    
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
     panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
     if (emojiGrid.firstChild) { emojiGrid.firstChild.click(); }
