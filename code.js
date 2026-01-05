@@ -274,19 +274,64 @@ async function populateFrameWithConfetti(frame, pList) {
 async function createFinalConfettiOnCanvas(settings) {
   const fCount = validateNum(settings.frameCount, 1, 100, 20);
   const delay = validateNum(settings.frameDelay, 1, 5000, 75);
-  const createdFrames = [];
+  const createdVariants = [];
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
 
+  // 1. Create individual Component Nodes as variants
   for (let i = 0; i < fCount; i++) {
-    const outer = figma.createFrame(); outer.resize(1440, 1080); outer.x = i * 1640; outer.fills = []; outer.clipsContent = true;
-    figma.currentPage.appendChild(outer); createdFrames.push(outer);
-    const inner = figma.createFrame(); inner.resize(1440, 1080); inner.fills = []; inner.clipsContent = false;
-    await populateFrameWithConfetti(inner, pool.map(p => getParticleStateForFrame(p, i))); outer.appendChild(inner);
+    const component = figma.createComponent();
+    component.resize(1440, 1080);
+    // Standard variant naming: Property Name=Value
+    component.name = `Frame=${i + 1}`; 
+    component.fills = [];
+    component.clipsContent = true;
+    
+    figma.currentPage.appendChild(component);
+    createdVariants.push(component);
+
+    // Populate the component with particles
+    const innerContainer = figma.createFrame();
+    innerContainer.resize(1440, 1080);
+    innerContainer.fills = [];
+    innerContainer.clipsContent = false;
+    
+    await populateFrameWithConfetti(innerContainer, pool.map(p => getParticleStateForFrame(p, i)));
+    component.appendChild(innerContainer);
+    
+    // Slight delay to prevent UI freezing during heavy generation
     await new Promise(r => setTimeout(r, 20));
   }
-  if (createdFrames.length > 0) figma.currentPage.flowStartingPoints = [...figma.currentPage.flowStartingPoints, { nodeId: createdFrames[0].id, name: "Start Confetti" }];
-  for (let i = 0; i < createdFrames.length - 1; i++) {
-    createdFrames[i].reactions = [{ trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 }, actions: [{ type: 'NODE', destinationId: createdFrames[i+1].id, navigation: 'NAVIGATE', transition: { type: 'SMART_ANIMATE', duration: delay / 1000, easing: { type: 'LINEAR' } } }] }];
+
+  if (createdVariants.length > 0) {
+    // 2. Combine all components into a Component Set
+    const componentSet = figma.combineAsVariants(createdVariants, figma.currentPage);
+    componentSet.name = "Confetti Animation";
+    componentSet.layoutMode = "HORIZONTAL"; // Arrange variants neatly
+    componentSet.itemSpacing = 200;
+    componentSet.paddingBottom = 40;
+    componentSet.paddingTop = 40;
+    componentSet.paddingLeft = 40;
+    componentSet.paddingRight = 40;
+
+    // 3. Setup Prototyping (Change To) between variants
+    for (let i = 0; i < createdVariants.length - 1; i++) {
+      createdVariants[i].reactions = [{
+        trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 },
+        actions: [{
+          type: 'NODE',
+          destinationId: createdVariants[i + 1].id,
+          navigation: 'CHANGE_TO',
+          transition: {
+            type: 'SMART_ANIMATE',
+            duration: delay / 1000,
+            easing: { type: 'LINEAR' }
+          }
+        }]
+      }];
+    }
+    
+    // Center the view on the new component set
+    figma.viewport.scrollAndZoomIntoView([componentSet]);
   }
 }
 
