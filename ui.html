@@ -118,7 +118,7 @@
     .premium-icon { position: absolute; top: 0px; right: 0px; pointer-events: none; }
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
 
-    /* TOOLTIP IMPLEMENTATION */
+   /* TOOLTIP IMPLEMENTATION */
     [data-tooltip] {
       position: relative;
     }
@@ -565,10 +565,17 @@
       function updateFromSlider() {
         let val = parseFloat(sliderInput.value); const percent = ((val - min) / (max - min)) * 100; fill.style.width = `${percent}%`;
         if (format === 'percent') { textInput.value = `${Math.round(val)}%`; } else if (format === 'zoom') { textInput.value = `x${(val / 10).toFixed(1)}`; }
-        if (!regenerateOnChange) { triggerPreviewUpdate(true, 'scale'); } else { 
-            const type = sliderInputId === 'flutterInput' ? 'flutter' : undefined;
-            triggerPreviewUpdate(true, type); 
+        
+        let keepPositions = !regenerateOnChange;
+        let type = undefined;
+        
+        if (sliderInputId === 'zoomInput') type = 'scale';
+        if (sliderInputId === 'flutterInput') {
+            type = 'flutter';
+            keepPositions = true; 
         }
+        
+        triggerPreviewUpdate(keepPositions, type);
       }
       function updateFromText() {
           let rawValue = textInput.value; let numericValue;
@@ -941,7 +948,7 @@
         { char: '🤢', name: 'Nauseated' }, { char: '🤮', name: 'Vomiting' }, { char: '🤧', name: 'Sneezing' }, { char: '😷', name: 'Masked' },
         { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Thermometer' }, { char: '🤕', name: 'Bandaged' }, { char: '🤑', name: 'Money Mouth' },
         { char: '🤠', name: 'Cowboy' }, { char: '😈', name: 'Happy Horns' }, { char: '👿', name: 'Angry Horns' }, { char: '👹', name: 'Ogre' },
-        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: '💩', name: 'Poo' }, { char: '👻', name: 'Ghost' },
+        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: '💩', name: 'Poo' }, { char: 'ghost', name: 'Ghost' },
         { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull Cross' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Monster' },
         { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Pumpkin' }, { char: '😺', name: 'Cat Smile' }, { char: '😸', name: 'Cat Grin' },
         { char: '😹', name: 'Cat Joy' }, { char: '😻', name: 'Cat Hearts' }, { char: '😼', name: 'Cat Wry' }, { char: '😽', name: 'Cat Kiss' },
@@ -1087,9 +1094,7 @@
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
     // HOW IT WORKS OVERLAY CONTROLS
-    document.getElementById('howItWorksBtn').addEventListener('click', () => {
-      document.getElementById('howItWorksPage').classList.add('show');
-    });
+    document.getElementById('howItWorksPage').classList.add('show');
     document.getElementById('closeHowItWorks').addEventListener('click', () => {
       document.getElementById('howItWorksPage').classList.remove('show');
     });
