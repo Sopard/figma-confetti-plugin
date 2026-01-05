@@ -103,7 +103,6 @@
     .overlay-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
     
     /* YOUTUBE VIDEO STYLING */
-    /* UPDATED YOUTUBE VIDEO STYLING */
 .video-container {
   position: relative;
   width: 100%;
@@ -336,6 +335,36 @@
     .stop-remove-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; color: #888; margin-left: 4px; }
     .stop-remove-btn:hover { color: var(--stop-remove-hover); }
     #cpAddConfirmBtn { flex-shrink: 0; height: 46px; min-height: 46px; font-size: 14px; font-weight: 600; flex-grow: 0; margin-top: auto; }
+
+    /* TOAST NOTIFICATION STYLING */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: #2c2c2c;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 2000;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4cd964;
+    }
   </style>
 </head>
 <body>
@@ -564,6 +593,17 @@
       </div>
       <button id="csSaveBtn" class="btn btn-primary">Save Shape</button>
   </div>
+
+  <div id="successToast" class="toast">
+      <div class="toast-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+      </div>
+      <span>Confetti generated successfully!</span>
+  </div>
+
   <script>
     // --- GLOBALS ---
     const previewSvg = document.getElementById('previewSvg');
@@ -1064,7 +1104,7 @@
         if (!(finalCustomShapePathStr && csResetIcon.style.display === 'block')) {
             const drawCircle = (x, y, cls, idx, type) => { const circle = createSvgElement('circle', { cx: x, cy: y, r: 6, class: cls }); circle.addEventListener('mousedown', (e) => startDrag(e, idx, type)); return circle; };
             const drawLine = (x1, y1, x2, y2) => createSvgElement('line', { x1, y1, x2, y2, class: 'cs-connector' });
-            csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy)); csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[4].dx, a[2].y + c[4].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
+            csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[0].dx, a[0].y + c[0].dy)); csEditorSvg.appendChild(drawLine(a[0].x, a[0].y, a[0].x + c[1].dx, a[0].y + c[1].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[2].dx, a[1].y + c[2].dy)); csEditorSvg.appendChild(drawLine(a[1].x, a[1].y, a[1].x + c[3].dx, a[1].y + c[3].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[2].x, a[2].y, a[2].x + c[5].dx, a[2].y + c[5].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[6].dx, a[3].y + c[6].dy)); csEditorSvg.appendChild(drawLine(a[3].x, a[3].y, a[3].x + c[7].dx, a[3].y + c[7].dy));
             c.forEach((ctrl, i) => { const anchorIdx = Math.floor(i / 2); const absX = a[anchorIdx].x + ctrl.dx; const absY = a[anchorIdx].y + ctrl.dy; csEditorSvg.appendChild(drawCircle(absX, absY, 'cs-control', i, 'control')); }); a.forEach((p, i) => { csEditorSvg.appendChild(drawCircle(p.x, p.y, 'cs-anchor', i, 'anchor')); });
         }
     }
@@ -1231,6 +1271,13 @@
             const btnText = document.getElementById('generateBtnText');
             btn.disabled = false; btn.classList.remove('btn-loading'); 
             btnText.textContent = "Generate Confetti";
+
+            // SHOW SUCCESS TOAST
+            const toast = document.getElementById('successToast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
     };
     panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
