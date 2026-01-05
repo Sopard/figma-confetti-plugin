@@ -101,6 +101,45 @@
     .overlay-header { height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .overlay-content { max-width: 600px; margin: 0 auto; width: 100%; padding: 40px; }
     .overlay-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
+    
+    /* YOUTUBE VIDEO STYLING */
+    /* UPDATED YOUTUBE VIDEO STYLING */
+.video-container {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 32px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: transform 0.2s;
+}
+
+.video-container:hover {
+  transform: scale(1.02);
+}
+
+.video-container img {
+  width: 100%;
+  display: block;
+}
+
+/* Play Button Overlay */
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  width: 60px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
     .instruction-step { margin-bottom: 24px; }
     .instruction-step h3 { font-size: 16px; margin-bottom: 8px; color: var(--primary); }
     .instruction-step p { font-size: 14px; line-height: 1.6; color: var(--muted-foreground); margin: 0; }
@@ -320,7 +359,18 @@
       <div class="overlay-content">
         <div class="overlay-title">How to use Confetti Animator</div>
         
+        <a href="https://www.youtube.com/watch?v=UKMoAYv1oCg" target="_blank" style="text-decoration: none;">
+    <div class="video-container">
+      <img src="https://img.youtube.com/vi/UKMoAYv1oCg/maxresdefault.jpg" alt="Video Tutorial Thumbnail">
+      <div class="play-overlay">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </div>
+    </div>
+  </a>
         <div class="instruction-step">
+        <p style="margin-top: 14px; font-style: Bold"><b>Steps:</b></p>
           <h3>1. Choose Your Confetti</h3>
           <p>Select from classic shapes (Circles, Squares, Stars), choose your favorite Emojis, or use Flag SVGs. You can even draw your own path in the "Custom" editor.</p>
         </div>
@@ -345,7 +395,7 @@
           <p>Switch to the Prototype tab in Figma and click the Present (Play) icon on the first frame.</p>
         </div>
 
-        <p style="margin-top: 14px; font-style: italic;"><b>Tip:</b> We’ve already linked the frames with Smart Animate, so your animation is ready to preview immediately.</p>
+       <div class="instruction-step"> <p style="margin-top: 14px; font-style: italic;"><b>Tip:</b> We’ve already linked the frames with Smart Animate, so your animation is ready to preview immediately.</p></div>
       </div>
   </div>
 
@@ -379,8 +429,8 @@
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
         <div id="particleColorSection"><div class="label" style="margin-top: 4px; margin-bottom: 24px;">Confetti Color</div><div class="color-toggle-row" style="margin-bottom: 12px;"><div class="color-toggle-label"><div class="rainbow-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#paint0_angular_2580_64390_clip_path)" data-figma-skip-parse="true"><g transform="matrix(0 0.011 -0.011 0 11 11)"><foreignObject x="-1100" y="-1100" width="2200" height="2200"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(209, 90, 168, 1) 0deg,rgba(84, 125, 253, 1) 24.3555deg,rgba(103, 225, 78, 1) 102.115deg,rgba(254, 255, 136, 1) 176.538deg,rgba(252, 206, 68, 1) 244.038deg,rgba(246, 75, 85, 1) 314.915deg,rgba(209, 90, 168, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><rect width="22" height="22" rx="6" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.32941177487373352,&#34;g&#34;:0.49019607901573181,&#34;b&#34;:0.99215686321258545,&#34;a&#34;:1.0},&#34;position&#34;:0.067654237151145935},{&#34;color&#34;:{&#34;r&#34;:0.40392157435417175,&#34;g&#34;:0.88235294818878174,&#34;b&#34;:0.40392157435417175,&#34;a&#34;:1.0},&#34;position&#34;:0.28365385532379150},{&#34;color&#34;:{&#34;r&#34;:0.99607843160629272,&#34;g&#34;:1.0,&#34;b&#34;:0.53333336114883423,&#34;a&#34;:1.0},&#34;position&#34;:0.49038460850715637},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.80784314870834351,&#34;b&#34;:0.26666668057441711,&#34;a&#34;:1.0},&#34;position&#34;:0.67788463830947876},{&#34;color&#34;:{&#34;r&#34;:0.96470588445663452,&#34;g&#34;:0.29411765933036804,&#34;b&#34;:0.33333334326744080,&#34;a&#34;:1.0},&#34;position&#34;:0.87476503849029541},{&#34;color&#34;:{&#34;r&#34;:0.81960785388946533,&#34;g&#34;:0.35294118523597717,&#34;b&#34;:0.65882354974746704,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;transform&#34;:{&#34;m00&#34;:1.3471115643134642e-15,&#34;m01&#34;:-22.0,&#34;m02&#34;:22.0,&#34;m10&#34;:22.0,&#34;m11&#34;:2.5772017576671316e-14,&#34;m12&#34;:-1.3559564305794594e-14},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}"/><g filter="url(#filter0_f_2580_64390)"><circle cx="11.5" cy="11.5" r="3.5" fill="white"/></g><defs><clipPath id="paint0_angular_2580_64390_clip_path"><rect width="22" height="22" rx="6"/></clipPath><filter id="filter0_f_2580_64390" x="4" y="4" width="15" height="15" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="2" result="effect1_foregroundBlur_2580_64390"/></filter></defs></svg></div><span>Multi-color</span></div><label class="switch"><input type="checkbox" id="multiColorSwitch"><span class="switch-slider"></span></label></div><div class="color-header-box"><span class="color-count-text" id="colorCounter">0 Colors</span><button class="icon-btn-flat" id="addColorBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div><div class="color-list-container"><div class="scrollable-grid-container"><div id="colorRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0 0 0;">
-        <div style="margin-top: 8px;">
-            <div class="label" style="margin-bottom: 24px;">Animation Settings <span class="recommended-tag">Recommended</span></div>
+        <div id="animationSettingsSection">
+            <div class="label" style="margin-top: 8px; margin-bottom: 24px;">Animation Settings <span class="recommended-tag">Recommended</span></div>
             <div class="grouped-settings-box" style="padding: 10px; gap: 8px;">
                 <div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="100" min="1"></div>
                 <div class="number-input-row"><span class="toggle-label">Frame Count (Min 1)</span><input type="number" id="frameCountInput" class="number-input-field" value="20" min="1"></div>
