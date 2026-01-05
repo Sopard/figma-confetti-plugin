@@ -118,10 +118,40 @@
     .premium-icon { position: absolute; top: 0px; right: 0px; pointer-events: none; }
     .color-item-row.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
 
-    .emoji-grid > div:nth-child(-n+18):hover::after,
-    .id-shape-selector > div:nth-child(-n+3):hover::after {
-        bottom: auto;
-        top: 110%;
+    /* TOOLTIP IMPLEMENTATION */
+    [data-tooltip] {
+      position: relative;
+    }
+
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    [data-tooltip]:hover::after {
+      opacity: 1;
+    }
+
+    /* Adjust position for Emojis/Flags to prevent clipping */
+    .emoji-grid [data-tooltip]::after, 
+    .id-shape-selector [data-tooltip]::after {
+      bottom: auto;
+      top: 110%;
     }
 
     .label { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
