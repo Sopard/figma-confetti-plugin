@@ -96,9 +96,10 @@
     .how-it-works-link:hover { color: var(--primary); }
 
     /* FULL OVERLAY */
-    .full-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background); z-index: 1000; display: none; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
+    .full-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background); z-index: 1000; display: none; flex-direction: column; padding: 0; box-sizing: border-box; overflow-y: auto; }
     .full-overlay.show { display: flex; }
-    .overlay-content { max-width: 600px; margin: 0 auto; width: 100%; }
+    .overlay-header { height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .overlay-content { max-width: 600px; margin: 0 auto; width: 100%; padding: 40px; }
     .overlay-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
     .instruction-step { margin-bottom: 24px; }
     .instruction-step h3 { font-size: 16px; margin-bottom: 8px; color: var(--primary); }
@@ -276,19 +277,16 @@
       <button id="miniSaveBtn" class="btn btn-primary" onclick="event.stopPropagation(); applyPickerToActive(); closeMiniPopover()">Save</button>
   </div>
 
-  <div class="header">
-    <div id="howItWorksBtn" class="how-it-works-link">
-      <span>How it works ?</span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
-    </div>
-  </div>
-
-  <div class="main-layout">
-    <div id="howItWorksPage" class="full-overlay">
+  <div id="howItWorksPage" class="full-overlay">
+      <div class="overlay-header">
+        <div id="closeHowItWorks" class="how-it-works-link" style="color: var(--foreground);">
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <line x1="19" y1="12" x2="5" y2="12"></line>
+             <polyline points="12 19 5 12 12 5"></polyline>
+           </svg>
+           <span>Back to Editor</span>
+        </div>
+      </div>
       <div class="overlay-content">
         <div class="overlay-title">How to use Confetti Animator</div>
         
@@ -308,14 +306,31 @@
         </div>
 
         <div class="instruction-step">
-          <h3>4. Generate & Smart Animate</h3>
-          <p>Hit <b>Generate Confetti</b>. The plugin creates multiple frames with particles moving downward. In Figma, just play the prototype; the frames are already linked with "Smart Animate" for a smooth transition.</p>
+          <h3>4. Generate your confetti:</h3>
+          <p>Click Generate Confetti, and the plugin will create your assets instantly.</p>
         </div>
 
-        <button id="closeHowItWorks" class="btn btn-primary" style="margin-top: 20px;">Back to Editor</button>
-      </div>
-    </div>
+        <div class="instruction-step">
+          <h3>5. Preview the animation:</h3>
+          <p>Switch to the Prototype tab in Figma and click the Present (Play) icon on the first frame.</p>
+        </div>
 
+        <p style="margin-top: 14px; font-style: italic;"><b>Tip:</b> We’ve already linked the frames with Smart Animate, so your animation is ready to preview immediately.</p>
+      </div>
+  </div>
+
+  <div class="header">
+    <div id="howItWorksBtn" class="how-it-works-link">
+      <span>How it works ?</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+  </div>
+
+  <div class="main-layout">
     <div class="settings-panel">
         <div class="tabs-list" style="margin-bottom: -4px;">
             <div class="tab-trigger" data-state="active" style="font-size: 14px; padding: 8px;">Free Fall</div>
@@ -337,7 +352,7 @@
         <div style="margin-top: 8px;">
             <div class="label" style="margin-bottom: 24px;">Animation Settings <span class="recommended-tag">Recommended</span></div>
             <div class="grouped-settings-box" style="padding: 10px; gap: 8px;">
-                <div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="75" min="1"></div>
+                <div class="number-input-row"><span class="toggle-label">Animation Delay (ms)</span><input type="number" id="frameDelayInput" class="number-input-field" value="100" min="1"></div>
                 <div class="number-input-row"><span class="toggle-label">Frame Count (Min 1)</span><input type="number" id="frameCountInput" class="number-input-field" value="20" min="1"></div>
             </div>
         </div>
@@ -896,7 +911,7 @@
         { char: '🤢', name: 'Nauseated' }, { char: '🤮', name: 'Vomiting' }, { char: '🤧', name: 'Sneezing' }, { char: '😷', name: 'Masked' },
         { char: '💤', name: 'Zzz' }, { char: '🤒', name: 'Thermometer' }, { char: '🤕', name: 'Bandaged' }, { char: '🤑', name: 'Money Mouth' },
         { char: '🤠', name: 'Cowboy' }, { char: '😈', name: 'Happy Horns' }, { char: '👿', name: 'Angry Horns' }, { char: '👹', name: 'Ogre' },
-        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: 'poo', name: 'Poo' }, { char: '👻', name: 'Ghost' },
+        { char: '👺', name: 'Goblin' }, { char: '🤡', name: 'Clown' }, { char: '💩', name: 'Poo' }, { char: '👻', name: 'Ghost' },
         { char: '💀', name: 'Skull' }, { char: '☠️', name: 'Skull Cross' }, { char: '👽', name: 'Alien' }, { char: '👾', name: 'Monster' },
         { char: '🤖', name: 'Robot' }, { char: '🎃', name: 'Pumpkin' }, { char: '😺', name: 'Cat Smile' }, { char: '😸', name: 'Cat Grin' },
         { char: '😹', name: 'Cat Joy' }, { char: '😻', name: 'Cat Hearts' }, { char: '😼', name: 'Cat Wry' }, { char: '😽', name: 'Cat Kiss' },
@@ -970,7 +985,7 @@
     function onDrag(e) { if (!draggingElement) return; const rect = csEditorSvg.getBoundingClientRect(); const x = Math.max(0, Math.min(320, e.clientX - rect.left)); const y = Math.max(0, Math.min(320, e.clientY - rect.top)); if (draggingElement === 'anchor') { csState.anchors[dragStartIndex] = {x, y}; } else if (draggingElement === 'control') { const anchorIdx = Math.floor(dragStartIndex / 2); const anchor = csState.anchors[anchorIdx]; csState.controls[dragStartIndex] = { dx: x - anchor.x, dy: y - anchor.y }; } renderEditorCanvas(); }
     function stopDrag() { draggingElement = null; dragStartIndex = -1; document.removeEventListener('mousemove', onDrag); document.removeEventListener('mouseup', stopDrag); }
     function undoShape() { if (csHistory.length > 0) { csState = csHistory.pop(); renderEditorCanvas(); } }
-    document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { if (customShapePopover.style.display === 'flex') { e.preventDefault(); undoShape(); } } });
+    document.addEventListener('keydown', (e) => { if (e.ctrlKey || e.metaKey) { if (e.key.toLowerCase() === 'z' && !e.shiftKey) { if (customShapePopover.style.display === 'flex') { e.preventDefault(); undoShape(); } } } });
     customShapeBtn.addEventListener('click', () => { customShapePopover.style.display = 'flex'; renderEditorCanvas(); });
     csCloseBtn.addEventListener('click', () => { customShapePopover.style.display = 'none'; });
     csSaveBtn.addEventListener('click', () => { 
@@ -1035,7 +1050,7 @@
         document.getElementById('randomInput').value = 80; document.getElementById('amountInput').value = 20; document.getElementById('zoomInput').value = 10; document.getElementById('flutterInput').value = 100;
         document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0].char); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } 
         document.getElementById('frameCountInput').value = 20; 
-        document.getElementById('frameDelayInput').value = 75; 
+        document.getElementById('frameDelayInput').value = 100; 
         document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); document.getElementById('flutterInput').dispatchEvent(new Event('input'));
         updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
     }
