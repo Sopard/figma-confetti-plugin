@@ -101,6 +101,10 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   const count = Math.floor((boundsWidth * boundsHeight / 3000) * (0.1 + (amount / 100) * 2.9));
   const particles = [];
 
+  // New Distribution Logic: Pull towards center based on randomness
+  const centerX = boundsWidth / 2;
+  const centerY = boundsHeight / 2;
+
   for (let i = 0; i < count; i++) {
     const shapeIdentifier = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
     const baseReferenceSize = 20; 
@@ -116,12 +120,17 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
     const actualHeight = baseHeight * scaleFactor;
 
     let xPos, startY, targetEndY;
+    
+    // Horizontal spread logic (Uniform vs Chaotic)
+    const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
+    xPos = centerX + hSpread - (baseWidth * scaleFactor / 2);
+
     if (isPreview) {
-        xPos = (Math.random() * boundsWidth * 1.1) - (boundsWidth * 0.05);
-        startY = (Math.random() * boundsHeight);
+        // Vertical spread for preview (clustered vs scattered)
+        const vSpread = (Math.random() - 0.5) * boundsHeight * randomness;
+        startY = centerY + vSpread;
         targetEndY = startY; 
     } else {
-        xPos = Math.random() * Math.max(0, boundsWidth - (baseWidth * scaleFactor));
         startY = -actualHeight - 50 - (Math.random() * boundsHeight * 1.5);
         targetEndY = boundsHeight + (0.6 * boundsHeight * 2);
     }
