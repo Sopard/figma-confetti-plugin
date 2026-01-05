@@ -144,7 +144,7 @@
     .instruction-step p { font-size: 14px; line-height: 1.6; color: var(--muted-foreground); margin: 0; }
 
     /* ATTRIBUTION BOTTOM */
-    .attribution-bottom { margin-top: auto; padding: 24px 0 8px 0; text-align: center; }
+    .attribution-bottom { margin-top: auto; padding: 24px 0 8px 0; display: flex; justify-content: space-between; align-items: center; }
     .credit-link { font-size: 13px; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
     .credit-link:hover { color: var(--primary); }
 
@@ -254,7 +254,7 @@
     .cs-reset-icon { position: absolute; top: 8px; right: 8px; background-color: var(--background); border: 1px solid var(--border); border-radius: 4px; padding: 4px; cursor: pointer; color: var(--muted-foreground); display: none; }
     #csSaveBtn { flex-shrink: 0; width: 100%; }
 
-    .footer { display: flex; margin-top: -8px; padding-top: 0; }
+    .footer { display: flex; margin-top: -18px; padding-top: 0; }
     .btn { height: 44px; border-radius: var(--radius); font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; }
     .btn-primary { flex: 3; background-color: var(--primary); color: white; }
     .btn-primary:hover { background-color: var(--primary-hover); }
@@ -270,7 +270,8 @@
     .grouped-settings-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .grouped-settings-box .number-input-row { margin-bottom: 0; }
 
-    .color-picker-popover { position: absolute; top: 0; left: 0; width: 320px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 10; display: none; border: 1px solid var(--border); box-sizing: border-box; flex-direction: column; min-height: auto; max-height: 90vh; }
+   .color-picker-popover { position: absolute; top: 0; left: 0; width: 320px; background: var(--background); border-radius: 12px; box-shadow: var(--shadow-md); padding: 20px; z-index: 10; display: none; border: 1px solid var(--border); box-sizing: border-box; flex-direction: column; min-height: auto; max-height: 620px; overflow-y: auto; }
+    .mini-color-popover { position: fixed; z-index: 100; background: var(--background); border: 1px solid var(--border); box-shadow: var(--shadow-md); border-radius: 12px; padding: 12px; width: 260px; display: none; }
     .mini-color-popover { position: fixed; z-index: 100; background: var(--background); border: 1px solid var(--border); box-shadow: var(--shadow-md); border-radius: 12px; padding: 12px; width: 260px; display: none; }
     .mini-color-popover .cp-inputs-row { margin-bottom: 0; }
     .mini-color-popover .cp-sat-bright-area { height: 160px; }
@@ -320,7 +321,7 @@
     .gradient-handle.active svg path { stroke: var(--primary) !important; stroke-width: 3px !important; z-index: 20; }
     .gradient-handle:active { cursor: grabbing; }
 
-    .stops-section { display: flex; flex-direction: column; gap: 8px; }
+    .stops-section { display: flex; flex-direction: column; gap: 8px; max-height: 140px; overflow: scroll;}
     .stops-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
     .stops-list { display: flex; flex-direction: column; gap: 8px; }
     .stop-row { display: flex; align-items: center; gap: 12px; }
@@ -468,6 +469,7 @@
         <hr class="section-divider"><div class="footer"><button id="resetBtn" class="btn btn-outline">Reset</button></div>
 
         <div class="attribution-bottom">
+          <span style="font-size: 12px; color: var(--muted-foreground); pointer-events: none;">v1.1.0</span>
           <a href="https://toolshq.com" target="_blank" class="credit-link">Made with ♥️ by ToolsHQ</a>
         </div>
     </div>
