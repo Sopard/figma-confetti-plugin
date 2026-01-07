@@ -79,8 +79,6 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   const amount = validateNum(settings.amount, 0, 100, 60);
   const zoom = validateNum(settings.zoom, 0, 50, 10);
   const flutter = validateNum(settings.flutter, 0, 100, 50) / 50; 
-  const randomizeSize = settings.randomizeSize === true;
-  const randomizeRotation = settings.randomizeRotation === true;
   const totalFrames = Math.max(1, validateNum(settings.frameCount, 1, 100, 20));
 
   let shapesToUse = [];
@@ -101,7 +99,6 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   const count = Math.floor((boundsWidth * boundsHeight / 3000) * (0.1 + (amount / 100) * 2.9));
   const particles = [];
 
-  // New Distribution Logic: Pull towards center based on randomness
   const centerX = boundsWidth / 2;
   const centerY = boundsHeight / 2;
 
@@ -115,42 +112,56 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
     if (isEmojiMode || shapeIdentifier === 'custom' || isFlagMode) { baseWidth = baseReferenceSize * 1.2; baseHeight = baseReferenceSize * 1.2; }
     if (shapeIdentifier === 'wave') { baseWidth = baseReferenceSize * 1.0; baseHeight = baseReferenceSize * 1.4; }
 
-    let scaleFactor = (zoom / 10) * (randomizeSize ? (0.5 + Math.random()) : 1);
+    let scaleFactor = (zoom / 10) * (settings.randomizeSize ? (0.5 + Math.random()) : 1);
     scaleFactor = Math.max(scaleFactor, 0.1);
-    const actualHeight = baseHeight * scaleFactor;
-
-    let xPos, startY, targetEndY;
     
-    // Horizontal spread logic (Uniform vs Chaotic)
-    const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
-    xPos = centerX + hSpread - (baseWidth * scaleFactor / 2);
+    const initialRotation = settings.randomizeRotation ? Math.random() * 360 : 0;
+    const rotationSpeed = settings.randomizeRotation ? (Math.random() - 0.5) * 15 * randomness * flutter : 0;
 
-    if (isPreview) {
-        // Vertical spread for preview (clustered vs scattered)
-        const vSpread = (Math.random() - 0.5) * boundsHeight * randomness;
-        startY = centerY + vSpread;
-        targetEndY = startY; 
-    } else {
-        startY = -actualHeight - 50 - (Math.random() * boundsHeight * 1.5);
-        targetEndY = boundsHeight + (0.6 * boundsHeight * 2);
-    }
-    
-    const steps = Math.max(1, totalFrames - 1);
-    const finalPixelsPerFrame = ((targetEndY - startY) / steps) * (1 + ((Math.random() - 0.5) * 0.6 * randomness));
-    const initialRotation = randomizeRotation ? Math.random() * 360 : 0;
-    const rotationSpeed = randomizeRotation ? (Math.random() - 0.5) * 15 * randomness * flutter : 0;
-
-    particles.push({
+    let particle = {
       isEmoji: isEmojiMode,
       shapeType: isFlagMode ? 'flag' : (shapeIdentifier === 'custom' ? 'custom' : shapeIdentifier),
       flagSvg: isFlagMode ? shapeIdentifier.svg : null,
       customPathData: shapeIdentifier === 'custom' ? settings.customShapePath : null,
       customViewBox: shapeIdentifier === 'custom' ? settings.customViewBox : "0 0 320 320",
       color: (!isEmojiMode && !isFlagMode && colorPalette.length > 0) ? colorPalette[Math.floor(Math.random() * colorPalette.length)] : null,
-      baseWidth, baseHeight, scale: scaleFactor, startX: xPos, startY, pixelsPerFrame: finalPixelsPerFrame,
-      initialRotation, rotationSpeed, driftAmp: 10 + (Math.random() * 80 * randomness), driftSpeed: 0.05 + (Math.random() * 0.15 * randomness), driftPhase: Math.random() * Math.PI * 2,
-      flipSpeed: (0.1 + (Math.random() * 0.4 * randomness)) * flutter, flipPhase: Math.random() * Math.PI * 2
-    });
+      baseWidth, baseHeight, scale: scaleFactor,
+      initialRotation, rotationSpeed, 
+      flipSpeed: (0.1 + (Math.random() * 0.4 * randomness)) * flutter, flipPhase: Math.random() * Math.PI * 2,
+      animationMode: settings.animationMode
+    };
+
+    if (settings.animationMode === 'Impact Fall') {
+        // Explosion Physics
+        particle.startX = centerX;
+        particle.startY = centerY;
+        // Radial Angle: 0 to 360
+        particle.popAngle = Math.random() * Math.PI * 2;
+        // Pop Speed: Based on amount and randomness
+        const baseSpeed = 15 + (amount / 2);
+        particle.popSpeed = baseSpeed * (0.5 + Math.random() * randomness);
+        // Gravity Effect
+        particle.gravity = 0.8 + (randomness * 1.5);
+    } else {
+        // Standard Free Fall Physics
+        const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
+        particle.startX = centerX + hSpread - (baseWidth * scaleFactor / 2);
+        if (isPreview) {
+            const vSpread = (Math.random() - 0.5) * boundsHeight * randomness;
+            particle.startY = centerY + vSpread;
+            particle.pixelsPerFrame = 0;
+        } else {
+            particle.startY = - (baseHeight * scaleFactor) - 50 - (Math.random() * boundsHeight * 1.5);
+            const targetEndY = boundsHeight + (0.6 * boundsHeight * 2);
+            const steps = Math.max(1, totalFrames - 1);
+            particle.pixelsPerFrame = ((targetEndY - particle.startY) / steps) * (1 + ((Math.random() - 0.5) * 0.6 * randomness));
+        }
+        particle.driftAmp = 10 + (Math.random() * 80 * randomness);
+        particle.driftSpeed = 0.05 + (Math.random() * 0.15 * randomness);
+        particle.driftPhase = Math.random() * Math.PI * 2;
+    }
+
+    particles.push(particle);
   }
   return particles;
 }
@@ -181,9 +192,28 @@ function updateStyleAttributes(particles, settings, changeType) {
 
 function getParticleStateForFrame(particle, frameIndex) {
     const t = frameIndex;
-    const linearY = particle.startY + (particle.pixelsPerFrame * t);
-    const driftOffset = Math.sin(particle.driftPhase + (particle.driftSpeed * t)) * particle.driftAmp;
-    return Object.assign({}, particle, { x: particle.startX + driftOffset, y: linearY, rotation: particle.initialRotation + (particle.rotationSpeed * t), flipFactor: Math.cos(particle.flipPhase + (particle.flipSpeed * t)) });
+    let x, y;
+
+    if (particle.animationMode === 'Impact Fall') {
+        // Explosion Trajectory: P = Origin + (Velocity * t) + (0.5 * Gravity * t^2)
+        const velX = Math.cos(particle.popAngle) * particle.popSpeed;
+        const velY = Math.sin(particle.popAngle) * particle.popSpeed;
+        
+        x = particle.startX + (velX * t);
+        // Gravity only affects Y axis downward
+        y = particle.startY + (velY * t) + (0.5 * particle.gravity * t * t);
+    } else {
+        const linearY = particle.startY + (particle.pixelsPerFrame * t);
+        const driftOffset = Math.sin(particle.driftPhase + (particle.driftSpeed * t)) * particle.driftAmp;
+        x = particle.startX + driftOffset;
+        y = linearY;
+    }
+
+    return Object.assign({}, particle, { 
+        x, y, 
+        rotation: particle.initialRotation + (particle.rotationSpeed * t), 
+        flipFactor: Math.cos(particle.flipPhase + (particle.flipSpeed * t)) 
+    });
 }
 
 // --- NODE CREATION ---
@@ -195,9 +225,7 @@ async function createFigmaShapeNode(p) {
       node.characters = p.shapeType; node.fontSize = p.baseHeight; node.textAlignHorizontal = 'CENTER'; node.textAlignVertical = 'CENTER'; node.resize(p.baseWidth, p.baseHeight);
   } else if (p.shapeType === 'flag' && p.flagSvg) {
       const imported = figma.createNodeFromSvg(p.flagSvg);
-      node = imported;
-      node.fills = []; 
-      node.clipsContent = false;
+      node = imported; node.fills = []; node.clipsContent = false;
       figma.currentPage.appendChild(node);
       setScaleConstraints(node);
       const ratio = node.width > 0 && node.height > 0 ? node.width / node.height : 1.5;
@@ -237,9 +265,7 @@ async function populateFrameWithConfetti(frame, pList) {
 
     if (p.shapeType === 'flag') {
         const aspectRatio = parseFloat(node.getPluginData('aspectRatio') || "1.5");
-        const targetArea = 960; 
-        const normH = Math.sqrt(targetArea / aspectRatio);
-        const normW = normH * aspectRatio;
+        const targetArea = 960; const normH = Math.sqrt(targetArea / aspectRatio); const normW = normH * aspectRatio;
         node.resize(normW * p.scale, normH * p.scale * flipScale);
     } else {
         node.resize(p.baseWidth * p.scale, p.baseHeight * p.scale * flipScale);
@@ -253,11 +279,7 @@ async function populateFrameWithConfetti(frame, pList) {
             if (p.color.subtype === 'Radial') figmaType = 'GRADIENT_RADIAL';
             if (p.color.subtype === 'Angular') figmaType = 'GRADIENT_ANGULAR';
             if (p.color.subtype === 'Diamond') figmaType = 'GRADIENT_DIAMOND';
-
-            const transform = (figmaType === 'GRADIENT_LINEAR') 
-                ? (p.color.isVertical ? [[0, 1, 0], [-1, 0, 1]] : [[1, 0, 0], [0, 1, 0]])
-                : [[0.5, 0, 0.5], [0, 0.5, 0.5]];
-
+            const transform = (figmaType === 'GRADIENT_LINEAR') ? (p.color.isVertical ? [[0, 1, 0], [-1, 0, 1]] : [[1, 0, 0], [0, 1, 0]]) : [[0.5, 0, 0.5], [0, 0.5, 0.5]];
             fill = { type: figmaType, gradientStops: p.color.gradientStops, gradientTransform: transform };
         } else {
             fill = { type: 'SOLID', color: { r: p.color.r, g: p.color.g, b: p.color.b }, opacity: p.color.a };
@@ -277,60 +299,40 @@ async function createFinalConfettiOnCanvas(settings) {
   const createdVariants = [];
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
 
-  // 1. Create individual Component Nodes as variants
   for (let i = 0; i < fCount; i++) {
     const component = figma.createComponent();
     component.resize(1440, 1080);
-    // Standard variant naming: Property Name=Value
     component.name = `Frame=${i + 1}`; 
     component.fills = [];
     component.clipsContent = true;
-    
     figma.currentPage.appendChild(component);
     createdVariants.push(component);
 
-    // Populate the component with particles
     const innerContainer = figma.createFrame();
     innerContainer.resize(1440, 1080);
     innerContainer.fills = [];
     innerContainer.clipsContent = false;
-    
     await populateFrameWithConfetti(innerContainer, pool.map(p => getParticleStateForFrame(p, i)));
     component.appendChild(innerContainer);
-    
-    // Slight delay to prevent UI freezing during heavy generation
     await new Promise(r => setTimeout(r, 20));
   }
 
   if (createdVariants.length > 0) {
-    // 2. Combine all components into a Component Set
     const componentSet = figma.combineAsVariants(createdVariants, figma.currentPage);
     componentSet.name = "Confetti Animation";
-    componentSet.layoutMode = "HORIZONTAL"; // Arrange variants neatly
+    componentSet.layoutMode = "HORIZONTAL";
     componentSet.itemSpacing = 200;
-    componentSet.paddingBottom = 40;
-    componentSet.paddingTop = 40;
-    componentSet.paddingLeft = 40;
-    componentSet.paddingRight = 40;
+    componentSet.paddingBottom = componentSet.paddingTop = componentSet.paddingLeft = componentSet.paddingRight = 40;
 
-    // 3. Setup Prototyping (Change To) between variants
     for (let i = 0; i < createdVariants.length - 1; i++) {
       createdVariants[i].reactions = [{
         trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 },
         actions: [{
-          type: 'NODE',
-          destinationId: createdVariants[i + 1].id,
-          navigation: 'CHANGE_TO',
-          transition: {
-            type: 'SMART_ANIMATE',
-            duration: delay / 1000,
-            easing: { type: 'LINEAR' }
-          }
+          type: 'NODE', destinationId: createdVariants[i + 1].id, navigation: 'CHANGE_TO',
+          transition: { type: 'SMART_ANIMATE', duration: delay / 1000, easing: { type: 'LINEAR' } }
         }]
       }];
     }
-    
-    // Center the view on the new component set
     figma.viewport.scrollAndZoomIntoView([componentSet]);
   }
 }
