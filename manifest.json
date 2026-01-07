@@ -4,5 +4,14 @@
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
-  "editorType": ["figma"]
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://unpkg.com",
+      "https://flagcdn.com",
+      "https://img.youtube.com",
+      "https://www.google.com"
+    ],
+    "reasoning": "This plugin loads the Panzoom library, Flag SVGs, and tutorial thumbnails from external CDNs."
+  }
 }

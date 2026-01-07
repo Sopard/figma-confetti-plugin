@@ -1175,14 +1175,93 @@
         else { parent.postMessage({ pluginMessage: { type: 'generate-confetti', settings: settings } }, '*'); } 
     });
     
+    // --- ROBUST INITIALIZATION ---
+    let isInitializing = false; // Flag to prevent preview spam during reset
+
     function resetPluginState() { 
-        document.getElementById('randomInput').value = 90; document.getElementById('amountInput').value = 2; document.getElementById('zoomInput').value = 10; document.getElementById('flutterInput').value = 100;
-        document.getElementById('checkSize').checked = true; document.getElementById('checkRotation').checked = true; colorState = { isMultiColor: false, colors: [] }; multiColorSwitch.checked = false; renderColorList(); editingColorIndex = -1; document.querySelector('.shape-tab-trigger[data-target="preset"]').click(); document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { const val = item.getAttribute('data-value'); if(val === 'rectangle' || val === 'circle' || val === 'star') { item.setAttribute('data-state', 'selected'); } else { item.removeAttribute('data-state'); } }); csState = JSON.parse(JSON.stringify(initialCsState)); customShapeBtn.removeAttribute('data-state'); finalCustomShapePathStr = ""; finalCustomViewBox = "0 0 320 320"; csResetIcon.style.display = 'none'; selectedEmojis = []; selectedFlags = []; document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); if (emojiGrid.firstChild) { selectedEmojis.push(modernEmojis[0].char); emojiGrid.firstChild.setAttribute('data-state', 'selected'); } 
-        document.getElementById('frameCountInput').value = 20; 
-        document.getElementById('frameDelayInput').value = 100; 
-        document.getElementById('randomInput').dispatchEvent(new Event('input')); document.getElementById('amountInput').dispatchEvent(new Event('input')); document.getElementById('zoomInput').dispatchEvent(new Event('input')); document.getElementById('flutterInput').dispatchEvent(new Event('input'));
-        updatePreview(false); if (panzoomInstance) panzoomInstance.reset(); 
+        isInitializing = true; // 1. Silence preview updates
+
+        // 2. Reset Sliders (DOM Only)
+        document.getElementById('randomInput').value = 90; 
+        document.getElementById('amountInput').value = 2; 
+        document.getElementById('zoomInput').value = 10; 
+        document.getElementById('flutterInput').value = 100;
+        
+        // Update slider fills manually without triggering events yet
+        document.getElementById('randomFill').style.width = '90%';
+        document.getElementById('randomValueInput').value = '90%';
+        document.getElementById('amountFill').style.width = '2%';
+        document.getElementById('amountValueInput').value = '2%';
+        document.getElementById('zoomFill').style.width = '20%';
+        document.getElementById('zoomValueInput').value = 'x1.0';
+        document.getElementById('flutterFill').style.width = '100%';
+        document.getElementById('flutterValueInput').value = '100%';
+
+        // 3. Reset Toggles
+        document.getElementById('checkSize').checked = true; 
+        document.getElementById('checkRotation').checked = true; 
+        
+        // 4. Reset Colors
+        colorState = { isMultiColor: false, colors: [] }; 
+        multiColorSwitch.checked = false; 
+        renderColorList(); 
+        editingColorIndex = -1; 
+
+        // 5. Reset Shapes & Tab (Crucial for Preview)
+        activeShapeTab = 'preset';
+        document.querySelectorAll('.shape-tab-trigger').forEach(t => t.removeAttribute('data-state'));
+        document.querySelector('.shape-tab-trigger[data-target="preset"]').setAttribute('data-state', 'active');
+        
+        presetShapesContainer.style.display = 'block'; 
+        emojiShapesContainer.style.display = 'none'; 
+        flagShapesContainer.style.display = 'none';
+        particleColorSection.classList.remove('section-disabled');
+
+        // Force select default shapes in the DOM immediately
+        document.querySelectorAll('.id-shape-selector .selector-item').forEach(item => { 
+            const val = item.getAttribute('data-value'); 
+            if(val === 'rectangle' || val === 'circle' || val === 'star') { 
+                item.setAttribute('data-state', 'selected'); 
+            } else { 
+                item.removeAttribute('data-state'); 
+            } 
+        });
+
+        // 6. Reset Custom Shapes & Other State
+        csState = JSON.parse(JSON.stringify(initialCsState)); 
+        customShapeBtn.removeAttribute('data-state'); 
+        finalCustomShapePathStr = ""; 
+        finalCustomViewBox = "0 0 320 320"; 
+        csResetIcon.style.display = 'none'; 
+        selectedEmojis = []; 
+        selectedFlags = []; 
+        document.querySelectorAll('.emoji-item, .flag-item').forEach(i => i.removeAttribute('data-state')); 
+        
+        if (panzoomInstance) panzoomInstance.reset(); 
+
+        isInitializing = false; // 7. Un-silence
+        updatePreview(false);   // 8. Fire EXACTLY ONE update with the perfect state
     }
+
+    document.getElementById('resetBtn').addEventListener('click', resetPluginState);
+
+    // --- UPDATED PREVIEW GUARD ---
+    // Modify your updatePreview function to respect the flag
+    const originalUpdatePreview = updatePreview;
+    updatePreview = function(keepPositions, changeType) {
+        if (isInitializing) return; // Ignore updates while resetting
+        originalUpdatePreview(keepPositions, changeType);
+    }
+
+    // --- INITIALIZATION ON LOAD ---
+    // Initialize Panzoom
+    try {
+        panzoomInstance = Panzoom(panzoomContainer, { maxScale: 5, minScale: 0.1, contain: 'outside', startScale: 1 });
+        panzoomContainer.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+    } catch(e) { console.log("Panzoom not loaded yet"); }
+
+    // Run reset immediately (No timeout) to render the initial canvas
+    resetPluginState();
     document.getElementById('resetBtn').addEventListener('click', resetPluginState);
 
     // HOW IT WORKS OVERLAY CONTROLS
