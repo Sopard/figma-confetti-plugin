@@ -132,25 +132,18 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
     };
 
     if (settings.animationMode === 'Impact Fall') {
-        // Explosion Physics
         particle.startX = centerX;
-        particle.startY = boundsHeight / 3; // Shifted up to 1/3 of the frame height
-        
-        // Radial Angle: 0 to 360
+        particle.startY = boundsHeight / 3; 
         particle.popAngle = Math.random() * Math.PI * 2;
         
         const steps = Math.max(1, totalFrames - 1);
-        
-        // Scale speed relative to frames to ensure particles cover distance effectively
         const speedScale = 200 / steps;
         particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
         
-        // Dynamic Gravity: Calculated to guarantee every particle clears the boundsHeight (1080) by the last step
         const requiredClearance = boundsHeight * 1.2; 
         const minGravity = (2 * requiredClearance) / (steps * steps);
         particle.gravity = minGravity * (1.2 + Math.random() * randomness);
     } else {
-        // Standard Free Fall Physics
         const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
         particle.startX = centerX + hSpread - (baseWidth * scaleFactor / 2);
         if (isPreview) {
@@ -202,7 +195,6 @@ function getParticleStateForFrame(particle, frameIndex) {
     let x, y;
 
     if (particle.animationMode === 'Impact Fall') {
-        // Parabolic trajectory with gravity
         const velX = Math.cos(particle.popAngle) * particle.popSpeed;
         const velY = Math.sin(particle.popAngle) * particle.popSpeed;
         
@@ -305,6 +297,7 @@ async function createFinalConfettiOnCanvas(settings) {
   const createdVariants = [];
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
 
+  // 1. Generate normal particle frames
   for (let i = 0; i < fCount; i++) {
     const component = figma.createComponent();
     component.resize(1440, 1080);
@@ -323,6 +316,17 @@ async function createFinalConfettiOnCanvas(settings) {
     await new Promise(r => setTimeout(r, 20));
   }
 
+  // 2. For Impact Fall, add an absolute empty frame at the end
+  if (settings.animationMode === 'Impact Fall') {
+    const emptyComponent = figma.createComponent();
+    emptyComponent.resize(1440, 1080);
+    emptyComponent.name = `Frame=${fCount + 1}`;
+    emptyComponent.fills = [];
+    emptyComponent.clipsContent = true;
+    figma.currentPage.appendChild(emptyComponent);
+    createdVariants.push(emptyComponent);
+  }
+
   if (createdVariants.length > 0) {
     const componentSet = figma.combineAsVariants(createdVariants, figma.currentPage);
     componentSet.name = "Confetti Animation";
@@ -330,6 +334,7 @@ async function createFinalConfettiOnCanvas(settings) {
     componentSet.itemSpacing = 200;
     componentSet.paddingBottom = componentSet.paddingTop = componentSet.paddingLeft = componentSet.paddingRight = 40;
 
+    // Link all variants including the terminal empty one
     for (let i = 0; i < createdVariants.length - 1; i++) {
       createdVariants[i].reactions = [{
         trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 },
