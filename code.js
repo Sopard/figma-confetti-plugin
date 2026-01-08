@@ -134,14 +134,21 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
     if (settings.animationMode === 'Impact Fall') {
         // Explosion Physics
         particle.startX = centerX;
-        particle.startY = centerY;
+        particle.startY = boundsHeight / 3; // Shifted up to 1/3 of the frame height
+        
         // Radial Angle: 0 to 360
         particle.popAngle = Math.random() * Math.PI * 2;
-        // Pop Speed: Based on amount and randomness
-        const baseSpeed = 15 + (amount / 2);
-        particle.popSpeed = baseSpeed * (0.5 + Math.random() * randomness);
-        // Gravity Effect
-        particle.gravity = 0.8 + (randomness * 1.5);
+        
+        const steps = Math.max(1, totalFrames - 1);
+        
+        // Scale speed relative to frames to ensure particles cover distance effectively
+        const speedScale = 200 / steps;
+        particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
+        
+        // Dynamic Gravity: Calculated to guarantee every particle clears the boundsHeight (1080) by the last step
+        const requiredClearance = boundsHeight * 1.2; 
+        const minGravity = (2 * requiredClearance) / (steps * steps);
+        particle.gravity = minGravity * (1.2 + Math.random() * randomness);
     } else {
         // Standard Free Fall Physics
         const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
@@ -195,12 +202,11 @@ function getParticleStateForFrame(particle, frameIndex) {
     let x, y;
 
     if (particle.animationMode === 'Impact Fall') {
-        // Explosion Trajectory: P = Origin + (Velocity * t) + (0.5 * Gravity * t^2)
+        // Parabolic trajectory with gravity
         const velX = Math.cos(particle.popAngle) * particle.popSpeed;
         const velY = Math.sin(particle.popAngle) * particle.popSpeed;
         
         x = particle.startX + (velX * t);
-        // Gravity only affects Y axis downward
         y = particle.startY + (velY * t) + (0.5 * particle.gravity * t * t);
     } else {
         const linearY = particle.startY + (particle.pixelsPerFrame * t);
