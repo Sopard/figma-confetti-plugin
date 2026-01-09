@@ -143,6 +143,26 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
         const requiredClearance = boundsHeight * 1.2; 
         const minGravity = (2 * requiredClearance) / (steps * steps);
         particle.gravity = minGravity * (1.2 + Math.random() * randomness);
+    } else if (settings.animationMode === 'Spray Fall') {
+        // Pop from both sides (Left or Right)
+        const isLeftSide = i % 2 === 0;
+        particle.startX = isLeftSide ? 0 : boundsWidth;
+        particle.startY = (boundsHeight * 2) / 3; // Starts at 2/3 of frame height
+
+        // Angle Logic: Inward and Upward
+        // Left side (0 to boundsWidth): pops between -30 and -80 degrees
+        // Right side (boundsWidth to 0): pops between -100 and -150 degrees
+        const baseAngle = isLeftSide ? -30 : -100;
+        const angleRange = isLeftSide ? -50 : -50;
+        particle.popAngle = (baseAngle + Math.random() * angleRange) * (Math.PI / 180);
+
+        const steps = Math.max(1, totalFrames - 1);
+        const speedScale = 200 / steps;
+        particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
+
+        const requiredClearance = boundsHeight * 1.5 ; 
+        const minGravity = (2 * requiredClearance) / (steps * steps);
+        particle.gravity = minGravity * (1.2 + Math.random() * randomness);
     } else {
         const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
         particle.startX = centerX + hSpread - (baseWidth * scaleFactor / 2);
@@ -194,7 +214,7 @@ function getParticleStateForFrame(particle, frameIndex) {
     const t = frameIndex;
     let x, y;
 
-    if (particle.animationMode === 'Impact Fall') {
+    if (particle.animationMode === 'Impact Fall' || particle.animationMode === 'Spray Fall') {
         const velX = Math.cos(particle.popAngle) * particle.popSpeed;
         const velY = Math.sin(particle.popAngle) * particle.popSpeed;
         
@@ -316,8 +336,8 @@ async function createFinalConfettiOnCanvas(settings) {
     await new Promise(r => setTimeout(r, 20));
   }
 
-  // 2. For Impact Fall, add an absolute empty frame at the end
-  if (settings.animationMode === 'Impact Fall') {
+  // 2. For Impact and Spray Fall, add an absolute empty frame at the end
+  if (settings.animationMode === 'Impact Fall' || settings.animationMode === 'Spray Fall') {
     const emptyComponent = figma.createComponent();
     emptyComponent.resize(1440, 1080);
     emptyComponent.name = `Frame=${fCount + 1}`;
