@@ -581,6 +581,25 @@
       function triggerPreviewUpdate(keepPositions, changeType) { updatePreview(keepPositions, changeType); }
       sliderInput.addEventListener('input', updateFromSlider); textInput.addEventListener('change', updateFromText); textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.target.blur(); } });
     }
+
+    // NEW: Helper to update sliders programmatically without triggering individual slider input events
+    function setSliderValue(sliderId, fillId, textId, value, format) {
+        const slider = document.getElementById(sliderId);
+        const fill = document.getElementById(fillId);
+        const text = document.getElementById(textId);
+        const min = parseFloat(slider.min) || 0;
+        const max = parseFloat(slider.max) || 100;
+        
+        slider.value = value;
+        const percent = ((value - min) / (max - min)) * 100;
+        fill.style.width = `${percent}%`;
+        
+        if (format === 'percent') {
+            text.value = `${value}%`;
+        } else if (format === 'zoom') {
+            text.value = `x${(value / 10).toFixed(1)}`;
+        }
+    }
     
     setupSlider('randomInput', 'randomFill', 'randomValueInput', 'percent', true); 
     setupSlider('amountInput', 'amountFill', 'amountValueInput', 'percent', true); 
@@ -589,8 +608,19 @@
 
     document.querySelectorAll('#animationTabs .tab-trigger').forEach(tab => { 
         tab.addEventListener('click', () => { 
+            const mode = tab.getAttribute('data-mode');
             document.querySelectorAll('#animationTabs .tab-trigger').forEach(t => t.removeAttribute('data-state')); 
             tab.setAttribute('data-state', 'active'); 
+
+            // Dynamic UI updates based on mode
+            if (mode === 'Fireworks') {
+                setSliderValue('amountInput', 'amountFill', 'amountValueInput', 10, 'percent');
+                setSliderValue('zoomInput', 'zoomFill', 'zoomValueInput', 6, 'zoom');
+            } else {
+                setSliderValue('amountInput', 'amountFill', 'amountValueInput', 2, 'percent');
+                setSliderValue('zoomInput', 'zoomFill', 'zoomValueInput', 10, 'zoom');
+            }
+
             updatePreview(false); 
         }); 
     });
