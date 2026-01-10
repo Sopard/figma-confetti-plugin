@@ -41,6 +41,7 @@ function setScaleConstraints(node) {
 function getColorPalette(settings) {
     if (settings.shapeTab === 'emoji' || settings.shapeTab === 'flag') return [];
     if (settings.colorData.isMultiColor) {
+        // Multi-color logic from Source of Truth
         return [
           { type: 'solid', r: 1, g: 0.2, b: 0.2, a: 1 },
           { type: 'solid', r: 1, g: 0.6, b: 0, a: 1 },
@@ -102,6 +103,20 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
   const centerX = boundsWidth / 2;
   const centerY = boundsHeight / 2;
 
+  const fireworkPops = [];
+  if (settings.animationMode === 'Fireworks') {
+      const staggerBase = Math.floor(totalFrames / 5);
+      for(let j=0; j<5; j++) {
+          fireworkPops.push({
+              x: (0.15 + Math.random() * 0.7) * boundsWidth,
+              y: (0.15 + Math.random() * 0.4) * boundsHeight,
+              // All 160px diameter (80px radius)
+              radius: 80, 
+              startFrame: j * staggerBase
+          });
+      }
+  }
+
   for (let i = 0; i < count; i++) {
     const shapeIdentifier = shapesToUse[Math.floor(Math.random() * shapesToUse.length)];
     const baseReferenceSize = 20; 
@@ -135,34 +150,40 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
         particle.startX = centerX;
         particle.startY = boundsHeight / 3; 
         particle.popAngle = Math.random() * Math.PI * 2;
-        
         const steps = Math.max(1, totalFrames - 1);
         const speedScale = 200 / steps;
         particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
-        
         const requiredClearance = boundsHeight * 1.2; 
         const minGravity = (2 * requiredClearance) / (steps * steps);
         particle.gravity = minGravity * (1.2 + Math.random() * randomness);
+        particle.startFrame = 0;
     } else if (settings.animationMode === 'Spray Fall') {
-        // Pop from both sides (Left or Right)
         const isLeftSide = i % 2 === 0;
         particle.startX = isLeftSide ? 0 : boundsWidth;
-        particle.startY = (boundsHeight * 2) / 3; // Starts at 2/3 of frame height
-
-        // Angle Logic: Inward and Upward
-        // Left side (0 to boundsWidth): pops between -30 and -80 degrees
-        // Right side (boundsWidth to 0): pops between -100 and -150 degrees
+        particle.startY = (boundsHeight * 2) / 3;
         const baseAngle = isLeftSide ? -30 : -100;
         const angleRange = isLeftSide ? -50 : -50;
         particle.popAngle = (baseAngle + Math.random() * angleRange) * (Math.PI / 180);
-
         const steps = Math.max(1, totalFrames - 1);
         const speedScale = 200 / steps;
         particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
-
-        const requiredClearance = boundsHeight * 1.5 ; 
+        const requiredClearance = boundsHeight * 1.5; 
         const minGravity = (2 * requiredClearance) / (steps * steps);
         particle.gravity = minGravity * (1.2 + Math.random() * randomness);
+        particle.startFrame = 0;
+    } else if (settings.animationMode === 'Fireworks') {
+        const pop = fireworkPops[i % 5];
+        particle.popAngle = Math.random() * Math.PI * 2; 
+        particle.startX = pop.x + Math.cos(particle.popAngle) * pop.radius;
+        particle.startY = pop.y + Math.sin(particle.popAngle) * pop.radius;
+        particle.startFrame = pop.startFrame;
+        const steps = Math.max(1, totalFrames - 1);
+        const speedScale = 200 / steps;
+        particle.popSpeed = (2 + Math.random() * 30 * randomness) * speedScale;
+        const effectiveSteps = steps - (totalFrames * 0.4); 
+        const requiredClearance = boundsHeight * 1.2; 
+        const minGravity = (2 * requiredClearance) / (effectiveSteps * effectiveSteps);
+        particle.gravity = minGravity * (1.5 + Math.random() * randomness);
     } else {
         const hSpread = (Math.random() - 0.5) * boundsWidth * randomness;
         particle.startX = centerX + hSpread - (baseWidth * scaleFactor / 2);
@@ -179,6 +200,7 @@ function initializeParticlePool(settings, bounds, isPreview = false) {
         particle.driftAmp = 10 + (Math.random() * 80 * randomness);
         particle.driftSpeed = 0.05 + (Math.random() * 0.15 * randomness);
         particle.driftPhase = Math.random() * Math.PI * 2;
+        particle.startFrame = 0;
     }
 
     particles.push(particle);
@@ -211,26 +233,29 @@ function updateStyleAttributes(particles, settings, changeType) {
 }
 
 function getParticleStateForFrame(particle, frameIndex) {
-    const t = frameIndex;
-    let x, y;
+    const startOffset = particle.startFrame || 0;
+    const t = frameIndex - startOffset;
+    if (particle.animationMode === 'Fireworks' && t < 0) {
+        return Object.assign({}, particle, { x: particle.startX, y: particle.startY, scale: 0, rotation: 0, flipFactor: 1 });
+    }
 
-    if (particle.animationMode === 'Impact Fall' || particle.animationMode === 'Spray Fall') {
+    let x, y;
+    if (particle.animationMode === 'Impact Fall' || particle.animationMode === 'Spray Fall' || particle.animationMode === 'Fireworks') {
         const velX = Math.cos(particle.popAngle) * particle.popSpeed;
         const velY = Math.sin(particle.popAngle) * particle.popSpeed;
-        
         x = particle.startX + (velX * t);
         y = particle.startY + (velY * t) + (0.5 * particle.gravity * t * t);
     } else {
-        const linearY = particle.startY + (particle.pixelsPerFrame * t);
-        const driftOffset = Math.sin(particle.driftPhase + (particle.driftSpeed * t)) * particle.driftAmp;
+        const linearY = particle.startY + (particle.pixelsPerFrame * frameIndex);
+        const driftOffset = Math.sin(particle.driftPhase + (particle.driftSpeed * frameIndex)) * particle.driftAmp;
         x = particle.startX + driftOffset;
         y = linearY;
     }
 
     return Object.assign({}, particle, { 
         x, y, 
-        rotation: particle.initialRotation + (particle.rotationSpeed * t), 
-        flipFactor: Math.cos(particle.flipPhase + (particle.flipSpeed * t)) 
+        rotation: particle.initialRotation + (particle.rotationSpeed * (t > 0 ? t : frameIndex)), 
+        flipFactor: Math.cos(particle.flipPhase + (particle.flipSpeed * (t > 0 ? t : frameIndex))) 
     });
 }
 
@@ -275,6 +300,7 @@ async function createFigmaShapeNode(p) {
 async function populateFrameWithConfetti(frame, pList) {
   for (let i = 0; i < pList.length; i++) {
     const p = pList[i];
+    if (p.scale <= 0) continue;
     const node = await createFigmaShapeNode(p);
     if (!node) continue;
     node.name = `Particle ${i+1}`;
@@ -317,7 +343,6 @@ async function createFinalConfettiOnCanvas(settings) {
   const createdVariants = [];
   const pool = initializeParticlePool(settings, { width: 1440, height: 1080 });
 
-  // 1. Generate normal particle frames
   for (let i = 0; i < fCount; i++) {
     const component = figma.createComponent();
     component.resize(1440, 1080);
@@ -336,8 +361,8 @@ async function createFinalConfettiOnCanvas(settings) {
     await new Promise(r => setTimeout(r, 20));
   }
 
-  // 2. For Impact and Spray Fall, add an absolute empty frame at the end
-  if (settings.animationMode === 'Impact Fall' || settings.animationMode === 'Spray Fall') {
+  const mode = settings.animationMode;
+  if (mode === 'Impact Fall' || mode === 'Spray Fall' || mode === 'Fireworks') {
     const emptyComponent = figma.createComponent();
     emptyComponent.resize(1440, 1080);
     emptyComponent.name = `Frame=${fCount + 1}`;
@@ -354,7 +379,6 @@ async function createFinalConfettiOnCanvas(settings) {
     componentSet.itemSpacing = 200;
     componentSet.paddingBottom = componentSet.paddingTop = componentSet.paddingLeft = componentSet.paddingRight = 40;
 
-    // Link all variants including the terminal empty one
     for (let i = 0; i < createdVariants.length - 1; i++) {
       createdVariants[i].reactions = [{
         trigger: { type: 'AFTER_TIMEOUT', timeout: 0.001 },
